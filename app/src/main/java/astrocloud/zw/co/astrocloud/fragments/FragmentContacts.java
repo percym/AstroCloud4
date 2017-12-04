@@ -1,10 +1,9 @@
-package astrocloud.zw.co.astrocloud;
+package astrocloud.zw.co.astrocloud.fragments;
 
 
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -23,10 +22,10 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
+import astrocloud.zw.co.astrocloud.R;
 import astrocloud.zw.co.astrocloud.adapters.ContactsAdapter;
 import astrocloud.zw.co.astrocloud.models.ContactModel;
 
@@ -57,16 +56,17 @@ public class FragmentContacts extends Fragment {
         contactsChildReference= contactsDatabase.child("contacts");
 
 
-        FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-                writecontacts();
+//        FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.fab);
+//        fab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+////                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+////                        .setAction("Action", null).show();
+//                writecontacts();
+//
+//            }
+//        });
 
-            }
-        });
         getContacts();
         adapter = new ContactsAdapter(getContext(),arrayListContactsToDisplay);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
@@ -76,7 +76,7 @@ public class FragmentContacts extends Fragment {
         return view;
     }
 
-    static FragmentContacts newInstance(int val) {
+    public static FragmentContacts newInstance(int val) {
         FragmentContacts fragmentContacts = new FragmentContacts();
         // Supply val input as an argument.
         Bundle args = new Bundle();
@@ -188,6 +188,7 @@ public class FragmentContacts extends Fragment {
             ContactModel contact = ds.getValue(ContactModel.class);
             arrayListContactsToDisplay.add(contact);
         }
+        adapter.notifyDataSetChanged();
     }
     private void writeNewUser(ArrayList<ContactModel> arrayListContactsTobeWritten) {
 

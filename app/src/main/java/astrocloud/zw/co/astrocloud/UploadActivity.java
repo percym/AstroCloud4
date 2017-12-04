@@ -1,12 +1,8 @@
 package astrocloud.zw.co.astrocloud;
 
+import android.app.Activity;
 import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
-import android.provider.ContactsContract;
 import android.support.design.widget.TabLayout;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -15,24 +11,24 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-
-import org.json.JSONObject;
+import com.oguzdev.circularfloatingactionmenu.library.FloatingActionButton;
+import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
+import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
 
 import java.util.ArrayList;
 
+import astrocloud.zw.co.astrocloud.fragments.FragmentContacts;
 import astrocloud.zw.co.astrocloud.models.ContactModel;
 
 public class UploadActivity extends AppCompatActivity {
@@ -90,6 +86,26 @@ public class UploadActivity extends AppCompatActivity {
 
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
+
+
+        final ImageView fabIconNew = new ImageView(this);
+        fabIconNew.setImageDrawable(getResources().getDrawable(R.drawable.ic_green_cloud));
+        final FloatingActionButton rightLowerButton = new FloatingActionButton.Builder(this)
+                .setContentView(fabIconNew)
+                .build();
+
+        SubActionButton.Builder rLSubBuilder = new SubActionButton.Builder(this);
+        ImageView rlIcon1 = new ImageView(this);
+        ImageView rlIcon2 = new ImageView( this);
+
+        rlIcon1.setImageDrawable(getResources().getDrawable(R.drawable.ic_green_cloud));
+        rlIcon2.setImageDrawable(getResources().getDrawable(R.drawable.ic_cloud_upload));
+
+        final FloatingActionMenu rightLowerMenu = new FloatingActionMenu.Builder(this)
+                .addSubActionView(rLSubBuilder.setContentView(rlIcon1).build())
+                .addSubActionView(rLSubBuilder.setContentView(rlIcon2).build())
+                .attachTo(rightLowerButton)
+                .build();
 
 
 

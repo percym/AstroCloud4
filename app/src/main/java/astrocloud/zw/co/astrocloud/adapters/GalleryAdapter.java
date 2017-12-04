@@ -112,9 +112,6 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.MyViewHo
 
         Glide.with(mContext).load(image.getLarge())
                 .thumbnail(0.5f)
-                .crossFade()
-                .fitCenter()
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(holder.thumbnail);
     }
 

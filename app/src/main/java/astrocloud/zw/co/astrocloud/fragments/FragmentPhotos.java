@@ -1,4 +1,4 @@
-package astrocloud.zw.co.astrocloud;
+package astrocloud.zw.co.astrocloud.fragments;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -20,6 +20,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
+import astrocloud.zw.co.astrocloud.R;
 import astrocloud.zw.co.astrocloud.adapters.GalleryAdapter;
 import astrocloud.zw.co.astrocloud.models.Image;
 
