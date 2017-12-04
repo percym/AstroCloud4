@@ -1,0 +1,38 @@
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="vertical" />
+    <RelativeLayout
+        android:visibility="gone"
+        android:id="@+id/folder_state_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/empty_folder_icon"
+            android:background="#fff"
+            android:layout_centerInParent="true"
+            android:src="@drawable/empty_folder"
+            android:layout_width="56dp"
+            android:layout_height="56dp" />
+
+        <TextView
+            android:layout_below="@+id/empty_folder_icon"
+            android:layout_marginTop="10dp"
+            android:textSize="16sp"
+            android:text="This folder is empty"
+            android:layout_centerHorizontal="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </RelativeLayout>
+</RelativeLayout>

@@ -1,5 +1,9 @@
 package astrocloud.zw.co.astrocloud;
 
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.ContactsContract;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -11,6 +15,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,6 +23,17 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import android.widget.TextView;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+
+import astrocloud.zw.co.astrocloud.models.ContactModel;
 
 public class UploadActivity extends AppCompatActivity {
 
@@ -35,6 +51,24 @@ public class UploadActivity extends AppCompatActivity {
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
+    private FirebaseAuth mAuth;
+
+    private ArrayList<ContactModel> arrayListContacts;
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if(currentUser == null || currentUser.isAnonymous()){
+            FirebaseAuth.getInstance().signOut();
+            startActivity(new Intent(UploadActivity.this, MainActivity.class));
+            finish();
+
+        }
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +77,7 @@ public class UploadActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -56,14 +91,7 @@ public class UploadActivity extends AppCompatActivity {
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+
 
     }
 
@@ -139,7 +167,15 @@ public class UploadActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-            return PlaceholderFragment.newInstance(position + 1);
+
+            switch (position){
+                case 0:
+                    return FragmentContacts.newInstance(position);
+                case 1:
+                    return PlaceholderFragment.newInstance(position);
+                default:return FragmentContacts.newInstance(position);
+            }
+
         }
 
         @Override
@@ -148,4 +184,5 @@ public class UploadActivity extends AppCompatActivity {
             return 3;
         }
     }
+
 }

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@drawable/gradiant">
+    android:background="@drawable/green_back">
 
 
     <ImageView
@@ -14,8 +14,7 @@
         android:layout_height="80dp"
         android:src="@drawable/app_icon"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="35dp"/>
-
+        android:layout_marginTop="45dp"/>
 
 
     <TextView
@@ -57,7 +56,7 @@
                 android:layout_alignParentTop="true"
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="40dp"
                 android:orientation="vertical">
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -94,6 +93,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginEnd="8dp"
+                    android:layout_marginTop="4dp"
                     android:hint="enter code "
                     android:inputType="number"
                     android:lines="1"
@@ -109,35 +109,41 @@
 
     <Button
         android:id="@+id/btn_start_verification"
-        android:layout_width="240dp"
+        android:layout_width="match_parent"
         android:layout_height="40dp"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="10dp"
         android:background="@drawable/roundbut"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
         android:layout_above="@+id/btn_verify"
         android:text="SEND VERIFICATION CODE"
-        android:textColor="#FFF"
+        android:textColor="#4bde90"
         />
     <Button
         android:id="@+id/btn_verify"
-        android:layout_width="240dp"
+        android:layout_width="match_parent"
         android:layout_height="40dp"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="10dp"
         android:background="@drawable/roundbut"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
         android:layout_above="@+id/btn_resend"
         android:text="Verify"
-        android:textColor="#FFF"
+        android:textColor="#4bde90"
         />
     <Button
         android:id="@+id/btn_resend"
-        android:layout_width="240dp"
+        android:layout_width="match_parent"
         android:layout_height="40dp"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="10dp"
         android:background="@drawable/roundbut"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
         android:layout_above="@+id/signUp"
         android:text="RESEND SMS"
-        android:textColor="#FFF"
+        android:textColor="#4bde90"
         />
 </RelativeLayout>
