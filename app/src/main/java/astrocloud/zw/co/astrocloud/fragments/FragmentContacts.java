@@ -1,16 +1,13 @@
 package astrocloud.zw.co.astrocloud.fragments;
 
 
-import android.database.Cursor;
-import android.net.Uri;
-import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,8 +19,14 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import astrocloud.zw.co.astrocloud.R;
 import astrocloud.zw.co.astrocloud.adapters.ContactsAdapter;
@@ -39,12 +42,14 @@ public class FragmentContacts extends Fragment {
     RelativeLayout folderStateContainer;
     View view;
     private static final  String TAG = FragmentContacts.class.getCanonicalName();
-    private ArrayList<ContactModel> arrayListContacts = new ArrayList<>();
+    private ArrayList<Object> arrayListContacts = new ArrayList<>();
     private ArrayList<ContactModel> arrayListContactsToDisplay = new ArrayList<>();
     private DatabaseReference contactsDatabase;
     String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
     DatabaseReference contactsChildReference;
+    Query myContactsQuery;
     ContactsAdapter adapter;
+    GenericTypeIndicator<HashMap<String,Object>> genericTypeIndicator = new GenericTypeIndicator<HashMap<String, Object>>();
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -54,6 +59,7 @@ public class FragmentContacts extends Fragment {
 
         contactsDatabase = FirebaseDatabase.getInstance().getReference();
         contactsChildReference= contactsDatabase.child("contacts");
+
 
 
 //        FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.fab);
@@ -84,59 +90,8 @@ public class FragmentContacts extends Fragment {
         fragmentContacts.setArguments(args);
         return fragmentContacts;
     }
-    //----------------------------------------------contats
-    private void writecontacts(){
 
-        Uri uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
-        String[] projection = new String[]{ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
-                ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Email.ADDRESS,};
-
-        Cursor people = getActivity().getContentResolver().query(uri, projection, null, null, null);
-
-        int indexName = people.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
-        int indexNumber = people.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-
-        //people.moveToFirst();
-        for(people.moveToFirst(); !people.isAfterLast(); people.moveToNext()){
-
-            String name = people.getString(indexName);
-            String number = people.getString(indexNumber);
-
-            arrayListContacts.add(new ContactModel(name,number));
-
-
-        }
-
-//                do {
-//
-//                    String name = people.getString(indexName);
-//                    String number = people.getString(indexNumber);
-//                    HashMap<String, Object> NamePhoneType = new HashMap<String, Object>();
-//                    NamePhoneType.put("name", name);
-//                    NamePhoneType.put("mobileno", number);
-//                    Log.d("name+---+number", name + "----" + number);
-//                    try {
-//                        json = new JSONObject().put("contact_no", number.trim());
-//                    } catch (JSONException e) {
-//                        e.printStackTrace();
-//                    }
-//
-//                    try {
-//                        json.put("name", name.trim());
-//                        contactCount++;
-//                    } catch (JSONException e) {
-//                        e.printStackTrace();
-//                    }
-//
-//                } while (people.moveToNext());
-//                //Log.d("json data new query",postjson.toString().trim());
-//                String contactsAsString = String.valueOf(contactCount);
-//                Log.d(TAG,contactsAsString);
-//                //insertContact(GlobalDeclarations.UserAccountID, contactsFromJson, contactsAsString);
-        people.close();
-        writeNewUser(arrayListContacts);
-    }
-    private ArrayList<ContactModel> getContacts(){
+    private ArrayList<Object> getContacts(){
 //        contactsChildReference.child(userId).addValueEventListener(new ValueEventListener() {
 //            @Override
 //            public void onDataChange(DataSnapshot dataSnapshot) {
@@ -150,27 +105,12 @@ public class FragmentContacts extends Fragment {
 //            }
 //
 //        });
-        contactsChildReference.addChildEventListener(new ChildEventListener() {
+        myContactsQuery= contactsDatabase.child("contacts").child(userId);
+        myContactsQuery.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            public void onDataChange(DataSnapshot dataSnapshot) {
                 fillArrayListWithContacts(dataSnapshot);
 
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                fillArrayListWithContacts(dataSnapshot);
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                fillArrayListWithContacts(dataSnapshot);
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-                fillArrayListWithContacts(dataSnapshot);
             }
 
             @Override
@@ -178,43 +118,63 @@ public class FragmentContacts extends Fragment {
 
             }
         });
-        return    arrayListContactsToDisplay;
+//        myContactsQuery.addChildEventListener(new ChildEventListener() {
+//            @Override
+//            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+//                fillArrayListWithContacts(dataSnapshot);
+//
+//            }
+//
+//            @Override
+//            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+//               adapter.notifyDataSetChanged();
+//            }
+//
+//            @Override
+//            public void onChildRemoved(DataSnapshot dataSnapshot) {
+//                adapter.notifyDataSetChanged();
+//            }
+//
+//            @Override
+//            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+//                adapter.notifyDataSetChanged();
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//
+//            }
+//        });
+
+        return    arrayListContacts;
 
     }
 
-    private void fillArrayListWithContacts(DataSnapshot dataSnapshot){
-            arrayListContactsToDisplay.clear();
-        for(DataSnapshot ds : dataSnapshot.getChildren()){
-            ContactModel contact = ds.getValue(ContactModel.class);
-            arrayListContactsToDisplay.add(contact);
+    private void fillArrayListWithContacts(DataSnapshot dataSnapshot) {
+        arrayListContacts.clear();
+        arrayListContactsToDisplay.clear();
+        String cleanedName ="";
+        String cleanedNumber ="";
+        for (DataSnapshot ds : dataSnapshot.getChildren()) {
+            Log.e(TAG, ds.toString());
+            ContactModel contactModel = ds.getValue(ContactModel.class);
+
+
+
+
+            arrayListContactsToDisplay.add(contactModel);
         }
         adapter.notifyDataSetChanged();
-    }
-    private void writeNewUser(ArrayList<ContactModel> arrayListContactsTobeWritten) {
-
-        if (!TextUtils.isEmpty(userId)) {
-            if (arrayListContactsTobeWritten != null) {
-
-
-                for (int i = 0; i < arrayListContactsTobeWritten.size(); i++) {
-
-                    contactsDatabase.child("contacts").child(userId).child(nameformater(arrayListContactsTobeWritten.get(i).getName())).setValue(arrayListContactsTobeWritten.get(i));
-                }
-            }
-
-
-        }
+//        Iterable<DataSnapshot> snapshotIterator = dataSnapshot.getChildren();
+//        Iterator<DataSnapshot> iterator = snapshotIterator.iterator();
+//        while (iterator.hasNext()){
+//            ContactModel contact = iterator.next().getValue(ContactModel.class);
+//            arrayListContactsToDisplay.add(new ContactModel(contact.getName(),contact.getNumber()));
+//            Object obj = iterator.next().getKey();
+//            Object obj2 = iterator.next();
+//
+//        }
     }
 
-    private String nameformater(String name){
-        String [] badChars = {".","#","$","[","]"};
-        for(int i =0; i < badChars.length; i++) {
-            if (name.contains((badChars[i]))){
-                String toBeReplaced = badChars[i] ;
-             name =name.replace(toBeReplaced,"");
-            }
-        }
-        return name;
-    }
 
 }

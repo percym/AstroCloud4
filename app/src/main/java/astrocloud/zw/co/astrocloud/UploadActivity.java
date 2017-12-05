@@ -2,6 +2,9 @@ package astrocloud.zw.co.astrocloud;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.ContactsContract;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -11,6 +14,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,9 +23,12 @@ import android.view.ViewGroup;
 
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionButton;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
 import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
@@ -49,7 +56,10 @@ public class UploadActivity extends AppCompatActivity {
     private ViewPager mViewPager;
     private FirebaseAuth mAuth;
 
-    private ArrayList<ContactModel> arrayListContacts;
+    private ArrayList<ContactModel> arrayListContacts = new ArrayList<>();
+    private DatabaseReference contactsDatabase;
+    DatabaseReference contactsChildReference;
+    String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
 
     @Override
@@ -66,6 +76,60 @@ public class UploadActivity extends AppCompatActivity {
 
     }
 
+    //----------------------------------------------contats
+    private void writecontacts(){
+
+        Uri uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
+        String[] projection = new String[]{ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+                ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Email.ADDRESS,};
+
+        Cursor people = getContentResolver().query(uri, projection, null, null, null);
+
+        int indexName = people.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
+        int indexNumber = people.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+
+        //people.moveToFirst();
+        arrayListContacts.clear();
+        for(people.moveToFirst(); !people.isAfterLast(); people.moveToNext()){
+
+            String name = people.getString(indexName);
+            String number = people.getString(indexNumber);
+
+            arrayListContacts.add(new ContactModel(name,number));
+
+
+        }
+
+//                do {
+//
+//                    String name = people.getString(indexName);
+//                    String number = people.getString(indexNumber);
+//                    HashMap<String, Object> NamePhoneType = new HashMap<String, Object>();
+//                    NamePhoneType.put("name", name);
+//                    NamePhoneType.put("mobileno", number);
+//                    Log.d("name+---+number", name + "----" + number);
+//                    try {
+//                        json = new JSONObject().put("contact_no", number.trim());
+//                    } catch (JSONException e) {
+//                        e.printStackTrace();
+//                    }
+//
+//                    try {
+//                        json.put("name", name.trim());
+//                        contactCount++;
+//                    } catch (JSONException e) {
+//                        e.printStackTrace();
+//                    }
+//
+//                } while (people.moveToNext());
+//                //Log.d("json data new query",postjson.toString().trim());
+//                String contactsAsString = String.valueOf(contactCount);
+//                Log.d(TAG,contactsAsString);
+//                //insertContact(GlobalDeclarations.UserAccountID, contactsFromJson, contactsAsString);
+        people.close();
+        writeNewUser(arrayListContacts);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,7 +137,8 @@ public class UploadActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        contactsDatabase = FirebaseDatabase.getInstance().getReference();
+        contactsChildReference= contactsDatabase.child("contacts");
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -95,22 +160,70 @@ public class UploadActivity extends AppCompatActivity {
                 .build();
 
         SubActionButton.Builder rLSubBuilder = new SubActionButton.Builder(this);
-        ImageView rlIcon1 = new ImageView(this);
-        ImageView rlIcon2 = new ImageView( this);
+        ImageView rlIcon0 = new ImageView( this);
+        ImageView rlIcon1 = new ImageView( this);
+        ImageView rlIcon2 = new ImageView(this);
 
-        rlIcon1.setImageDrawable(getResources().getDrawable(R.drawable.ic_green_cloud));
-        rlIcon2.setImageDrawable(getResources().getDrawable(R.drawable.ic_cloud_upload));
+
+     //   rlIcon1.setImageDrawable(getResources().getDrawable(R.drawable.ic_upload_contacts));
+
+        rlIcon0.setImageDrawable(getResources().getDrawable(R.drawable.ic_search));
+        rlIcon1.setImageDrawable(getResources().getDrawable(R.drawable.ic_reload));
+        rlIcon2.setImageDrawable(getResources().getDrawable(R.drawable.ic_upload_contacts));
 
         final FloatingActionMenu rightLowerMenu = new FloatingActionMenu.Builder(this)
+                .addSubActionView(rLSubBuilder.setContentView(rlIcon0).build())
                 .addSubActionView(rLSubBuilder.setContentView(rlIcon1).build())
                 .addSubActionView(rLSubBuilder.setContentView(rlIcon2).build())
                 .attachTo(rightLowerButton)
                 .build();
 
+        switch (mViewPager.getCurrentItem()){
+            case 0:
+                rlIcon2.setImageDrawable(getResources().getDrawable(R.drawable.ic_upload_contacts));
+
+                rlIcon1.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Toast.makeText(getApplicationContext(),"pano",Toast.LENGTH_LONG).show();
+                    }
+                });
+
+                rlIcon2.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        writecontacts();
+                    }
+                });
+                break;
+        }
+    }
+    private void writeNewUser(ArrayList<ContactModel> arrayListContactsTobeWritten) {
+
+        if (!TextUtils.isEmpty(userId)) {
+            if (arrayListContactsTobeWritten != null) {
 
 
+                for (int i = 0; i < arrayListContactsTobeWritten.size(); i++) {
+
+                    contactsChildReference.child(userId).child(nameformater(arrayListContactsTobeWritten.get(i).getName())).setValue(arrayListContactsTobeWritten.get(i));
+                }
+            }
+
+
+        }
     }
 
+    private String nameformater(String name){
+        String [] badChars = {".","#","$","[","]"};
+        for(int i =0; i < badChars.length; i++) {
+            if (name.contains((badChars[i]))){
+                String toBeReplaced = badChars[i] ;
+                name =name.replace(toBeReplaced,"");
+            }
+        }
+        return name;
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -200,5 +313,7 @@ public class UploadActivity extends AppCompatActivity {
             return 3;
         }
     }
+
+
 
 }
