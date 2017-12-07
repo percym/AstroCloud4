@@ -11,9 +11,33 @@
         android:scrollbars="vertical"
         android:background="#fff">
 
-
-
     </android.support.v7.widget.RecyclerView>
+    <RelativeLayout
+        android:visibility="visible"
+        android:id="@+id/folder_state_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white">
 
 
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/empty_folder_icon"
+                android:src="@drawable/ic_user_not_there"
+                android:layout_width="125dp"
+                android:layout_height="125dp"
+                android:layout_centerVertical="true"
+                android:layout_centerHorizontal="true"/>
+
+        <TextView
+            android:layout_below="@+id/empty_folder_icon"
+            android:layout_marginTop="10dp"
+            android:textSize="16sp"
+            android:text="It seems you haven't backup your contacts yet"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </RelativeLayout>
 </RelativeLayout>

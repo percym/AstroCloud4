@@ -1,30 +1,29 @@
 package astrocloud.zw.co.astrocloud;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.design.widget.TabLayout;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeInfoDialog;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeSuccessDialog;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.interfaces.Closure;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -33,13 +32,19 @@ import com.oguzdev.circularfloatingactionmenu.library.FloatingActionButton;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
 import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
 
+import net.ralphpina.permissionsmanager.PermissionsManager;
+import net.ralphpina.permissionsmanager.PermissionsResult;
+
 import java.util.ArrayList;
 
 import astrocloud.zw.co.astrocloud.fragments.FragmentContacts;
+import astrocloud.zw.co.astrocloud.fragments.FragmentPhotos;
 import astrocloud.zw.co.astrocloud.models.ContactModel;
+import rx.functions.Action1;
 
 public class UploadActivity extends AppCompatActivity {
 
+    private static final int REQUEST_CONTACTS =101 ;
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -60,6 +65,7 @@ public class UploadActivity extends AppCompatActivity {
     private DatabaseReference contactsDatabase;
     DatabaseReference contactsChildReference;
     String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+    private AwesomeInfoDialog awesomeInfoDialog;
 
 
     @Override
@@ -73,6 +79,7 @@ public class UploadActivity extends AppCompatActivity {
             finish();
 
         }
+//        PermissionsManager.init(this);
 
     }
 
@@ -137,6 +144,7 @@ public class UploadActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        PermissionsManager.init(this);
         contactsDatabase = FirebaseDatabase.getInstance().getReference();
         contactsChildReference= contactsDatabase.child("contacts");
         // Create the adapter that will return a fragment for each of the three
@@ -160,43 +168,118 @@ public class UploadActivity extends AppCompatActivity {
                 .build();
 
         SubActionButton.Builder rLSubBuilder = new SubActionButton.Builder(this);
-        ImageView rlIcon0 = new ImageView( this);
-        ImageView rlIcon1 = new ImageView( this);
-        ImageView rlIcon2 = new ImageView(this);
+        final ImageView rlIcon0 = new ImageView( this);
+        final ImageView rlIcon1 = new ImageView( this);
+        final ImageView rlIcon2 = new ImageView( this);
+        final ImageView rlIcon3 = new ImageView(this);
 
 
      //   rlIcon1.setImageDrawable(getResources().getDrawable(R.drawable.ic_upload_contacts));
 
         rlIcon0.setImageDrawable(getResources().getDrawable(R.drawable.ic_search));
-        rlIcon1.setImageDrawable(getResources().getDrawable(R.drawable.ic_reload));
-        rlIcon2.setImageDrawable(getResources().getDrawable(R.drawable.ic_upload_contacts));
+        rlIcon1.setImageDrawable(getResources().getDrawable(R.drawable.ic_download));
+        rlIcon2.setImageDrawable(getResources().getDrawable(R.drawable.ic_reload));
+        rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_upload_contacts));
 
         final FloatingActionMenu rightLowerMenu = new FloatingActionMenu.Builder(this)
                 .addSubActionView(rLSubBuilder.setContentView(rlIcon0).build())
                 .addSubActionView(rLSubBuilder.setContentView(rlIcon1).build())
                 .addSubActionView(rLSubBuilder.setContentView(rlIcon2).build())
+                .addSubActionView(rLSubBuilder.setContentView(rlIcon3).build())
                 .attachTo(rightLowerButton)
                 .build();
+            mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+            tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+                @Override
+                public void onTabSelected(TabLayout.Tab tab) {
+                    switch (tab.getPosition()){
+                        case 0:
+                            if(rightLowerMenu.isOpen()){
+                                rightLowerMenu.close(true);
+
+                            }
+                            rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_upload_contacts));
+
+                            break;
+
+                        case 1:{
+                            rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_file_upload_white_48dp));
+                            if(rightLowerMenu.isOpen()){
+                                rightLowerMenu.close(true);
+
+                            }
+
+                        }
+
+                    }
+                }
+
+                @Override
+                public void onTabUnselected(TabLayout.Tab tab) {
+
+                }
+
+                @Override
+                public void onTabReselected(TabLayout.Tab tab) {
+
+                }
+            });
+
+
 
         switch (mViewPager.getCurrentItem()){
             case 0:
-                rlIcon2.setImageDrawable(getResources().getDrawable(R.drawable.ic_upload_contacts));
-
-                rlIcon1.setOnClickListener(new View.OnClickListener() {
+                rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_upload_contacts));
+                rlIcon0.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Toast.makeText(getApplicationContext(),"pano",Toast.LENGTH_LONG).show();
+
                     }
                 });
-
                 rlIcon2.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        writecontacts();
+                        FragmentContacts.newInstance(0);
+                    }
+                });
+
+
+                rlIcon3.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if(PermissionsManager.get().isContactsGranted()) {
+                            rightLowerMenu.close(true);
+
+                            writecontacts();
+                        }else if(PermissionsManager.get().neverAskForContacts(UploadActivity.this)) {
+                            showPermissionsDialogue();
+                        }else {
+                            PermissionsManager.get().requestContactsPermission()
+                                    .subscribe(new Action1<PermissionsResult>() {
+                                        @Override
+                                        public void call(PermissionsResult permissionsResult) {
+                                          if(!permissionsResult.isGranted()){
+                                              showPermissionsDialogue();
+
+                                          }
+                                        }
+                                    });
+
+                        }
                     }
                 });
                 break;
+
+            case 1:{
+                rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_file_upload_white_48dp));
+                if(rightLowerMenu.isOpen()){
+                    rightLowerMenu.updateItemPositions();
+                }
+
+            }
         }
+
+
     }
     private void writeNewUser(ArrayList<ContactModel> arrayListContactsTobeWritten) {
 
@@ -301,7 +384,7 @@ public class UploadActivity extends AppCompatActivity {
                 case 0:
                     return FragmentContacts.newInstance(position);
                 case 1:
-                    return PlaceholderFragment.newInstance(position);
+                    return FragmentPhotos.newInstance(position);
                 default:return FragmentContacts.newInstance(position);
             }
 
@@ -314,6 +397,51 @@ public class UploadActivity extends AppCompatActivity {
         }
     }
 
+    public void onClickGoToAppSettings() {
+        PermissionsManager.get()
+                .intentToAppSettings(this);
+    }
+    public void showPermissionsDialogue(){
+        new AwesomeSuccessDialog(this)
+                .setTitle("AstroCloud")
+                .setMessage("Permission to read and write contacts is needed for application to function properly")
+                .setColoredCircle(R.color.white)
+                .setDialogIconOnly(R.drawable.ic_app_icon)
+                .setCancelable(false)
+                .setPositiveButtonText(getString(R.string.give_permissions))
+                .setPositiveButtonbackgroundColor(R.color.dialogSuccessBackgroundColor)
+                .setPositiveButtonTextColor(R.color.white)
+                .setNegativeButtonText(getString(R.string.dialog_no_button))
+                .setNegativeButtonbackgroundColor(R.color.dialogErrorBackgroundColor)
+                .setNegativeButtonTextColor(R.color.white)
+                .setPositiveButtonClick(new Closure() {
+                    @Override
+                    public void exec() {
+                        //click
+                        onClickGoToAppSettings();
+                    }
+                })
+                .setNegativeButtonClick(new Closure() {
+                    @Override
+                    public void exec() {
 
+                    }
+                })
+                .show();
+
+    }
+
+
+    public void showUploadcontactsDialogue(){
+        awesomeInfoDialog = new AwesomeInfoDialog(this);
+        awesomeInfoDialog
+                .setTitle(R.string.app_name)
+                .setMessage("Uploading your contacts")
+                .setDialogIconOnly(R.drawable.ic_app_icon)
+                .setColoredCircle(R.color.white)
+                .setCancelable(false)
+                .show();
+
+    }
 
 }

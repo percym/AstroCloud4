@@ -32,8 +32,7 @@ public class PermissionUtil {
     public static void checkPermission(Context context, String permission, PermissionAskListener listener){
 /*
         * If permission is not granted
-        * */
-        if (shouldAskPermission(context, permission)){
+        * */if (shouldAskPermission(context, permission)){
 /*
             * If permission denied previously
             * */

@@ -32,6 +32,13 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.3.1'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.3.1'
     compile 'com.oguzdev:CircularFloatingActionMenu:1.0.2'
+    compile 'com.github.blennerSilva:AwesomeDialog:2.0.5'
+    compile 'com.github.ralphpina:Android-Permissions-Manager:v2.0.1'
+    compile 'com.appolica:flubber:1.0.1'
+    compile 'de.hdodenhof:circleimageview:2.2.0'
+    implementation ('com.h6ah4i.android.widget.advrecyclerview:advrecyclerview:0.11.0@aar'){
+        transitive=true
+    }
 }
 
 

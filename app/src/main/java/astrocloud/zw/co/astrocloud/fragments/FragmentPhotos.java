@@ -43,8 +43,11 @@ public class FragmentPhotos extends Fragment {
         // Required empty public constructor
 
     }
-    public static FragmentPhotos newInstance() {
+    public static FragmentPhotos newInstance( int val) {
         FragmentPhotos fr = new FragmentPhotos();
+        Bundle args = new Bundle();
+        args.putInt("val", val);
+        fr.setArguments(args);
         return fr;
     }
 
