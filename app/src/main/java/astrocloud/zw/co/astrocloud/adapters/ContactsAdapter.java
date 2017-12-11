@@ -107,6 +107,14 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ViewHo
         return filter;
     }
 
+    public void removeItem(int position) {
+        mDisplayedValues.remove(position);
+        mOriginalValues.remove(position);
+        notifyItemRemoved(position);
+        notifyItemRangeChanged(position,mDisplayedValues.size());
+        notifyItemRangeChanged(position,mOriginalValues.size());
+    }
+
 
 
 
@@ -123,4 +131,6 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ViewHo
         }
 
     }
+
+
 }

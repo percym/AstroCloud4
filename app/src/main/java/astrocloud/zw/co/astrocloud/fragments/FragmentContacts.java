@@ -1,22 +1,36 @@
 package astrocloud.zw.co.astrocloud.fragments;
 
 
+import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.RectF;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.appolica.flubber.Flubber;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeErrorDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeInfoDialog;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeSuccessDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.interfaces.Closure;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -28,14 +42,18 @@ import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import net.ralphpina.permissionsmanager.PermissionsManager;
+import net.ralphpina.permissionsmanager.PermissionsResult;
+
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 
 import astrocloud.zw.co.astrocloud.R;
 import astrocloud.zw.co.astrocloud.adapters.ContactsAdapter;
 import astrocloud.zw.co.astrocloud.models.ContactModel;
 import de.hdodenhof.circleimageview.CircleImageView;
+import rx.functions.Action1;
+
 
 /**
  * Created by Percy M on 11/30/2017.
@@ -46,7 +64,7 @@ public class FragmentContacts extends Fragment {
     RecyclerView contactsRecyclerView;
     RelativeLayout folderStateContainer;
     View view;
-    private static final  String TAG = FragmentContacts.class.getCanonicalName();
+    private static final String TAG = FragmentContacts.class.getCanonicalName();
     private ArrayList<Object> arrayListContacts = new ArrayList<>();
     private ArrayList<ContactModel> arrayListContactsToDisplay = new ArrayList<>();
     private DatabaseReference contactsDatabase;
@@ -54,20 +72,24 @@ public class FragmentContacts extends Fragment {
     DatabaseReference contactsChildReference;
     Query myContactsQuery;
     ContactsAdapter adapter;
-    GenericTypeIndicator<HashMap<String,Object>> genericTypeIndicator = new GenericTypeIndicator<HashMap<String, Object>>();
+    GenericTypeIndicator<HashMap<String, Object>> genericTypeIndicator = new GenericTypeIndicator<HashMap<String, Object>>();
     AwesomeInfoDialog awesomeInfoDialog;
-    CircleImageView emptyfolder ;
-    RelativeLayout  folder_state_container;
+    AwesomeInfoDialog awesomeErrorDialog;
+    CircleImageView emptyfolder;
+    RelativeLayout folder_state_container;
+    private Paint p = new Paint();
+    String name, phonenumber;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable final ViewGroup container, Bundle savedInstanceState) {
 
-        view = inflater.inflate(R.layout.fragment_contacts,container,false);
-        contactsRecyclerView= view.findViewById(R.id.contactsRecyclerView);
+        view = inflater.inflate(R.layout.fragment_contacts, container, false);
+        contactsRecyclerView = view.findViewById(R.id.contactsRecyclerView);
         emptyfolder = view.findViewById(R.id.empty_folder_icon);
         folder_state_container = view.findViewById(R.id.folder_state_container);
         contactsDatabase = FirebaseDatabase.getInstance().getReference();
-        contactsChildReference= contactsDatabase.child("contacts");
+        contactsChildReference = contactsDatabase.child("contacts");
 //        FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.fab);
 //        fab.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -81,23 +103,22 @@ public class FragmentContacts extends Fragment {
 
 //        contactsRecyclerView.setVisibility(View.GONE);
         folder_state_container.setVisibility(View.VISIBLE);
+        Flubber.with()
+                .animation(Flubber.AnimationPreset.ROTATION)
+                .interpolator(Flubber.Curve.BZR_EASE_IN_OUT_CUBIC)
+                .repeatCount(2)
+                .duration(2000)
+                .autoStart(true)
+                .createFor(emptyfolder);
         showFetchcontactsDialogue();
         getContacts();
-        adapter = new ContactsAdapter(getContext(),arrayListContactsToDisplay);
+        adapter = new ContactsAdapter(getContext(), arrayListContactsToDisplay);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
         contactsRecyclerView.setLayoutManager(mLayoutManager);
         contactsRecyclerView.setItemAnimator(new DefaultItemAnimator());
         contactsRecyclerView.setAdapter(adapter);
-
-
-//        Flubber.with()
-//                .animation(Flubber.AnimationPreset.ROTATION)
-//                .interpolator(Flubber.Curve.BZR_EASE_IN_OUT_CUBIC)
-//                .repeatCount(2)
-//                .duration(2000)
-//                .autoStart(true)
-//                .createFor(emptyfolder);
-            adapter.notifyDataSetChanged();
+        adapter.notifyDataSetChanged();
+        initSwipe();
         return view;
     }
 
@@ -110,15 +131,15 @@ public class FragmentContacts extends Fragment {
         return fragmentContacts;
     }
 
-    private ArrayList<Object> getContacts(){
-    arrayListContactsToDisplay.clear();
-    arrayListContacts.clear();
-        myContactsQuery= contactsDatabase.child("contacts").child(userId);
+    private ArrayList<Object> getContacts() {
+        arrayListContactsToDisplay.clear();
+        arrayListContacts.clear();
+        myContactsQuery = contactsDatabase.child("contacts").child(userId);
         myContactsQuery.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-              fillArrayListWithContactsDB(dataSnapshot);
-              adapter.notifyDataSetChanged();
+                fillArrayListWithContactsDB(dataSnapshot);
+                adapter.notifyDataSetChanged();
             }
 
             @Override
@@ -134,13 +155,13 @@ public class FragmentContacts extends Fragment {
 
             @Override
             public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-            adapter.notifyDataSetChanged();
+                adapter.notifyDataSetChanged();
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 String databaseErrorString = databaseError.getDetails();
-            showFetchErrorDialogue(databaseErrorString);
+                showFetchErrorDialogue(databaseErrorString);
 
             }
         });
@@ -159,7 +180,7 @@ public class FragmentContacts extends Fragment {
             }
         });
         awesomeInfoDialog.hide();
-        return    arrayListContacts;
+        return arrayListContacts;
 
     }
 
@@ -167,17 +188,17 @@ public class FragmentContacts extends Fragment {
 //        arrayListContacts.clear();
 //        arrayListContactsToDisplay.clear();
         for (DataSnapshot ds : dataSnapshot.getChildren()) {
-        //   Log.e(TAG, ds.toString());
+            //   Log.e(TAG, ds.toString());
             ContactModel contactModel = ds.getValue(ContactModel.class);
 
             arrayListContactsToDisplay.add(contactModel);
 
         }
-        if((arrayListContactsToDisplay.size()>0)){
+        if ((arrayListContactsToDisplay.size() > 0)) {
             awesomeInfoDialog.hide();
             contactsRecyclerView.setVisibility(View.VISIBLE);
             folder_state_container.setVisibility(View.GONE);
-        }else {
+        } else {
             awesomeInfoDialog.hide();
             contactsRecyclerView.setVisibility(View.GONE);
             folder_state_container.setVisibility(View.VISIBLE);
@@ -220,8 +241,9 @@ public class FragmentContacts extends Fragment {
             }
         });
     }
+
     private void fillArrayListWithContactsDB(DataSnapshot dataSnapshot) {
-;
+        ;
         for (DataSnapshot ds : dataSnapshot.getChildren()) {
             //   Log.e(TAG, ds.toString());
             ContactModel contactModel = dataSnapshot.getValue(ContactModel.class);
@@ -240,11 +262,11 @@ public class FragmentContacts extends Fragment {
             arrayListContactsToDisplay.add(contactModel);
 
         }
-        if((arrayListContactsToDisplay.size()>0)){
+        if ((arrayListContactsToDisplay.size() > 0)) {
             awesomeInfoDialog.hide();
             contactsRecyclerView.setVisibility(View.VISIBLE);
             folder_state_container.setVisibility(View.GONE);
-        }else {
+        } else {
             awesomeInfoDialog.hide();
             contactsRecyclerView.setVisibility(View.GONE);
             folder_state_container.setVisibility(View.VISIBLE);
@@ -287,6 +309,7 @@ public class FragmentContacts extends Fragment {
             }
         });
     }
+
     private void fillArrayListWithContactsDBRemoved(DataSnapshot dataSnapshot) {
 
         for (DataSnapshot ds : dataSnapshot.getChildren()) {
@@ -309,12 +332,11 @@ public class FragmentContacts extends Fragment {
         }
 
 
-
-        if((arrayListContactsToDisplay.size()>0)){
+        if ((arrayListContactsToDisplay.size() > 0)) {
             awesomeInfoDialog.hide();
             contactsRecyclerView.setVisibility(View.VISIBLE);
             folder_state_container.setVisibility(View.GONE);
-        }else {
+        } else {
             awesomeInfoDialog.hide();
             contactsRecyclerView.setVisibility(View.GONE);
             folder_state_container.setVisibility(View.VISIBLE);
@@ -357,6 +379,7 @@ public class FragmentContacts extends Fragment {
             }
         });
     }
+
     private void fillArrayListWithContactsDBChanged(DataSnapshot dataSnapshot) {
         ;
         for (DataSnapshot ds : dataSnapshot.getChildren()) {
@@ -380,12 +403,11 @@ public class FragmentContacts extends Fragment {
         }
 
 
-
-        if((arrayListContactsToDisplay.size()>0)){
+        if ((arrayListContactsToDisplay.size() > 0)) {
             awesomeInfoDialog.hide();
             contactsRecyclerView.setVisibility(View.VISIBLE);
             folder_state_container.setVisibility(View.GONE);
-        }else {
+        } else {
             awesomeInfoDialog.hide();
             contactsRecyclerView.setVisibility(View.GONE);
             folder_state_container.setVisibility(View.VISIBLE);
@@ -428,7 +450,8 @@ public class FragmentContacts extends Fragment {
             }
         });
     }
-    public void showFetchcontactsDialogue(){
+
+    public void showFetchcontactsDialogue() {
         awesomeInfoDialog = new AwesomeInfoDialog(getActivity());
         awesomeInfoDialog
                 .setTitle(R.string.app_name)
@@ -439,7 +462,8 @@ public class FragmentContacts extends Fragment {
                 .show();
 
     }
-    public void showFetchErrorDialogue(String databaseErrorString){
+
+    public void showFetchErrorDialogue(String databaseErrorString) {
 
         new AwesomeErrorDialog(getActivity())
                 .setTitle(R.string.app_name)
@@ -457,5 +481,239 @@ public class FragmentContacts extends Fragment {
                 .show();
     }
 
+    private void initSwipe() {
+        ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+
+                if (direction == ItemTouchHelper.RIGHT) {
+//                    removeView();
+
+                    name = ((TextView) contactsRecyclerView.findViewHolderForAdapterPosition(position).itemView.findViewById(R.id.firstLine)).getText().toString();
+                    phonenumber = ((TextView) contactsRecyclerView.findViewHolderForAdapterPosition(position).itemView.findViewById(R.id.secondLine)).getText().toString();
+                    if (PermissionsManager.get().isContactsGranted()) {
+                        if (doesContactExist(name)) {
+                            awesomeErrorDialog = new AwesomeInfoDialog(getContext());
+                            awesomeErrorDialog
+                                    .setTitle(R.string.app_name)
+                                    .setMessage("Contact " + name + " already exists. Do you want to continue restoring this contact ?")
+                                    .setDialogIconOnly(R.drawable.ic_app_icon)
+                                    .setColoredCircle(R.color.white)
+                                    .setCancelable(false)
+                                    .setPositiveButtonText(getString(R.string.restore))
+                                    .setPositiveButtonbackgroundColor(R.color.dialogSuccessBackgroundColor)
+                                    .setPositiveButtonTextColor(R.color.white)
+                                    .setNegativeButtonText(getString(R.string.cancel))
+                                    .setNegativeButtonbackgroundColor(R.color.dialogErrorBackgroundColor)
+                                    .setNegativeButtonTextColor(R.color.white)
+                                    .setPositiveButtonClick(new Closure() {
+                                        @Override
+                                        public void exec() {
+                                            addContactToPhone(name, phonenumber);
+                                            adapter.notifyDataSetChanged();
+                                        }
+                                    })
+                                    .setNegativeButtonClick(new Closure() {
+                                        @Override
+                                        public void exec() {
+
+                                        }
+                                    })
+                                    .show();
+                        } else {
+                            addContactToPhone(name, phonenumber);
+                            adapter.notifyDataSetChanged();
+                        }
+
+//                    edit_position = position;
+//                    alertDialog.setTitle("Edit Country");
+//                    et_country.setText(countries.get(position));
+//                    alertDialog.show();
+                        //               } else {
+
+                        //                  adapter.removeItem(position);
+                    } else if (PermissionsManager.get().neverAskForContacts(FragmentContacts.this)) {
+
+                        showFetchcontactsDialogue();
+                    } else {
+                        PermissionsManager.get().requestContactsPermission()
+                                .subscribe(new Action1<PermissionsResult>() {
+                                    @Override
+                                    public void call(PermissionsResult permissionsResult) {
+                                        if (!permissionsResult.isGranted()) {
+                                            showPermissionsDialogue();
+
+                                        }else {
+                                            addContactToPhone(name, phonenumber );
+
+                                        }
+                                    }
+                                });
+
+
+                    }
+                }
+
+            }
+
+            @Override
+            public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+
+                Bitmap icon;
+                if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+
+                    View itemView = viewHolder.itemView;
+                    float height = (float) itemView.getBottom() - (float) itemView.getTop();
+                    float width = height / 3;
+
+                    if (dX > 0) {
+                        p.setColor(Color.parseColor("#096d39"));
+                        RectF background = new RectF((float) itemView.getLeft(), (float) itemView.getTop(), dX, (float) itemView.getBottom());
+                        c.drawRect(background, p);
+                        icon = BitmapFactory.decodeResource(getResources(), R.drawable.cloud_computing);
+                        RectF icon_dest = new RectF((float) itemView.getLeft() + width, (float) itemView.getTop() + width, (float) itemView.getLeft() + 2 * width, (float) itemView.getBottom() - width);
+                        c.drawBitmap(icon, null, icon_dest, p);
+//                    } else {
+//                        p.setColor(Color.parseColor("#D32F2F"));
+//                        RectF background = new RectF((float) itemView.getRight() + dX, (float) itemView.getTop(),(float) itemView.getRight(), (float) itemView.getBottom());
+//                        c.drawRect(background,p);
+//                        icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_delete_white);
+//                        RectF icon_dest = new RectF((float) itemView.getRight() - 2*width ,(float) itemView.getTop() + width,(float) itemView.getRight() - width,(float)itemView.getBottom() - width);
+//                        c.drawBitmap(icon,null,icon_dest,p);
+                    }
+                }
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+            }
+        };
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
+        itemTouchHelper.attachToRecyclerView(contactsRecyclerView);
     }
+
+    private void addContactToPhone(String name, String number) {
+
+        Intent intent = new Intent(Intent.ACTION_INSERT);
+        intent.setType(ContactsContract.Contacts.CONTENT_TYPE);
+        intent.putExtra(ContactsContract.Intents.Insert.NAME, name);
+        intent.putExtra(ContactsContract.Intents.Insert.PHONE, number);
+        startActivity(intent);
+    }
+
+    private void removeView() {
+        if (view.getParent() != null) {
+            ((ViewGroup) view.getParent()).removeView(view);
+        }
+    }
+
+    private void restoreView() {
+
+        if (view.getParent() != null) {
+            ((ViewGroup) view.getParent()).removeView(view);
+        }
+    }
+
+    private boolean doesContactExist(String contactName) {
+        String contactNumber = "";
+        boolean state = false;
+        Uri uri = ContactsContract.Data.CONTENT_URI;
+        String[] projection = new String[]{ContactsContract.PhoneLookup._ID};
+        String selection = ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME + " = ?";
+        String[] selectionArguments = {contactName};
+        Cursor cursor = getActivity().getContentResolver().query(uri, projection, selection, selectionArguments, null);
+
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                contactNumber = cursor.getString(0);
+                Log.d("the #", contactNumber);
+                state = true;
+            }
+        } else {
+            state = false;
+        }
+        return state;
+    }
+
+    public void showUploadcontactsDialogue(String contactName) {
+        awesomeInfoDialog = new AwesomeInfoDialog(getContext());
+        awesomeInfoDialog
+                .setTitle(R.string.app_name)
+                .setMessage("Contact " + contactName + " already exists. Do you want to continue restoring this contact ?")
+                .setDialogIconOnly(R.drawable.ic_app_icon)
+                .setColoredCircle(R.color.white)
+                .setCancelable(false)
+                .setPositiveButtonText("Restore")
+                .setNegativeButtonText("Cancel")
+                .setPositiveButtonClick(new Closure() {
+                    @Override
+                    public void exec() {
+
+
+                    }
+                })
+                .setNegativeButtonClick(new Closure() {
+                    @Override
+                    public void exec() {
+                        adapter.notifyDataSetChanged();
+                    }
+                })
+                .show();
+
+    }
+
+    private void snackShower(String message) {
+        Snackbar snackbar;
+        snackbar = Snackbar.make(view, message, Snackbar.LENGTH_SHORT);
+        View snackBarView = snackbar.getView();
+        snackBarView.setBackgroundColor(getResources().getColor(R.color.mainGreen));
+        TextView textView = (TextView) snackBarView.findViewById(android.support.design.R.id.snackbar_text);
+        textView.setTextColor(Color.WHITE);
+        textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+        snackbar.show();
+    }
+
+    public void showPermissionsDialogue() {
+        new AwesomeSuccessDialog(getActivity())
+                .setTitle("AstroCloud")
+                .setMessage("Permission to read and write contacts is needed for application to function properly")
+                .setColoredCircle(R.color.white)
+                .setDialogIconOnly(R.drawable.ic_app_icon)
+                .setCancelable(false)
+                .setPositiveButtonText(getString(R.string.give_permissions))
+                .setPositiveButtonbackgroundColor(R.color.dialogSuccessBackgroundColor)
+                .setPositiveButtonTextColor(R.color.white)
+                .setNegativeButtonText(getString(R.string.dialog_no_button))
+                .setNegativeButtonbackgroundColor(R.color.dialogErrorBackgroundColor)
+                .setNegativeButtonTextColor(R.color.white)
+                .setPositiveButtonClick(new Closure() {
+                    @Override
+                    public void exec() {
+                        //click
+                        onClickGoToAppSettings();
+                    }
+                })
+                .setNegativeButtonClick(new Closure() {
+                    @Override
+                    public void exec() {
+
+                    }
+                })
+                .show();
+
+    }
+
+    public void onClickGoToAppSettings() {
+        PermissionsManager.get()
+                .intentToAppSettings(getActivity());
+    }
+
+    public ArrayList<ContactModel> getArrayListContactsToDisplay() {
+        return arrayListContactsToDisplay;
+    }
+}
 

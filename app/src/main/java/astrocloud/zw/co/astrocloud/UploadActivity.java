@@ -1,10 +1,16 @@
 package astrocloud.zw.co.astrocloud;
 
+import android.content.ContentProviderOperation;
 import android.content.Intent;
+import android.content.OperationApplicationException;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.provider.ContactsContract;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -20,6 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeInfoDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeSuccessDialog;
@@ -66,7 +73,8 @@ public class UploadActivity extends AppCompatActivity {
     DatabaseReference contactsChildReference;
     String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
     private AwesomeInfoDialog awesomeInfoDialog;
-
+    ArrayList<ContactModel> arrayListWithContacts;
+    CoordinatorLayout main_content;
 
     @Override
     protected void onStart() {
@@ -144,11 +152,16 @@ public class UploadActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        PermissionsManager.init(this);
+
+
         contactsDatabase = FirebaseDatabase.getInstance().getReference();
         contactsChildReference= contactsDatabase.child("contacts");
-        // Create the adapter that will return a fragment for each of the three
+        // Create the adapter that will return a fragment
+        // for each of the three
         // primary sections of the activity.
+
+        main_content= findViewById(R.id.main_content);
+
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
@@ -199,7 +212,42 @@ public class UploadActivity extends AppCompatActivity {
 
                             }
                             rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_upload_contacts));
+                            //restore to device
+                            rlIcon1.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    Fragment fragmentWithContactsToRestore = mSectionsPagerAdapter.getItem(1);
+                                    if(fragmentWithContactsToRestore instanceof FragmentContacts){
+                                       arrayListWithContacts=((FragmentContacts)fragmentWithContactsToRestore).getArrayListContactsToDisplay();
+                                        if(arrayListWithContacts != null) {
+                                            if (PermissionsManager.get().isContactsGranted()){
+                                                contactsRestorer(arrayListContacts);
+                                            }else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)){
 
+                                                showPermissionsDialogue();
+                                            }else {
+                                                PermissionsManager.get().requestContactsPermission()
+                                                        .subscribe(new Action1<PermissionsResult>() {
+                                                            @Override
+                                                            public void call(PermissionsResult permissionsResult) {
+                                                                if (!permissionsResult.isGranted()) {
+                                                                    showPermissionsDialogue();
+
+                                                                }else {
+                                                                    contactsRestorer(arrayListContacts);
+                                                                }
+                                                            }
+                                                        });
+
+                                            }
+
+                                        }else {
+                                            snackShower("No contacts found");
+                                        }
+
+                                    }
+                                }
+                            });
                             break;
 
                         case 1:{
@@ -444,4 +492,57 @@ public class UploadActivity extends AppCompatActivity {
 
     }
 
-}
+    private void contactsRestorer(ArrayList<ContactModel> contactModelArrayList){
+        for (int i = 0; i <= contactModelArrayList.size() - 1; i++) {
+            String name = contactModelArrayList.get(i).getName();
+            String mobileno = contactModelArrayList.get(i).getNumber();
+            ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+            int rawContactID = ops.size();
+            ops.add(ContentProviderOperation.newInsert(ContactsContract.RawContacts.CONTENT_URI)
+                    .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, null)
+                    .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, null)
+                    .build());
+
+            // Adding insert operation to operations list
+            // to insert display name in the table ContactsContract.Data
+            ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                    .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactID)
+                    .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+                    .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, name)
+                    .build());
+            // Adding insert operation to operations list
+            // to insert Mobile Number in the table ContactsContract.Data
+            ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                    .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactID)
+                    .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                    .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, mobileno)
+                    .withValue(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE)
+                    .build());
+            try {
+                getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
+                snackShower( "Contacts successfully restored");
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            } catch (OperationApplicationException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+    }
+
+    private void snackShower(String message) {
+        Snackbar snackbar;
+        snackbar = Snackbar.make(main_content, message, Snackbar.LENGTH_SHORT);
+        View snackBarView = snackbar.getView();
+        snackBarView.setBackgroundColor(getResources().getColor(R.color.mainGreen));
+        TextView textView = (TextView) snackBarView.findViewById(android.support.design.R.id.snackbar_text);
+        textView.setTextColor(Color.WHITE);
+        textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+        snackbar.show();
+    }
+
+
+ }
+
+
