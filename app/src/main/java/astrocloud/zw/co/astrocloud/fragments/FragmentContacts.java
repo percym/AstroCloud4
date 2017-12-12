@@ -48,9 +48,11 @@ import net.ralphpina.permissionsmanager.PermissionsResult;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import astrocloud.zw.co.astrocloud.App;
 import astrocloud.zw.co.astrocloud.R;
 import astrocloud.zw.co.astrocloud.adapters.ContactsAdapter;
 import astrocloud.zw.co.astrocloud.models.ContactModel;
+import astrocloud.zw.co.astrocloud.utils.GLOBALDECLARATIONS;
 import de.hdodenhof.circleimageview.CircleImageView;
 import rx.functions.Action1;
 
@@ -66,7 +68,7 @@ public class FragmentContacts extends Fragment {
     View view;
     private static final String TAG = FragmentContacts.class.getCanonicalName();
     private ArrayList<Object> arrayListContacts = new ArrayList<>();
-    private ArrayList<ContactModel> arrayListContactsToDisplay = new ArrayList<>();
+    private ArrayList<ContactModel> arrayListContactsToDisplay;
     private DatabaseReference contactsDatabase;
     String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
     DatabaseReference contactsChildReference;
@@ -90,6 +92,7 @@ public class FragmentContacts extends Fragment {
         folder_state_container = view.findViewById(R.id.folder_state_container);
         contactsDatabase = FirebaseDatabase.getInstance().getReference();
         contactsChildReference = contactsDatabase.child("contacts");
+//        App.getInstance();
 //        FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.fab);
 //        fab.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -111,13 +114,14 @@ public class FragmentContacts extends Fragment {
                 .autoStart(true)
                 .createFor(emptyfolder);
         showFetchcontactsDialogue();
+        arrayListContactsToDisplay = new ArrayList<>();
         getContacts();
         adapter = new ContactsAdapter(getContext(), arrayListContactsToDisplay);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
         contactsRecyclerView.setLayoutManager(mLayoutManager);
         contactsRecyclerView.setItemAnimator(new DefaultItemAnimator());
         contactsRecyclerView.setAdapter(adapter);
-        adapter.notifyDataSetChanged();
+
         initSwipe();
         return view;
     }
@@ -132,30 +136,30 @@ public class FragmentContacts extends Fragment {
     }
 
     private ArrayList<Object> getContacts() {
-        arrayListContactsToDisplay.clear();
-        arrayListContacts.clear();
+        arrayListContacts = new ArrayList<>();
+        arrayListContactsToDisplay = new ArrayList<>();
         myContactsQuery = contactsDatabase.child("contacts").child(userId);
         myContactsQuery.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 fillArrayListWithContactsDB(dataSnapshot);
-                adapter.notifyDataSetChanged();
+          adapter.notifyDataSetChanged();
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                adapter.notifyDataSetChanged();
+                 adapter.notifyDataSetChanged();
             }
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
-                fillArrayListWithContactsDBRemoved(dataSnapshot);
-                adapter.notifyDataSetChanged();
+                //fillArrayListWithContactsDBRemoved(dataSnapshot);
+              adapter.notifyDataSetChanged();
             }
 
             @Override
             public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-                adapter.notifyDataSetChanged();
+             adapter.notifyDataSetChanged();
             }
 
             @Override
@@ -165,101 +169,33 @@ public class FragmentContacts extends Fragment {
 
             }
         });
-        myContactsQuery.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                fillArrayListWithContactsDB(dataSnapshot);
-                adapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                String databaseErrorString = databaseError.getDetails().toString();
-                showFetchErrorDialogue(databaseErrorString);
-
-            }
-        });
+//        myContactsQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//                fillArrayListWithContactsDB(dataSnapshot);
+//               contactsRecyclerView.invalidate(); adapter.notifyDataSetChanged();
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//                String databaseErrorString = databaseError.getDetails().toString();
+//                showFetchErrorDialogue(databaseErrorString);
+//
+//            }
+//        });
         awesomeInfoDialog.hide();
+        GLOBALDECLARATIONS.GLOBAL_CONTACTS_ARRAYLIST = arrayListContactsToDisplay;
         return arrayListContacts;
 
     }
 
-    private void fillArrayListWithContacts(DataSnapshot dataSnapshot) {
-//        arrayListContacts.clear();
-//        arrayListContactsToDisplay.clear();
-        for (DataSnapshot ds : dataSnapshot.getChildren()) {
-            //   Log.e(TAG, ds.toString());
-            ContactModel contactModel = ds.getValue(ContactModel.class);
-
-            arrayListContactsToDisplay.add(contactModel);
-
-        }
-        if ((arrayListContactsToDisplay.size() > 0)) {
-            awesomeInfoDialog.hide();
-            contactsRecyclerView.setVisibility(View.VISIBLE);
-            folder_state_container.setVisibility(View.GONE);
-        } else {
-            awesomeInfoDialog.hide();
-            contactsRecyclerView.setVisibility(View.GONE);
-            folder_state_container.setVisibility(View.VISIBLE);
-            Flubber.with()
-                    .animation(Flubber.AnimationPreset.ROTATION)
-                    .interpolator(Flubber.Curve.BZR_EASE_IN_OUT_CUBIC)
-                    .repeatCount(2)
-                    .duration(2000)
-                    .autoStart(true)
-                    .createFor(emptyfolder);
-
-        }
-
-        adapter.notifyDataSetChanged();
-//        Iterable<DataSnapshot> snapshotIterator = dataSnapshot.getChildren();
-//        Iterator<DataSnapshot> iterator = snapshotIterator.iterator();
-//        while (iterator.hasNext()){
-//            ContactModel contact = iterator.next().getValue(ContactModel.class);
-//            arrayListContactsToDisplay.add(new ContactModel(contact.getName(),contact.getNumber()));
-//            Object obj = iterator.next().getKey();
-//            Object obj2 = iterator.next();
-//
-//        }
-
-        contactsRecyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
-            @Override
-            public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-                return false;
-            }
-
-            @Override
-            public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-
-
-            }
-
-            @Override
-            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-
-            }
-        });
-    }
-
     private void fillArrayListWithContactsDB(DataSnapshot dataSnapshot) {
-        ;
         for (DataSnapshot ds : dataSnapshot.getChildren()) {
             //   Log.e(TAG, ds.toString());
             ContactModel contactModel = dataSnapshot.getValue(ContactModel.class);
-
-//        Iterable<DataSnapshot> snapshotIterator = dataSnapshot.getChildren();
-//        Iterator<DataSnapshot> iterator = snapshotIterator.iterator();
-//        while (iterator.hasNext()){
-//            String id=String.valueOf(iterator.child("id").getValue);
-//            ContactModel contact = iterator.next().getValue(ContactModel.class);
-//
-//            arrayListContactsToDisplay.add(new ContactModel(contact.getName(),contact.getNumber()));
-//            Object obj = iterator.next().getKey();
-//            Object obj2 = iterator.next();
-//
-
-            arrayListContactsToDisplay.add(contactModel);
+            if(!arrayListContactsToDisplay.contains(contactModel)) {
+                arrayListContactsToDisplay.add(contactModel);
+            }
 
         }
         if ((arrayListContactsToDisplay.size() > 0)) {
@@ -279,158 +215,8 @@ public class FragmentContacts extends Fragment {
                     .createFor(emptyfolder);
 
         }
-
-        adapter.notifyDataSetChanged();
-//        Iterable<DataSnapshot> snapshotIterator = dataSnapshot.getChildren();
-//        Iterator<DataSnapshot> iterator = snapshotIterator.iterator();
-//        while (iterator.hasNext()){
-//            ContactModel contact = iterator.next().getValue(ContactModel.class);
-//            arrayListContactsToDisplay.add(new ContactModel(contact.getName(),contact.getNumber()));
-//            Object obj = iterator.next().getKey();
-//            Object obj2 = iterator.next();
-//
-//        }
-
-        contactsRecyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
-            @Override
-            public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-                return false;
-            }
-
-            @Override
-            public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-
-
-            }
-
-            @Override
-            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-
-            }
-        });
-    }
-
-    private void fillArrayListWithContactsDBRemoved(DataSnapshot dataSnapshot) {
-
-        for (DataSnapshot ds : dataSnapshot.getChildren()) {
-            //   Log.e(TAG, ds.toString());
-            ContactModel contactModel = dataSnapshot.getValue(ContactModel.class);
-
-//        Iterable<DataSnapshot> snapshotIterator = dataSnapshot.getChildren();
-//        Iterator<DataSnapshot> iterator = snapshotIterator.iterator();
-//        while (iterator.hasNext()){
-//            String id=String.valueOf(iterator.child("id").getValue);
-//            ContactModel contact = iterator.next().getValue(ContactModel.class);
-//
-//            arrayListContactsToDisplay.add(new ContactModel(contact.getName(),contact.getNumber()));
-//            Object obj = iterator.next().getKey();
-//            Object obj2 = iterator.next();
-//
-
-            arrayListContactsToDisplay.remove(contactModel);
-            adapter.notifyDataSetChanged();
-        }
-
-
-        if ((arrayListContactsToDisplay.size() > 0)) {
-            awesomeInfoDialog.hide();
-            contactsRecyclerView.setVisibility(View.VISIBLE);
-            folder_state_container.setVisibility(View.GONE);
-        } else {
-            awesomeInfoDialog.hide();
-            contactsRecyclerView.setVisibility(View.GONE);
-            folder_state_container.setVisibility(View.VISIBLE);
-            Flubber.with()
-                    .animation(Flubber.AnimationPreset.ROTATION)
-                    .interpolator(Flubber.Curve.BZR_EASE_IN_OUT_CUBIC)
-                    .repeatCount(2)
-                    .duration(2000)
-                    .autoStart(true)
-                    .createFor(emptyfolder);
-
-        }
-
-        adapter.notifyDataSetChanged();
-//        Iterable<DataSnapshot> snapshotIterator = dataSnapshot.getChildren();
-//        Iterator<DataSnapshot> iterator = snapshotIterator.iterator();
-//        while (iterator.hasNext()){
-//            ContactModel contact = iterator.next().getValue(ContactModel.class);
-//            arrayListContactsToDisplay.add(new ContactModel(contact.getName(),contact.getNumber()));
-//            Object obj = iterator.next().getKey();
-//            Object obj2 = iterator.next();
-//
-//        }
-
-        contactsRecyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
-            @Override
-            public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-                return false;
-            }
-
-            @Override
-            public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-
-
-            }
-
-            @Override
-            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-
-            }
-        });
-    }
-
-    private void fillArrayListWithContactsDBChanged(DataSnapshot dataSnapshot) {
-        ;
-        for (DataSnapshot ds : dataSnapshot.getChildren()) {
-            //   Log.e(TAG, ds.toString());
-            ContactModel contactModel = dataSnapshot.getValue(ContactModel.class);
-
-//        Iterable<DataSnapshot> snapshotIterator = dataSnapshot.getChildren();
-//        Iterator<DataSnapshot> iterator = snapshotIterator.iterator();
-//        while (iterator.hasNext()){
-//            String id=String.valueOf(iterator.child("id").getValue);
-//            ContactModel contact = iterator.next().getValue(ContactModel.class);
-//
-//            arrayListContactsToDisplay.add(new ContactModel(contact.getName(),contact.getNumber()));
-//            Object obj = iterator.next().getKey();
-//            Object obj2 = iterator.next();
-//
-
-            arrayListContactsToDisplay.remove(contactModel);
-            arrayListContactsToDisplay.remove(contactModel);
-            adapter.notifyDataSetChanged();
-        }
-
-
-        if ((arrayListContactsToDisplay.size() > 0)) {
-            awesomeInfoDialog.hide();
-            contactsRecyclerView.setVisibility(View.VISIBLE);
-            folder_state_container.setVisibility(View.GONE);
-        } else {
-            awesomeInfoDialog.hide();
-            contactsRecyclerView.setVisibility(View.GONE);
-            folder_state_container.setVisibility(View.VISIBLE);
-            Flubber.with()
-                    .animation(Flubber.AnimationPreset.ROTATION)
-                    .interpolator(Flubber.Curve.BZR_EASE_IN_OUT_CUBIC)
-                    .repeatCount(2)
-                    .duration(2000)
-                    .autoStart(true)
-                    .createFor(emptyfolder);
-
-        }
-
-        adapter.notifyDataSetChanged();
-//        Iterable<DataSnapshot> snapshotIterator = dataSnapshot.getChildren();
-//        Iterator<DataSnapshot> iterator = snapshotIterator.iterator();
-//        while (iterator.hasNext()){
-//            ContactModel contact = iterator.next().getValue(ContactModel.class);
-//            arrayListContactsToDisplay.add(new ContactModel(contact.getName(),contact.getNumber()));
-//            Object obj = iterator.next().getKey();
-//            Object obj2 = iterator.next();
-//
-//        }
+        contactsRecyclerView.invalidate();
+        contactsRecyclerView.invalidate(); adapter.notifyDataSetChanged();
 
         contactsRecyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
             @Override
@@ -517,7 +303,7 @@ public class FragmentContacts extends Fragment {
                                         @Override
                                         public void exec() {
                                             addContactToPhone(name, phonenumber);
-                                            adapter.notifyDataSetChanged();
+                                           adapter.notifyDataSetChanged();
                                         }
                                     })
                                     .setNegativeButtonClick(new Closure() {
@@ -529,7 +315,7 @@ public class FragmentContacts extends Fragment {
                                     .show();
                         } else {
                             addContactToPhone(name, phonenumber);
-                            adapter.notifyDataSetChanged();
+                            contactsRecyclerView.invalidate(); adapter.notifyDataSetChanged();
                         }
 
 //                    edit_position = position;
@@ -659,7 +445,7 @@ public class FragmentContacts extends Fragment {
                 .setNegativeButtonClick(new Closure() {
                     @Override
                     public void exec() {
-                        adapter.notifyDataSetChanged();
+                        contactsRecyclerView.invalidate(); adapter.notifyDataSetChanged();
                     }
                 })
                 .show();
@@ -712,8 +498,9 @@ public class FragmentContacts extends Fragment {
                 .intentToAppSettings(getActivity());
     }
 
-    public ArrayList<ContactModel> getArrayListContactsToDisplay() {
-        return arrayListContactsToDisplay;
+    public void getArrayListContactsToDisplay() {
+
+        GLOBALDECLARATIONS.GLOBAL_CONTACTS_ARRAYLIST = arrayListContactsToDisplay;
     }
 }
 

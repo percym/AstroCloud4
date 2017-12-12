@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
     private PhoneAuthProvider.ForceResendingToken mResendToken;
 
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -57,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         countryCodePicker = findViewById(R.id.countryCodeHolder);
         phoneNumber = findViewById(R.id.phoneNumber);
         editCode = findViewById(R.id.code);
@@ -68,7 +68,9 @@ public class MainActivity extends AppCompatActivity {
 
         countryCodePicker.registerCarrierNumberEditText(phoneNumber);
 
-
+        if(App.getInstance()==null){
+            App.getInstance();
+        }
         mAuth = FirebaseAuth.getInstance();
 
         mCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {

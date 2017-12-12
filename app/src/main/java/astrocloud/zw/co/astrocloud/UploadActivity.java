@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import astrocloud.zw.co.astrocloud.fragments.FragmentContacts;
 import astrocloud.zw.co.astrocloud.fragments.FragmentPhotos;
 import astrocloud.zw.co.astrocloud.models.ContactModel;
+import astrocloud.zw.co.astrocloud.utils.GLOBALDECLARATIONS;
 import rx.functions.Action1;
 
 public class UploadActivity extends AppCompatActivity {
@@ -73,8 +74,10 @@ public class UploadActivity extends AppCompatActivity {
     DatabaseReference contactsChildReference;
     String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
     private AwesomeInfoDialog awesomeInfoDialog;
+    private AwesomeInfoDialog awesomeInfocontacts;
     ArrayList<ContactModel> arrayListWithContacts;
     CoordinatorLayout main_content;
+    private AwesomeInfoDialog awesomeErrorDialog;
 
     @Override
     protected void onStart() {
@@ -212,42 +215,6 @@ public class UploadActivity extends AppCompatActivity {
 
                             }
                             rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_upload_contacts));
-                            //restore to device
-                            rlIcon1.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    Fragment fragmentWithContactsToRestore = mSectionsPagerAdapter.getItem(1);
-                                    if(fragmentWithContactsToRestore instanceof FragmentContacts){
-                                       arrayListWithContacts=((FragmentContacts)fragmentWithContactsToRestore).getArrayListContactsToDisplay();
-                                        if(arrayListWithContacts != null) {
-                                            if (PermissionsManager.get().isContactsGranted()){
-                                                contactsRestorer(arrayListContacts);
-                                            }else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)){
-
-                                                showPermissionsDialogue();
-                                            }else {
-                                                PermissionsManager.get().requestContactsPermission()
-                                                        .subscribe(new Action1<PermissionsResult>() {
-                                                            @Override
-                                                            public void call(PermissionsResult permissionsResult) {
-                                                                if (!permissionsResult.isGranted()) {
-                                                                    showPermissionsDialogue();
-
-                                                                }else {
-                                                                    contactsRestorer(arrayListContacts);
-                                                                }
-                                                            }
-                                                        });
-
-                                            }
-
-                                        }else {
-                                            snackShower("No contacts found");
-                                        }
-
-                                    }
-                                }
-                            });
                             break;
 
                         case 1:{
@@ -256,7 +223,7 @@ public class UploadActivity extends AppCompatActivity {
                                 rightLowerMenu.close(true);
 
                             }
-
+                            break;
                         }
 
                     }
@@ -281,6 +248,7 @@ public class UploadActivity extends AppCompatActivity {
                 rlIcon0.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        snackShower("pano");
 
                     }
                 });
@@ -292,28 +260,107 @@ public class UploadActivity extends AppCompatActivity {
                 });
 
 
+                rlIcon1.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Fragment fragmentWithContactsToRestore = mSectionsPagerAdapter.getItem(0);
+                        if(fragmentWithContactsToRestore instanceof FragmentContacts){
+                         //   ((FragmentContacts)fragmentWithContactsToRestore).getArrayListContactsToDisplay();
+                            arrayListWithContacts= GLOBALDECLARATIONS.GLOBAL_CONTACTS_ARRAYLIST;
+                            if(arrayListWithContacts != null) {
+                                if (PermissionsManager.get().isContactsGranted()){
+                                    rightLowerMenu.close(true);
+
+                                    showcontactsRestoration();
+                                    contactsRestorer(arrayListWithContacts);
+                                    dismissRestoration();
+                                }else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)){
+
+                                    showPermissionsDialogue();
+                                }else {
+                                    PermissionsManager.get().requestContactsPermission()
+                                            .subscribe(new Action1<PermissionsResult>() {
+                                                @Override
+                                                public void call(PermissionsResult permissionsResult) {
+                                                    if (!permissionsResult.isGranted()) {
+                                                        showPermissionsDialogue();
+
+                                                    }else {
+                                                        rightLowerMenu.close(true);
+                                                        showcontactsRestoration();
+                                                        contactsRestorer(arrayListContacts);
+                                                        dismissRestoration();
+                                                    }
+                                                }
+                                            });
+
+                                }
+
+                            }else {
+                                snackShower("No contacts found");
+                            }
+
+                        }
+                    }
+                });
+
                 rlIcon3.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if(PermissionsManager.get().isContactsGranted()) {
-                            rightLowerMenu.close(true);
 
-                            writecontacts();
-                        }else if(PermissionsManager.get().neverAskForContacts(UploadActivity.this)) {
-                            showPermissionsDialogue();
-                        }else {
+                        rightLowerMenu.close(true);
+
+                        if (PermissionsManager.get().isContactsGranted()) {
+
+                                awesomeErrorDialog = new AwesomeInfoDialog(UploadActivity.this);
+                                awesomeErrorDialog
+                                        .setTitle(R.string.app_name)
+                                        .setMessage(" Do you want to upload your contacts to your cloud account ?")
+                                        .setDialogIconOnly(R.drawable.ic_app_icon)
+                                        .setColoredCircle(R.color.white)
+                                        .setCancelable(false)
+                                        .setPositiveButtonText(getString(R.string.restore))
+                                        .setPositiveButtonbackgroundColor(R.color.dialogSuccessBackgroundColor)
+                                        .setPositiveButtonTextColor(R.color.white)
+                                        .setNegativeButtonText(getString(R.string.cancel))
+                                        .setNegativeButtonbackgroundColor(R.color.dialogErrorBackgroundColor)
+                                        .setNegativeButtonTextColor(R.color.white)
+                                        .setPositiveButtonClick(new Closure() {
+                                            @Override
+                                            public void exec() {
+                                                writecontacts();
+                                            }
+                                        })
+                                        .setNegativeButtonClick(new Closure() {
+                                            @Override
+                                            public void exec() {
+
+                                            }
+                                        })
+                                        .show();
+
+                        } else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)) {
+
+                            showFetchcontactsDialogue();
+                        } else {
                             PermissionsManager.get().requestContactsPermission()
                                     .subscribe(new Action1<PermissionsResult>() {
                                         @Override
                                         public void call(PermissionsResult permissionsResult) {
-                                          if(!permissionsResult.isGranted()){
-                                              showPermissionsDialogue();
+                                            if (!permissionsResult.isGranted()) {
+                                                showPermissionsDialogue();
 
-                                          }
+                                            }else {
+                                             writecontacts();
+
+                                            }
                                         }
                                     });
 
+
                         }
+                        writecontacts();
+
                     }
                 });
                 break;
@@ -341,7 +388,7 @@ public class UploadActivity extends AppCompatActivity {
                 }
             }
 
-
+        snackShower("Contacts Uploaded");
         }
     }
 
@@ -493,10 +540,10 @@ public class UploadActivity extends AppCompatActivity {
     }
 
     private void contactsRestorer(ArrayList<ContactModel> contactModelArrayList){
+        ArrayList<ContentProviderOperation>  ops= new ArrayList<ContentProviderOperation>();
         for (int i = 0; i <= contactModelArrayList.size() - 1; i++) {
             String name = contactModelArrayList.get(i).getName();
             String mobileno = contactModelArrayList.get(i).getNumber();
-            ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
             int rawContactID = ops.size();
             ops.add(ContentProviderOperation.newInsert(ContactsContract.RawContacts.CONTENT_URI)
                     .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, null)
@@ -518,9 +565,10 @@ public class UploadActivity extends AppCompatActivity {
                     .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, mobileno)
                     .withValue(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE)
                     .build());
+
             try {
                 getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
-                snackShower( "Contacts successfully restored");
+                snackShower("Contacts successfully restored");
             } catch (RemoteException e) {
                 e.printStackTrace();
             } catch (OperationApplicationException e) {
@@ -542,7 +590,30 @@ public class UploadActivity extends AppCompatActivity {
         snackbar.show();
     }
 
+    public void showcontactsRestoration() {
+        awesomeInfocontacts = new AwesomeInfoDialog(this);
+        awesomeInfocontacts.setTitle(R.string.app_name)
+                .setMessage("Restoring your contacts")
+                .setDialogIconOnly(R.drawable.ic_app_icon)
+                .setColoredCircle(R.color.white)
+                .setCancelable(false)
+                .show();
+    }
 
+    public void dismissRestoration(){
+        awesomeInfocontacts.hide();
+    }
+    public void showFetchcontactsDialogue() {
+        awesomeInfoDialog = new AwesomeInfoDialog(this);
+        awesomeInfoDialog
+                .setTitle(R.string.app_name)
+                .setMessage("Fetching your contacts")
+                .setDialogIconOnly(R.drawable.ic_app_icon)
+                .setColoredCircle(R.color.white)
+                .setCancelable(false)
+                .show();
+
+    }
  }
 
 
