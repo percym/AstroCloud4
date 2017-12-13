@@ -63,6 +63,8 @@ import java.util.ArrayList;
 import astrocloud.zw.co.astrocloud.fragments.FragmentContacts;
 import astrocloud.zw.co.astrocloud.fragments.FragmentPhotos;
 import astrocloud.zw.co.astrocloud.models.ContactModel;
+import astrocloud.zw.co.astrocloud.models.Image;
+import astrocloud.zw.co.astrocloud.models.ImageModel;
 import astrocloud.zw.co.astrocloud.utils.AppConfig;
 import astrocloud.zw.co.astrocloud.utils.GLOBALDECLARATIONS;
 import droidninja.filepicker.FilePickerBuilder;
@@ -91,6 +93,7 @@ public class UploadActivity extends AppCompatActivity {
     private ArrayList<ContactModel> arrayListContacts = new ArrayList<>();
     private DatabaseReference contactsDatabase;
     DatabaseReference contactsChildReference;
+    DatabaseReference uploadedFilesChildReference;
     String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
     private AwesomeInfoDialog awesomeInfoDialog;
     private AwesomeInfoDialog awesomeInfocontacts;
@@ -160,13 +163,13 @@ public class UploadActivity extends AppCompatActivity {
 
         contactsDatabase = FirebaseDatabase.getInstance().getReference();
         contactsChildReference= contactsDatabase.child("contacts");
+        uploadedFilesChildReference = contactsChildReference.child("fileUrls");
         
         //Storage for images
       //  mStorageReference = FirebaseStorage.getInstance().getReference(AppConfig.FIRESTOREDBURL);
         mStorageReference = FirebaseStorage.getInstance(AppConfig.FIRESTOREDBURL);
         mImagesStorageReference = mStorageReference.getReference("images");
-        mImagesStorageReference = mStorageReference.getReference("images");
-        mUserStorageReference = mImagesStorageReference.child(userId);
+        uploadedFilesChildReference = contactsDatabase.child("user_files").child(userId).child("images");
         // Create the adapter that will return a fragment
         // for each of the three
         // primary sections of the activity.
@@ -179,7 +182,13 @@ public class UploadActivity extends AppCompatActivity {
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
+
+
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+
+        for(int i = 0 ; i < mSectionsPagerAdapter.getCount();i++) {
+            tabLayout.getTabAt(i).setText(mSectionsPagerAdapter.getPageTitle(i+1));
+        }
 
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
@@ -238,6 +247,7 @@ public class UploadActivity extends AppCompatActivity {
                                 @Override
                                 public void onClick(View view) {
                                     if (PermissionsManager.get().isStorageGranted()) {
+                                        photoPaths = new ArrayList<>();
                                         FilePickerBuilder.getInstance().setMaxCount(20)
                                                 .setSelectedFiles(photoPaths)
                                                 .setActivityTheme(R.style.AppTheme_PopupOverlay)
@@ -557,6 +567,8 @@ public class UploadActivity extends AppCompatActivity {
             }
             return super.getPageTitle(position);
         }
+
+
     }
 
     public void onClickGoToAppSettings() {
@@ -729,12 +741,15 @@ public class UploadActivity extends AppCompatActivity {
 
     private void imageUploaderToFireStore(ArrayList<String> arrayListPhotos){
         final int id =1;
-        mNotifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        mBuilder = new NotificationCompat.Builder(getApplicationContext())
-                .setContentTitle("AstroCloud")
-                .setContentText("Uploading image to your cloud account" )
-                .setSmallIcon(R.drawable.ic_stat_cloud_upload);
+
         for (String looper : arrayListPhotos){
+            mNotifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            mBuilder = new NotificationCompat.Builder(getApplicationContext(),"AstroCloud")
+                    .setContentTitle("AstroCloud")
+                    .setContentText("Uploading image to your cloud account" )
+                    .setAutoCancel(true)
+                    .setSmallIcon(R.drawable.ic_stat_cloud_upload);
+
             file = Uri.fromFile(new File(looper));
             metadata = new StorageMetadata.Builder()
                     .setContentType("image/jpeg")
@@ -746,6 +761,7 @@ public class UploadActivity extends AppCompatActivity {
                 public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
                     Double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
                     mBuilder.setProgress(100, progress.intValue(), false);
+                    mBuilder.setContentText("Uploading image");
                     // Displays the progress bar for the first time.
                     mNotifyManager.notify(id, mBuilder.build());
 
@@ -758,8 +774,8 @@ public class UploadActivity extends AppCompatActivity {
             }).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                    writeNewUpload(task.getResult().getDownloadUrl().toString());
                     mBuilder.setContentText("Upload completed");
-                    mNotifyManager.cancel(id);
 
                 }
             }).addOnFailureListener(new OnFailureListener() {
@@ -771,6 +787,15 @@ public class UploadActivity extends AppCompatActivity {
             });
         }
 
+        photoPaths = new ArrayList<>();
+
+    }
+
+    private void writeNewUpload(String downloadUrl){
+
+        String key = uploadedFilesChildReference.push().getKey();
+        ImageModel imageModel = new ImageModel(downloadUrl);
+        uploadedFilesChildReference.child(key).setValue(imageModel);
 
     }
 }
