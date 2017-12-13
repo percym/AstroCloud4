@@ -10,4 +10,5 @@ import astrocloud.zw.co.astrocloud.models.ContactModel;
 
 public class GLOBALDECLARATIONS {
     public static ArrayList<ContactModel> GLOBAL_CONTACTS_ARRAYLIST= new ArrayList<>();
+    public static String FIRESTORE_DB_PATH= "gs://bvunzai-4fb08.appspot.com/";
 }

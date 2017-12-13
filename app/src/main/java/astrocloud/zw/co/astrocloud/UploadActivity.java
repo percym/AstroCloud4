@@ -1,6 +1,9 @@
 package astrocloud.zw.co.astrocloud;
 
+import android.app.Activity;
+import android.app.NotificationManager;
 import android.content.ContentProviderOperation;
+import android.content.Context;
 import android.content.Intent;
 import android.content.OperationApplicationException;
 import android.database.Cursor;
@@ -9,12 +12,15 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -31,10 +37,19 @@ import android.widget.Toast;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeInfoDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeSuccessDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.interfaces.Closure;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnPausedListener;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageMetadata;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionButton;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
 import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
@@ -42,12 +57,16 @@ import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
 import net.ralphpina.permissionsmanager.PermissionsManager;
 import net.ralphpina.permissionsmanager.PermissionsResult;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import astrocloud.zw.co.astrocloud.fragments.FragmentContacts;
 import astrocloud.zw.co.astrocloud.fragments.FragmentPhotos;
 import astrocloud.zw.co.astrocloud.models.ContactModel;
+import astrocloud.zw.co.astrocloud.utils.AppConfig;
 import astrocloud.zw.co.astrocloud.utils.GLOBALDECLARATIONS;
+import droidninja.filepicker.FilePickerBuilder;
+import droidninja.filepicker.FilePickerConst;
 import rx.functions.Action1;
 
 public class UploadActivity extends AppCompatActivity {
@@ -78,6 +97,15 @@ public class UploadActivity extends AppCompatActivity {
     ArrayList<ContactModel> arrayListWithContacts;
     CoordinatorLayout main_content;
     private AwesomeInfoDialog awesomeErrorDialog;
+    private FirebaseStorage mStorageReference;
+    private StorageReference mImagesStorageReference;
+    private StorageReference mUserStorageReference;
+    private ArrayList<String> photoPaths;
+    private Uri file;
+    private StorageMetadata metadata;
+    private UploadTask uploadTask;
+    private NotificationManager mNotifyManager;
+    private NotificationCompat.Builder mBuilder;
 
     @Override
     protected void onStart() {
@@ -117,33 +145,6 @@ public class UploadActivity extends AppCompatActivity {
 
 
         }
-
-//                do {
-//
-//                    String name = people.getString(indexName);
-//                    String number = people.getString(indexNumber);
-//                    HashMap<String, Object> NamePhoneType = new HashMap<String, Object>();
-//                    NamePhoneType.put("name", name);
-//                    NamePhoneType.put("mobileno", number);
-//                    Log.d("name+---+number", name + "----" + number);
-//                    try {
-//                        json = new JSONObject().put("contact_no", number.trim());
-//                    } catch (JSONException e) {
-//                        e.printStackTrace();
-//                    }
-//
-//                    try {
-//                        json.put("name", name.trim());
-//                        contactCount++;
-//                    } catch (JSONException e) {
-//                        e.printStackTrace();
-//                    }
-//
-//                } while (people.moveToNext());
-//                //Log.d("json data new query",postjson.toString().trim());
-//                String contactsAsString = String.valueOf(contactCount);
-//                Log.d(TAG,contactsAsString);
-//                //insertContact(GlobalDeclarations.UserAccountID, contactsFromJson, contactsAsString);
         people.close();
         writeNewUser(arrayListContacts);
     }
@@ -159,6 +160,13 @@ public class UploadActivity extends AppCompatActivity {
 
         contactsDatabase = FirebaseDatabase.getInstance().getReference();
         contactsChildReference= contactsDatabase.child("contacts");
+        
+        //Storage for images
+      //  mStorageReference = FirebaseStorage.getInstance().getReference(AppConfig.FIRESTOREDBURL);
+        mStorageReference = FirebaseStorage.getInstance(AppConfig.FIRESTOREDBURL);
+        mImagesStorageReference = mStorageReference.getReference("images");
+        mImagesStorageReference = mStorageReference.getReference("images");
+        mUserStorageReference = mImagesStorageReference.child(userId);
         // Create the adapter that will return a fragment
         // for each of the three
         // primary sections of the activity.
@@ -217,13 +225,48 @@ public class UploadActivity extends AppCompatActivity {
                             rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_upload_contacts));
                             break;
 
-                        case 1:{
-                            rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_file_upload_white_48dp));
-                            if(rightLowerMenu.isOpen()){
+                        case 1: {
+                            rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_image_upload));
+                            if (rightLowerMenu.isOpen()) {
                                 rightLowerMenu.close(true);
 
                             }
+                            if (rightLowerMenu.isOpen()) {
+                                rightLowerMenu.updateItemPositions();
+                            }
+                            rlIcon3.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    if (PermissionsManager.get().isStorageGranted()) {
+                                        FilePickerBuilder.getInstance().setMaxCount(20)
+                                                .setSelectedFiles(photoPaths)
+                                                .setActivityTheme(R.style.AppTheme_PopupOverlay)
+                                                .pickPhoto(UploadActivity.this);
+                                      //  imageUploaderToFireStore(photoPaths);
+
+                                    }else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)){
+
+                                        showPermissionsDialogueStorage();
+
+                                    }else {
+                                        PermissionsManager.get().requestContactsPermission()
+                                                .subscribe(new Action1<PermissionsResult>() {
+                                                    @Override
+                                                    public void call(PermissionsResult permissionsResult) {
+                                                        if (!permissionsResult.isGranted()) {
+                                                            showPermissionsDialogueStorage();
+
+                                                        }else {
+                                                            imageUploaderToFireStore(photoPaths);
+
+                                                        }
+                                                    }
+                                                });
+                                    }
+                                }
+                            });
                             break;
+
                         }
 
                     }
@@ -359,18 +402,28 @@ public class UploadActivity extends AppCompatActivity {
 
 
                         }
-                        writecontacts();
 
                     }
                 });
                 break;
 
-            case 1:{
-                rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_file_upload_white_48dp));
-                if(rightLowerMenu.isOpen()){
-                    rightLowerMenu.updateItemPositions();
-                }
-
+            case 1: {
+//                if (rightLowerMenu.isOpen()) {
+//                    rightLowerMenu.updateItemPositions();
+//                }
+//                rlIcon3.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View view) {
+//                        if (PermissionsManager.get().isStorageGranted()) {
+//                            FilePickerBuilder.getInstance().setMaxCount(20)
+//                                    .setSelectedFiles(photoPaths)
+//                                    .setActivityTheme(R.style.AppTheme_PopupOverlay)
+//                                    .pickPhoto(UploadActivity.this);
+//
+//                        }
+//                    }
+//                });
+//                break;
             }
         }
 
@@ -490,6 +543,20 @@ public class UploadActivity extends AppCompatActivity {
             // Show 3 total pages.
             return 3;
         }
+
+        @Nullable
+        @Override
+        public CharSequence getPageTitle(int position) {
+            switch (position){
+                case 1:
+                    return "Contacts";
+                case 2:
+                    return "Photos";
+                case 3:
+                    return "Contacts";
+            }
+            return super.getPageTitle(position);
+        }
     }
 
     public void onClickGoToAppSettings() {
@@ -500,6 +567,35 @@ public class UploadActivity extends AppCompatActivity {
         new AwesomeSuccessDialog(this)
                 .setTitle("AstroCloud")
                 .setMessage("Permission to read and write contacts is needed for application to function properly")
+                .setColoredCircle(R.color.white)
+                .setDialogIconOnly(R.drawable.ic_app_icon)
+                .setCancelable(false)
+                .setPositiveButtonText(getString(R.string.give_permissions))
+                .setPositiveButtonbackgroundColor(R.color.dialogSuccessBackgroundColor)
+                .setPositiveButtonTextColor(R.color.white)
+                .setNegativeButtonText(getString(R.string.dialog_no_button))
+                .setNegativeButtonbackgroundColor(R.color.dialogErrorBackgroundColor)
+                .setNegativeButtonTextColor(R.color.white)
+                .setPositiveButtonClick(new Closure() {
+                    @Override
+                    public void exec() {
+                        //click
+                        onClickGoToAppSettings();
+                    }
+                })
+                .setNegativeButtonClick(new Closure() {
+                    @Override
+                    public void exec() {
+
+                    }
+                })
+                .show();
+
+    }
+    public void showPermissionsDialogueStorage(){
+        new AwesomeSuccessDialog(this)
+                .setTitle("AstroCloud")
+                .setMessage("Permission to read and write storage is needed for application to function properly")
                 .setColoredCircle(R.color.white)
                 .setDialogIconOnly(R.drawable.ic_app_icon)
                 .setCancelable(false)
@@ -614,6 +710,69 @@ public class UploadActivity extends AppCompatActivity {
                 .show();
 
     }
- }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode){
+            case FilePickerConst.REQUEST_CODE_PHOTO:
+                if(resultCode == Activity.RESULT_OK && data != null){
+                    photoPaths = new ArrayList<>();
+                    photoPaths.addAll(data.getStringArrayListExtra(FilePickerConst.KEY_SELECTED_MEDIA));
+                    //start upload
+                   imageUploaderToFireStore(photoPaths);
+
+                }
+                break;
+        }
+    }
+
+    private void imageUploaderToFireStore(ArrayList<String> arrayListPhotos){
+        final int id =1;
+        mNotifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mBuilder = new NotificationCompat.Builder(getApplicationContext())
+                .setContentTitle("AstroCloud")
+                .setContentText("Uploading image to your cloud account" )
+                .setSmallIcon(R.drawable.ic_stat_cloud_upload);
+        for (String looper : arrayListPhotos){
+            file = Uri.fromFile(new File(looper));
+            metadata = new StorageMetadata.Builder()
+                    .setContentType("image/jpeg")
+                    .build();
+            uploadTask = mImagesStorageReference.child(userId + "/"+file.getLastPathSegment()).putFile(file,metadata);
+
+            uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                    Double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                    mBuilder.setProgress(100, progress.intValue(), false);
+                    // Displays the progress bar for the first time.
+                    mNotifyManager.notify(id, mBuilder.build());
+
+                }
+            }).addOnPausedListener(new OnPausedListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onPaused(UploadTask.TaskSnapshot taskSnapshot) {
+                    mBuilder.setContentText("Upload paused");
+                }
+            }).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                    mBuilder.setContentText("Upload completed");
+                    mNotifyManager.cancel(id);
+
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    mBuilder.setContentText("Upload failed " + e.getMessage());
+
+                }
+            });
+        }
+
+
+    }
+}
 
 

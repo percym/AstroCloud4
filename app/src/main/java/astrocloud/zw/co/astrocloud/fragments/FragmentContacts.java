@@ -19,6 +19,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -50,6 +51,7 @@ import java.util.HashMap;
 
 import astrocloud.zw.co.astrocloud.App;
 import astrocloud.zw.co.astrocloud.R;
+import astrocloud.zw.co.astrocloud.UploadActivity;
 import astrocloud.zw.co.astrocloud.adapters.ContactsAdapter;
 import astrocloud.zw.co.astrocloud.models.ContactModel;
 import astrocloud.zw.co.astrocloud.utils.GLOBALDECLARATIONS;
@@ -68,6 +70,7 @@ public class FragmentContacts extends Fragment {
     View view;
     private static final String TAG = FragmentContacts.class.getCanonicalName();
     private ArrayList<Object> arrayListContacts = new ArrayList<>();
+    private ArrayList<ContactModel> arrayListContactsToBeWritten = new ArrayList<>();
     private ArrayList<ContactModel> arrayListContactsToDisplay;
     private DatabaseReference contactsDatabase;
     String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -77,7 +80,7 @@ public class FragmentContacts extends Fragment {
     GenericTypeIndicator<HashMap<String, Object>> genericTypeIndicator = new GenericTypeIndicator<HashMap<String, Object>>();
     AwesomeInfoDialog awesomeInfoDialog;
     AwesomeInfoDialog awesomeErrorDialog;
-    CircleImageView emptyfolder;
+    CircleImageView emptyfolder, imageUploadContacts;
     RelativeLayout folder_state_container;
     private Paint p = new Paint();
     String name, phonenumber;
@@ -90,21 +93,65 @@ public class FragmentContacts extends Fragment {
         contactsRecyclerView = view.findViewById(R.id.contactsRecyclerView);
         emptyfolder = view.findViewById(R.id.empty_folder_icon);
         folder_state_container = view.findViewById(R.id.folder_state_container);
+        imageUploadContacts = view.findViewById(R.id.imageUploadContacts);
+        imageUploadContacts.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (PermissionsManager.get().isContactsGranted()) {
+
+                    awesomeErrorDialog = new AwesomeInfoDialog(getContext());
+                    awesomeErrorDialog
+                            .setTitle(R.string.app_name)
+                            .setMessage(" Do you want to upload your contacts to your cloud account ?")
+                            .setDialogIconOnly(R.drawable.ic_app_icon)
+                            .setColoredCircle(R.color.white)
+                            .setCancelable(false)
+                            .setPositiveButtonText(getString(R.string.restore))
+                            .setPositiveButtonbackgroundColor(R.color.dialogSuccessBackgroundColor)
+                            .setPositiveButtonTextColor(R.color.white)
+                            .setNegativeButtonText(getString(R.string.cancel))
+                            .setNegativeButtonbackgroundColor(R.color.dialogErrorBackgroundColor)
+                            .setNegativeButtonTextColor(R.color.white)
+                            .setPositiveButtonClick(new Closure() {
+                                @Override
+                                public void exec() {
+                                    writecontacts();
+                                }
+                            })
+                            .setNegativeButtonClick(new Closure() {
+                                @Override
+                                public void exec() {
+
+                                }
+                            })
+                            .show();
+
+                } else if (PermissionsManager.get().neverAskForContacts(getActivity())) {
+
+                    showFetchcontactsDialogue();
+                } else {
+                    PermissionsManager.get().requestContactsPermission()
+                            .subscribe(new Action1<PermissionsResult>() {
+                                @Override
+                                public void call(PermissionsResult permissionsResult) {
+                                    if (!permissionsResult.isGranted()) {
+                                        showPermissionsDialogue();
+
+                                    } else {
+                                        writecontacts();
+
+                                    }
+                                }
+                            });
+
+
+                }
+
+            }
+        });
         contactsDatabase = FirebaseDatabase.getInstance().getReference();
         contactsChildReference = contactsDatabase.child("contacts");
-//        App.getInstance();
-//        FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-////                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-////                        .setAction("Action", null).show();
-//                writecontacts();
-//
-//            }
-//        });
 
-//        contactsRecyclerView.setVisibility(View.GONE);
         folder_state_container.setVisibility(View.VISIBLE);
         Flubber.with()
                 .animation(Flubber.AnimationPreset.ROTATION)
@@ -143,23 +190,23 @@ public class FragmentContacts extends Fragment {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 fillArrayListWithContactsDB(dataSnapshot);
-          adapter.notifyDataSetChanged();
+                adapter.notifyDataSetChanged();
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                 adapter.notifyDataSetChanged();
+                adapter.notifyDataSetChanged();
             }
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
                 //fillArrayListWithContactsDBRemoved(dataSnapshot);
-              adapter.notifyDataSetChanged();
+                adapter.notifyDataSetChanged();
             }
 
             @Override
             public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-             adapter.notifyDataSetChanged();
+                adapter.notifyDataSetChanged();
             }
 
             @Override
@@ -193,7 +240,7 @@ public class FragmentContacts extends Fragment {
         for (DataSnapshot ds : dataSnapshot.getChildren()) {
             //   Log.e(TAG, ds.toString());
             ContactModel contactModel = dataSnapshot.getValue(ContactModel.class);
-            if(!arrayListContactsToDisplay.contains(contactModel)) {
+            if (!arrayListContactsToDisplay.contains(contactModel)) {
                 arrayListContactsToDisplay.add(contactModel);
             }
 
@@ -216,7 +263,8 @@ public class FragmentContacts extends Fragment {
 
         }
         contactsRecyclerView.invalidate();
-        contactsRecyclerView.invalidate(); adapter.notifyDataSetChanged();
+        contactsRecyclerView.invalidate();
+        adapter.notifyDataSetChanged();
 
         contactsRecyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
             @Override
@@ -303,7 +351,7 @@ public class FragmentContacts extends Fragment {
                                         @Override
                                         public void exec() {
                                             addContactToPhone(name, phonenumber);
-                                           adapter.notifyDataSetChanged();
+                                            adapter.notifyDataSetChanged();
                                         }
                                     })
                                     .setNegativeButtonClick(new Closure() {
@@ -315,7 +363,8 @@ public class FragmentContacts extends Fragment {
                                     .show();
                         } else {
                             addContactToPhone(name, phonenumber);
-                            contactsRecyclerView.invalidate(); adapter.notifyDataSetChanged();
+                            contactsRecyclerView.invalidate();
+                            adapter.notifyDataSetChanged();
                         }
 
 //                    edit_position = position;
@@ -336,8 +385,8 @@ public class FragmentContacts extends Fragment {
                                         if (!permissionsResult.isGranted()) {
                                             showPermissionsDialogue();
 
-                                        }else {
-                                            addContactToPhone(name, phonenumber );
+                                        } else {
+                                            addContactToPhone(name, phonenumber);
 
                                         }
                                     }
@@ -445,7 +494,8 @@ public class FragmentContacts extends Fragment {
                 .setNegativeButtonClick(new Closure() {
                     @Override
                     public void exec() {
-                        contactsRecyclerView.invalidate(); adapter.notifyDataSetChanged();
+                        contactsRecyclerView.invalidate();
+                        adapter.notifyDataSetChanged();
                     }
                 })
                 .show();
@@ -498,9 +548,83 @@ public class FragmentContacts extends Fragment {
                 .intentToAppSettings(getActivity());
     }
 
-    public void getArrayListContactsToDisplay() {
+    private void writecontacts() {
 
-        GLOBALDECLARATIONS.GLOBAL_CONTACTS_ARRAYLIST = arrayListContactsToDisplay;
+        Uri uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
+        String[] projection = new String[]{ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+                ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Email.ADDRESS,};
+
+        Cursor people = getActivity().getContentResolver().query(uri, projection, null, null, null);
+
+        int indexName = people.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
+        int indexNumber = people.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+
+        //people.moveToFirst();
+        arrayListContactsToBeWritten.clear();
+        for (people.moveToFirst(); !people.isAfterLast(); people.moveToNext()) {
+
+            String name = people.getString(indexName);
+            String number = people.getString(indexNumber);
+
+            arrayListContactsToBeWritten.add(new ContactModel(name, number));
+
+
+        }
+
+//                do {
+//
+//                    String name = people.getString(indexName);
+//                    String number = people.getString(indexNumber);
+//                    HashMap<String, Object> NamePhoneType = new HashMap<String, Object>();
+//                    NamePhoneType.put("name", name);
+//                    NamePhoneType.put("mobileno", number);
+//                    Log.d("name+---+number", name + "----" + number);
+//                    try {
+//                        json = new JSONObject().put("contact_no", number.trim());
+//                    } catch (JSONException e) {
+//                        e.printStackTrace();
+//                    }
+//
+//                    try {
+//                        json.put("name", name.trim());
+//                        contactCount++;
+//                    } catch (JSONException e) {
+//                        e.printStackTrace();
+//                    }
+//
+//                } while (people.moveToNext());
+//                //Log.d("json data new query",postjson.toString().trim());
+//                String contactsAsString = String.valueOf(contactCount);
+//                Log.d(TAG,contactsAsString);
+//                //insertContact(GlobalDeclarations.UserAccountID, contactsFromJson, contactsAsString);
+        people.close();
+        writeNewUser(arrayListContactsToBeWritten);
+    }
+    private void writeNewUser(ArrayList<ContactModel> arrayListContactsTobeWritten) {
+
+        if (!TextUtils.isEmpty(userId)) {
+            if (arrayListContactsTobeWritten != null) {
+
+
+                for (int i = 0; i < arrayListContactsTobeWritten.size(); i++) {
+
+                    contactsChildReference.child(userId).child(nameformater(arrayListContactsTobeWritten.get(i).getName())).setValue(arrayListContactsTobeWritten.get(i));
+                }
+            }
+
+            snackShower("Contacts Uploaded");
+        }
+    }
+
+    private String nameformater(String name){
+        String [] badChars = {".","#","$","[","]"};
+        for(int i =0; i < badChars.length; i++) {
+            if (name.contains((badChars[i]))){
+                String toBeReplaced = badChars[i] ;
+                name =name.replace(toBeReplaced,"");
+            }
+        }
+        return name;
     }
 }
 

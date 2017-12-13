@@ -25,6 +25,7 @@ dependencies {
     implementation 'com.android.support:design:26.1.0'
     implementation 'com.google.firebase:firebase-auth:11.0.4'
     implementation 'com.google.firebase:firebase-database:11.0.4'
+    implementation 'com.google.firebase:firebase-storage:11.0.4'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
@@ -36,10 +37,12 @@ dependencies {
     compile 'com.github.ralphpina:Android-Permissions-Manager:v2.0.1'
     compile 'com.appolica:flubber:1.0.1'
     compile 'de.hdodenhof:circleimageview:2.2.0'
-    implementation ('com.h6ah4i.android.widget.advrecyclerview:advrecyclerview:0.11.0@aar'){
-        transitive=true
+    implementation('com.h6ah4i.android.widget.advrecyclerview:advrecyclerview:0.11.0@aar') {
+        transitive = true
     }
+    compile 'com.droidninja:filepicker:2.1.1'
 }
+
 
 
 

@@ -15,6 +15,11 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.RelativeLayout;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.Query;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -23,6 +28,8 @@ import java.util.ArrayList;
 import astrocloud.zw.co.astrocloud.R;
 import astrocloud.zw.co.astrocloud.adapters.GalleryAdapter;
 import astrocloud.zw.co.astrocloud.models.Image;
+import astrocloud.zw.co.astrocloud.utils.AppConfig;
+import astrocloud.zw.co.astrocloud.utils.GLOBALDECLARATIONS;
 
 /**
  * Created by Percy M on 11/9/2016.
@@ -38,6 +45,12 @@ public class FragmentPhotos extends Fragment {
     private GalleryAdapter mAdapter;
     private RecyclerView recyclerView;
     private RelativeLayout folder_state_container;
+    String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+    private FirebaseStorage mStorageReference;
+    private StorageReference mImagesStorageReference;
+    private StorageReference mUserStorageReference;
+
+
 
     public FragmentPhotos() {
         // Required empty public constructor
@@ -63,7 +76,11 @@ public class FragmentPhotos extends Fragment {
         setHasOptionsMenu(true);
         recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         folder_state_container = (RelativeLayout) view.findViewById(R.id.folder_state_container);
-
+        //initialise the FireStore
+        //mStorageReference = FirebaseStorage.getInstance().getReference(AppConfig.FIRESTOREDBURL);
+        mStorageReference = FirebaseStorage.getInstance(AppConfig.FIRESTOREDBURL);
+        mImagesStorageReference = mStorageReference.getReference("images");
+        mUserStorageReference = mImagesStorageReference.child(userId);
         pDialog = new ProgressDialog(getActivity());
         images = new ArrayList<>();
         mAdapter = new GalleryAdapter(getActivity(), images);
