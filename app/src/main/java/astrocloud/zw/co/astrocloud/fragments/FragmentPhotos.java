@@ -8,7 +8,9 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +18,8 @@ import android.view.WindowManager;
 import android.widget.RelativeLayout;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.Query;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -27,9 +30,8 @@ import java.util.ArrayList;
 
 import astrocloud.zw.co.astrocloud.R;
 import astrocloud.zw.co.astrocloud.adapters.GalleryAdapter;
-import astrocloud.zw.co.astrocloud.models.Image;
+import astrocloud.zw.co.astrocloud.models.ImageModel;
 import astrocloud.zw.co.astrocloud.utils.AppConfig;
-import astrocloud.zw.co.astrocloud.utils.GLOBALDECLARATIONS;
 
 /**
  * Created by Percy M on 11/9/2016.
@@ -40,7 +42,7 @@ public class FragmentPhotos extends Fragment {
     //private static final String endpoint = "http://192.168.1.9/mobile_api/user_files.php?user_account_id=a6df6e3a841a3d958934690595ff99866b58387c&content_type=img";
 
     private String media_url = "";
-    private ArrayList<Image> images;
+    private ArrayList<ImageModel> images;
     private ProgressDialog pDialog;
     private GalleryAdapter mAdapter;
     private RecyclerView recyclerView;
@@ -49,7 +51,9 @@ public class FragmentPhotos extends Fragment {
     private FirebaseStorage mStorageReference;
     private StorageReference mImagesStorageReference;
     private StorageReference mUserStorageReference;
-
+    private DatabaseReference userfilesDatabase;
+    private DatabaseReference contactsChildReference;
+    private DatabaseReference uploadedFilesChildReference;
 
 
     public FragmentPhotos() {
@@ -81,10 +85,15 @@ public class FragmentPhotos extends Fragment {
         mStorageReference = FirebaseStorage.getInstance(AppConfig.FIRESTOREDBURL);
         mImagesStorageReference = mStorageReference.getReference("images");
         mUserStorageReference = mImagesStorageReference.child(userId);
+
+        userfilesDatabase = FirebaseDatabase.getInstance().getReference();
+        contactsChildReference= userfilesDatabase.child("user_files");
+        uploadedFilesChildReference = contactsChildReference.child(userId).child("images");
         pDialog = new ProgressDialog(getActivity());
         images = new ArrayList<>();
-        mAdapter = new GalleryAdapter(getActivity(), images);
-        RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(getActivity(),2);
+        mAdapter = new GalleryAdapter(getActivity(), uploadedFilesChildReference);
+       RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(getActivity(),2);
+       // StaggeredGridLayoutManager staggeredGridLayoutManager = new StaggeredGridLayoutManager(2, LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(mAdapter);

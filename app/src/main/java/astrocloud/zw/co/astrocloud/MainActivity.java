@@ -68,9 +68,9 @@ public class MainActivity extends AppCompatActivity {
 
         countryCodePicker.registerCarrierNumberEditText(phoneNumber);
 
-        if(App.getInstance()==null){
-            App.getInstance();
-        }
+//        if(App.getInstance() == null){
+//            App.getInstance();
+//        }
         mAuth = FirebaseAuth.getInstance();
 
         mCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
@@ -149,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
         //String fullNumber = countryCode.concat(phoneNumber);
         String fullNumber = countryCodePicker.getFullNumber();
         formatedNumber = fullNumber;
-        if (TextUtils.isEmpty(fullNumber)) {
+        if (TextUtils.isEmpty(formatedNumber)) {
             snackShower("Invalid phone number.");
             return false;
         }
