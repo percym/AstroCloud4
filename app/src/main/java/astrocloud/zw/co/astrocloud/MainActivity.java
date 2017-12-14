@@ -65,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
         btn_verify = findViewById(R.id.btn_verify);
         btn_resend = findViewById(R.id.btn_resend);
         relMain = findViewById(R.id.relMain);
+        editCode.setEnabled(false);
 
         countryCodePicker.registerCarrierNumberEditText(phoneNumber);
 
@@ -91,6 +92,8 @@ public class MainActivity extends AppCompatActivity {
             public void onCodeSent(String verificationId,
                                    PhoneAuthProvider.ForceResendingToken token) {
                 Log.d(TAG, "onCodeSent:" + verificationId);
+                btn_start_verification.setClickable(false);
+                editCode.setClickable(true);
                 mVerificationId = verificationId;
                 mResendToken = token;
             }
@@ -103,8 +106,8 @@ public class MainActivity extends AppCompatActivity {
             if(!validatePhoneNumber()){
                 return;
             }
-
-            startPhoneNumberVerification(formatedNumber);
+            //they changed jimmy ! they changed the number
+            startPhoneNumberVerification("+"+formatedNumber);
         }
     });
 

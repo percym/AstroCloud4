@@ -14,6 +14,7 @@ import android.widget.ImageView;
 
 import com.appolica.flubber.Flubber;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -42,8 +43,49 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.MyViewHo
 
     private Context mContext;
     private List<ImageModel> mOriginalPhotoValues = new ArrayList<>();  // Original Values
-    private List<ImageModel> mDisplayedPhotoValues = new ArrayList<>();    // Values to be displayed
+    private List<ImageModel> mDisplayedPhotoValues = new ArrayList<>();
 
+    // Values to be displayed
+    public GalleryAdapter( Context context, DatabaseReference ref) {
+        mContext = context;
+        databaseReference = ref;
+
+        // Create child event listener
+        // [START child_event_listener_recycler]
+        Query photosQuery = databaseReference;
+        photosQuery.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                fillArrayListWithContactsDB(dataSnapshot);
+                notifyDataSetChanged();
+
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                notifyDataSetChanged();
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                notifyDataSetChanged();
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
+
+    }
     @Override
     public Filter getFilter() {
         Filter filter = new Filter() {
@@ -104,45 +146,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.MyViewHo
     }
 
 
-    public GalleryAdapter(final Context context, DatabaseReference ref) {
-        mContext = context;
-       databaseReference = ref;
 
-        // Create child event listener
-        // [START child_event_listener_recycler]
-        Query photosQuery = databaseReference;
-        photosQuery.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                fillArrayListWithContactsDB(dataSnapshot);
-                notifyDataSetChanged();
-
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-
-
-    }
 
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -155,11 +159,11 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.MyViewHo
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
 
-        if(mDisplayedPhotoValues.size() < 0) {
-            Glide.with(mContext).load(mDisplayedPhotoValues.get(position).getUrl())
+
+            Glide.with(GalleryAdapter.this.mContext).load(mDisplayedPhotoValues.get(position).getUrl())
                     .thumbnail(0.5f)
                     .into(holder.thumbnail);
-        }
+
     }
 
     @Override

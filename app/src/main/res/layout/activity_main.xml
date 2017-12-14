@@ -14,7 +14,7 @@
         android:layout_height="80dp"
         android:src="@drawable/app_icon"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="45dp"/>
+        android:layout_marginTop="60dp"/>
 
 
     <TextView
@@ -31,7 +31,7 @@
         android:enabled="false"/>
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="340dp"
+        android:layout_height="wrap_content"
         android:layout_above="@+id/signUp"
         android:layout_centerHorizontal="true">
 
@@ -62,43 +62,48 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
-                    android:background="#c1c1c1">
+                    android:background="@drawable/roundtext">
 
-                <com.hbb20.CountryCodePicker
-                    android:id="@+id/countryCodeHolder"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:layout_marginEnd="4dp"
-                    android:layout_marginStart="8dp"
-                    app:ccp_countryPreference="ZW,ZM,MW,ZA"
-                    app:ccpDialog_backgroundColor="#FFF"
-                    app:ccp_autoFormatNumber="false" />
+                    <com.hbb20.CountryCodePicker
+                        android:id="@+id/countryCodeHolder"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:layout_marginEnd="4dp"
+                        android:layout_marginStart="8dp"
+                        app:ccp_countryPreference="ZW,ZM,MW,ZA"
+                        app:ccpDialog_backgroundColor="#FFF"
+                        app:ccp_autoFormatNumber="false" />
 
 
 
-                <EditText
-                    android:id="@+id/phoneNumber"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginEnd="8dp"
-                   android:hint="phone number"
-                    android:inputType="number"
-                    android:lines="1"
-                    android:editable="false"
-                    android:textAlignment="center" />
+                    <EditText
+                        android:id="@+id/phoneNumber"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="8dp"
+                        android:hint="phone number"
+                        android:inputType="number"
+                        android:textColor="@color/black"
+                        android:lines="1"
+                        android:editable="false"
+                        android:textAlignment="center"
+                        android:background="@null"/>
                 </LinearLayout>
                 <EditText
                     android:id="@+id/code"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginTop="4dp"
+                    android:layout_height="45dp"
+                    android:layout_marginEnd="50dp"
+                    android:layout_marginStart="50dp"
+                    android:layout_marginTop="8dp"
                     android:hint="enter code "
+                    android:textColor="@color/black"
                     android:inputType="number"
                     android:lines="1"
                     android:maxLength="10"
-                    android:textAlignment="center" />
+                    android:textAlignment="center"
+                    android:background="@drawable/roundtext"/>
 
 
             </LinearLayout>
@@ -110,7 +115,7 @@
     <Button
         android:id="@+id/btn_start_verification"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="45dp"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="10dp"
         android:background="@drawable/roundbut"
@@ -123,7 +128,7 @@
     <Button
         android:id="@+id/btn_verify"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="45dp"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="10dp"
         android:background="@drawable/roundbut"
@@ -136,7 +141,7 @@
     <Button
         android:id="@+id/btn_resend"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="45dp"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="10dp"
         android:background="@drawable/roundbut"
