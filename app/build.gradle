@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 26
+    useLibrary 'org.apache.http.legacy'
     defaultConfig {
         applicationId "astrocloud.zw.co.astrocloud"
         minSdkVersion 21
@@ -31,6 +32,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
     compile 'com.hbb20:ccp:2.1.0'
+    //do not upgrade 4.3.1 is stable
     implementation 'com.github.bumptech.glide:glide:4.3.1'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.3.1'
     compile 'com.oguzdev:CircularFloatingActionMenu:1.0.2'
@@ -40,8 +42,11 @@ dependencies {
     compile 'de.hdodenhof:circleimageview:2.2.0'
     implementation('com.h6ah4i.android.widget.advrecyclerview:advrecyclerview:0.11.0@aar') {
         transitive = true
+
     }
     compile 'com.droidninja:filepicker:2.1.1'
+    compile 'com.github.rubensousa:bottomsheetbuilder:1.4'
+    compile 'com.mcxiaoke.volley:library-aar:1.0.0'
 }
 
 

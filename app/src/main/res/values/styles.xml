@@ -25,5 +25,14 @@
         <item name="android:layout_marginLeft">4dp</item>
         <item name="android:textColor">@android:color/white</item>
     </style>
+    <style name="AppTheme.BottomSheetDialog" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/AppTheme.BottomSheetStyle</item>
+    </style>
 
+    <style name="AppTheme.BottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">
+    <item name="android:background">@color/colorPrimary</item>
+    <item name="behavior_hideable">true</item>
+    <item name="behavior_skipCollapsed">true</item>
+    <item name="android:backgroundDimAmount">0.5</item>
+    </style>
 </resources>

@@ -774,7 +774,8 @@ public class UploadActivity extends AppCompatActivity {
             }).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                    writeNewUpload(task.getResult().getDownloadUrl().toString());
+                    writeNewUpload(task.getResult().getDownloadUrl().toString(), task.getResult().getMetadata().getName(),
+                            task.getResult().getMetadata().getSizeBytes());
                     mBuilder.setContentText("Upload completed");
 
                 }
@@ -791,10 +792,10 @@ public class UploadActivity extends AppCompatActivity {
 
     }
 
-    private void writeNewUpload(String downloadUrl){
+    private void writeNewUpload(String downloadUrl, String name, Long sizeInBytes){
 
         String key = uploadedFilesChildReference.push().getKey();
-        ImageModel imageModel = new ImageModel(downloadUrl);
+        ImageModel imageModel = new ImageModel(downloadUrl, name, sizeInBytes);
         uploadedFilesChildReference.child(key).setValue(imageModel);
 
     }

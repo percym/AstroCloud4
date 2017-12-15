@@ -101,14 +101,16 @@ public class FragmentPhotos extends Fragment {
          recyclerView.addOnItemTouchListener(new GalleryAdapter.RecyclerTouchListener(getActivity(), recyclerView, new GalleryAdapter.ClickListener() {
             @Override
             public void onClick(View view, int position) {
+                images = new ArrayList<>();
+                images.addAll(mAdapter.getmDisplayedPhotoValues());
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("images", images);
                 bundle.putInt("position", position);
 
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
-//                SlideshowDialogFragment newFragment = SlideshowDialogFragment.newInstance();
-//                newFragment.setArguments(bundle);
-//                newFragment.show(ft, "slideshow");
+                SlideshowDialogFragment newFragment = SlideshowDialogFragment.newInstance();
+                newFragment.setArguments(bundle);
+                newFragment.show(ft, "slideshow");
             }
 
             @Override

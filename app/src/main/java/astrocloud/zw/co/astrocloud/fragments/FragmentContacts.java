@@ -237,14 +237,12 @@ public class FragmentContacts extends Fragment {
     }
 
     private void fillArrayListWithContactsDB(DataSnapshot dataSnapshot) {
-        for (DataSnapshot ds : dataSnapshot.getChildren()) {
+
             //   Log.e(TAG, ds.toString());
             ContactModel contactModel = dataSnapshot.getValue(ContactModel.class);
             if (!arrayListContactsToDisplay.contains(contactModel)) {
                 arrayListContactsToDisplay.add(contactModel);
             }
-
-        }
         if ((arrayListContactsToDisplay.size() > 0)) {
             awesomeInfoDialog.hide();
             contactsRecyclerView.setVisibility(View.VISIBLE);

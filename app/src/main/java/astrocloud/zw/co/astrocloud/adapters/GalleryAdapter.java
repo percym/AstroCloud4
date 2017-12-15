@@ -38,9 +38,7 @@ import astrocloud.zw.co.astrocloud.models.ImageModel;
 
 public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.MyViewHolder> implements Filterable {
 
-    private DatabaseReference databaseReference;
-    private ChildEventListener childEventListener;
-
+    private DatabaseReference databaseReference ;
     private Context mContext;
     private List<ImageModel> mOriginalPhotoValues = new ArrayList<>();  // Original Values
     private List<ImageModel> mDisplayedPhotoValues = new ArrayList<>();
@@ -56,6 +54,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.MyViewHo
         photosQuery.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
                 fillArrayListWithContactsDB(dataSnapshot);
                 notifyDataSetChanged();
 
@@ -221,14 +220,29 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.MyViewHo
     }
 
     private void fillArrayListWithContactsDB(DataSnapshot dataSnapshot) {
-        for (DataSnapshot ds : dataSnapshot.getChildren()) {
+
+
             //   Log.e(TAG, ds.toString());
             ImageModel imageModel = dataSnapshot.getValue(ImageModel.class);
-            mDisplayedPhotoValues.add(new ImageModel(imageModel.getUrl()));
-            mOriginalPhotoValues.add(new ImageModel(imageModel.getUrl()));
+            mDisplayedPhotoValues.add(new ImageModel(imageModel.getUrl(), imageModel.getName(), imageModel.getSizeInBytes()));
+            mOriginalPhotoValues.add(new ImageModel(imageModel.getUrl(), imageModel.getName(),imageModel.getSizeInBytes()));
 
-
-        }
         notifyDataSetChanged();
+    }
+
+    public List<ImageModel> getmOriginalPhotoValues() {
+        return mOriginalPhotoValues;
+    }
+
+    public void setmOriginalPhotoValues(List<ImageModel> mOriginalPhotoValues) {
+        this.mOriginalPhotoValues = mOriginalPhotoValues;
+    }
+
+    public List<ImageModel> getmDisplayedPhotoValues() {
+        return mDisplayedPhotoValues;
+    }
+
+    public void setmDisplayedPhotoValues(List<ImageModel> mDisplayedPhotoValues) {
+        this.mDisplayedPhotoValues = mDisplayedPhotoValues;
     }
 }
