@@ -355,6 +355,7 @@ public class FragmentContacts extends Fragment {
                                     .setNegativeButtonClick(new Closure() {
                                         @Override
                                         public void exec() {
+                                            adapter.notifyDataSetChanged();
 
                                         }
                                     })
