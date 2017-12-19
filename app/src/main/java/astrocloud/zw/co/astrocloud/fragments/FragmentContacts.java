@@ -128,7 +128,7 @@ public class FragmentContacts extends Fragment {
 
                 } else if (PermissionsManager.get().neverAskForContacts(getActivity())) {
 
-                    showFetchcontactsDialogue();
+                    showPermissionsDialogue();
                 } else {
                     PermissionsManager.get().requestContactsPermission()
                             .subscribe(new Action1<PermissionsResult>() {

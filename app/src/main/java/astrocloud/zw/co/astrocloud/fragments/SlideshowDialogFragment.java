@@ -6,6 +6,7 @@ package astrocloud.zw.co.astrocloud.fragments;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.DownloadManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -16,6 +17,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
@@ -35,10 +37,28 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeInfoDialog;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeSuccessDialog;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.interfaces.Closure;
 import com.bumptech.glide.Glide;
 import com.github.rubensousa.bottomsheetbuilder.BottomSheetBuilder;
 import com.github.rubensousa.bottomsheetbuilder.BottomSheetMenuDialog;
 import com.github.rubensousa.bottomsheetbuilder.adapter.BottomSheetItemClickListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
+import net.ralphpina.permissionsmanager.PermissionsManager;
+import net.ralphpina.permissionsmanager.PermissionsResult;
 
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
@@ -57,6 +77,11 @@ import astrocloud.zw.co.astrocloud.R;
 import astrocloud.zw.co.astrocloud.UploadActivity;
 import astrocloud.zw.co.astrocloud.models.Image;
 import astrocloud.zw.co.astrocloud.models.ImageModel;
+import astrocloud.zw.co.astrocloud.utils.AppConfig;
+import astrocloud.zw.co.astrocloud.utils.FilenameUtils;
+import rx.functions.Action1;
+
+import static android.content.Context.DOWNLOAD_SERVICE;
 
 
 public class SlideshowDialogFragment extends DialogFragment {
@@ -68,6 +93,12 @@ public class SlideshowDialogFragment extends DialogFragment {
     private int selectedPosition = 0;
     private BottomSheetMenuDialog mBottomSheetDialog;
     private BottomSheetBehavior mBehavior;
+    String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+    private DatabaseReference contactsDatabase;
+    private DatabaseReference uploadedFilesChildReference;
+    private FirebaseStorage mStorageReference;
+    private StorageReference mImagesStorageReference;
+    private AwesomeInfoDialog awesomeErrorDialog;
 
 
     static SlideshowDialogFragment newInstance() {
@@ -84,15 +115,22 @@ public class SlideshowDialogFragment extends DialogFragment {
         lblTitle = (TextView) v.findViewById(R.id.title);
         lblDate = (TextView) v.findViewById(R.id.date);
 
+        //intialise database
+        contactsDatabase = FirebaseDatabase.getInstance().getReference();
+        uploadedFilesChildReference = contactsDatabase.child("user_files").child(userId).child("images");
+
+        //Storage for images
+        //  mStorageReference = FirebaseStorage.getInstance().getReference(AppConfig.FIRESTOREDBURL);
+        mStorageReference = FirebaseStorage.getInstance(AppConfig.FIRESTOREDBURL);
+        mImagesStorageReference = mStorageReference.getReference("images");
         images = (ArrayList<ImageModel>) getArguments().getSerializable("images");
         selectedPosition = getArguments().getInt("position");
 
-        Log.e(TAG, "position: " + selectedPosition);
-        Log.e(TAG, "images size: " + images.size());
 
         myViewPagerAdapter = new MyViewPagerAdapter();
         viewPager.setAdapter(myViewPagerAdapter);
         viewPager.addOnPageChangeListener(viewPagerPageChangeListener);
+
 
         setCurrentItem(selectedPosition);
 
@@ -157,7 +195,7 @@ public class SlideshowDialogFragment extends DialogFragment {
         }
 
         @Override
-        public Object instantiateItem(ViewGroup container, int position)  {
+        public Object instantiateItem(ViewGroup container, final int position)  {
             layoutInflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             final View view = layoutInflater.inflate(R.layout.image_fullsreen_preview, container, false);
             final ImageView imageViewPreview = (ImageView) view.findViewById(R.id.image_preview);
@@ -188,46 +226,133 @@ public class SlideshowDialogFragment extends DialogFragment {
 
                                     switch (item.getItemId()){
                                         case R.id.image_download:{
-//                                            if (Build.VERSION.SDK_INT >= 23) {
-//                                                verifyStoragePermissions(getActivity());
-//                                                if (getPermissionStatus(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE) == 0 && (getPermissionStatus(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == 0) ) {
-//                                                    saveImageLocally(imageViewPreview);
-//                                                } else {
-//                                                    Toast.makeText(getContext(), "Allow all permissions for application to run properly ", Toast.LENGTH_LONG);
-//                                                }
-//                                            } else {
-//                                                saveImageLocally(imageViewPreview);
-//                                            }
-//                                             break;
+
+                                            if (PermissionsManager.get().isStorageGranted()) {
+
+                                                saveImageLocally(imageViewPreview);
+
+                                            }else if(PermissionsManager.get().neverAskForStorage(getActivity())){
+                                                showPermissionsDialogueStorage();
+
+
+                                            }else{
+                                                PermissionsManager.get().requestContactsPermission()
+                                                        .subscribe(new Action1<PermissionsResult>() {
+                                                            @Override
+                                                            public void call(PermissionsResult permissionsResult) {
+                                                                if (!permissionsResult.isGranted()) {
+                                                                    showPermissionsDialogueStorage();
+                                                                } else {
+                                                               saveImageLocally(imageViewPreview);
+
+                                                                }
+                                                            }
+                                                        });
+
+
+                                            }
+                                            break;
                                         }
                                         case R.id.image_delete:{
-//                                            MarkedFileLocationLink = "/userFiles/" + GlobalDeclarations.UserAccountID + "/" + getFileType(image.getName()) + "/" + image.getName();
-//                                            deleteFile(Base64Encode(MarkedFileLocationLink), AppConfig.URL_DELETE_FILE);
-//                                            break;
+                                            if (PermissionsManager.get().isStorageGranted()) {
+
+                                                awesomeErrorDialog = new AwesomeInfoDialog(getContext());
+                                                awesomeErrorDialog
+                                                        .setTitle(R.string.app_name)
+                                                        .setMessage(" Are you sure you want to delete " + image.getName() + "?")
+                                                        .setDialogIconOnly(R.drawable.ic_app_icon)
+                                                        .setColoredCircle(R.color.white)
+                                                        .setCancelable(false)
+                                                        .setPositiveButtonText(getString(R.string.restore))
+                                                        .setPositiveButtonbackgroundColor(R.color.dialogSuccessBackgroundColor)
+                                                        .setPositiveButtonTextColor(R.color.white)
+                                                        .setNegativeButtonText(getString(R.string.cancel))
+                                                        .setNegativeButtonbackgroundColor(R.color.dialogErrorBackgroundColor)
+                                                        .setNegativeButtonTextColor(R.color.white)
+                                                        .setPositiveButtonClick(new Closure() {
+                                                            @Override
+                                                            public void exec() {
+                                                                fileChewer(image, userId, position);
+                                                                getActivity().getFragmentManager().popBackStack();
+//                                                                 getChildFragmentManager().beginTransaction().remove(SlideshowDialogFragment.this).commit();
+                                                                getActivity().getSupportFragmentManager().beginTransaction().remove(SlideshowDialogFragment.this).commit();
+                                                            }
+                                                        })
+                                                        .setNegativeButtonClick(new Closure() {
+                                                            @Override
+                                                            public void exec() {
+
+                                                            }
+                                                        })
+                                                        .show();
+
+
+                                            }else if(PermissionsManager.get().neverAskForStorage(getActivity())){
+                                                showPermissionsDialogueStorage();
+
+
+                                            }else{
+                                                PermissionsManager.get().requestContactsPermission()
+                                                        .subscribe(new Action1<PermissionsResult>() {
+                                                            @Override
+                                                            public void call(PermissionsResult permissionsResult) {
+                                                                if (!permissionsResult.isGranted()) {
+                                                                    showPermissionsDialogueStorage();
+                                                                } else {
+                                                                    fileChewer(image,userId,position);
+
+//                                                                    getChildFragmentManager().beginTransaction().remove(SlideshowDialogFragment.this).commit()
+                                                                    getActivity().getSupportFragmentManager().beginTransaction().remove(SlideshowDialogFragment.this).commit();
+                                                                }
+                                                            }
+                                                        });
+
+
+                                            }
+                                            break;
                                         }
                                         case R.id.image_share:{
-                                            if (Build.VERSION.SDK_INT >= 23) {
-                                                verifyStoragePermissions(getActivity());
-                                                if (getPermissionStatus(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE) == 0 && (getPermissionStatus(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == 0) ) {
-                                                    final Intent shareIntent = new Intent(Intent.ACTION_SEND);
-                                                    shareIntent.setType("image/jpg");
-                                                    shareIntent.putExtra(Intent.EXTRA_STREAM, getImageLocal(imageViewPreview));
-                                                    shareIntent.putExtra(Intent.EXTRA_TITLE,"Shared  from Astrocloud");
-                                                    // shareIntent.putExtra(Intent.EXTRA_SUBJECT,"Shared  from Astrocloud");
-                                                    startActivity(Intent.createChooser(shareIntent, "Share image using"));
-                                                } else {
-                                                    Toast.makeText(getContext(), "Allow all permissions for application to run properly ", Toast.LENGTH_LONG);
-                                                }
+                                            if (PermissionsManager.get().isStorageGranted()) {
 
 
-                                            }else {
-                                                final Intent shareIntent = new Intent(Intent.ACTION_SEND);
-                                                shareIntent.setType("image/jpg");
-                                                shareIntent.putExtra(Intent.EXTRA_STREAM, getImageLocal(imageViewPreview));
-                                                shareIntent.putExtra(Intent.EXTRA_TITLE,"Shared  from Astrocloud");
-                                                // shareIntent.putExtra(Intent.EXTRA_SUBJECT,"Shared  from Astrocloud");
-                                                startActivity(Intent.createChooser(shareIntent, "Share image using"));
+
+                                                                final Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                                                                shareIntent.setType("image/jpg");
+                                                                shareIntent.putExtra(Intent.EXTRA_STREAM, getImageLocal(imageViewPreview));
+                                                                shareIntent.putExtra(Intent.EXTRA_TITLE,"Shared  from Astrocloud");
+                                                                // shareIntent.putExtra(Intent.EXTRA_SUBJECT,"Shared  from Astrocloud");
+                                                                startActivity(Intent.createChooser(shareIntent, "Share image using"));
+
+
+
+                                            }else if(PermissionsManager.get().neverAskForStorage(getActivity())){
+                                                showPermissionsDialogueStorage();
+
+
+                                            }else{
+                                                PermissionsManager.get().requestContactsPermission()
+                                                        .subscribe(new Action1<PermissionsResult>() {
+                                                            @Override
+                                                            public void call(PermissionsResult permissionsResult) {
+                                                                if (!permissionsResult.isGranted()) {
+                                                                    showPermissionsDialogueStorage();
+                                                                } else {
+
+                                                                    final Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                                                                    shareIntent.setType("image/jpg");
+                                                                    shareIntent.putExtra(Intent.EXTRA_STREAM, getImageLocal(imageViewPreview));
+                                                                    shareIntent.putExtra(Intent.EXTRA_TITLE,"Shared  from Astrocloud");
+                                                                    // shareIntent.putExtra(Intent.EXTRA_SUBJECT,"Shared  from Astrocloud");
+                                                                    startActivity(Intent.createChooser(shareIntent, "Share image using"));
+
+                                                                }
+                                                            }
+                                                        });
+
+
                                             }
+                                            break;
+
 
                                         }
 
@@ -283,7 +408,7 @@ public class SlideshowDialogFragment extends DialogFragment {
                 fos.close();
 
                 scanFile(getActivity(), Uri.fromFile(file));
-
+                Toast.makeText(getContext(), "The file was successfully saved", Toast.LENGTH_LONG).show(); ;
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -435,5 +560,141 @@ public class SlideshowDialogFragment extends DialogFragment {
             }
             return fileType;
         }
+
+        private void fileChewer(final ImageModel fileToDelete, String uid , final int pos){
+            StorageReference localReferencePath = mImagesStorageReference.child(uid).child(fileToDelete.getName());
+            localReferencePath.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    images.remove(pos);
+                    dataChewer(fileToDelete.getKey());
+
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                Toast.makeText(getContext(), "Deletion error" , Toast.LENGTH_LONG);
+
+                }
+            });
+
+        }
+
+        private void dataChewer(String ref){
+            DatabaseReference localReference = uploadedFilesChildReference.child(ref);
+            localReference.setValue(null).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+
+                }
+            });
+        }
+    }
+
+
+    public void showPermissionsDialogueStorage() {
+        new AwesomeSuccessDialog(getActivity())
+                .setTitle("AstroCloud")
+                .setMessage("Permission to read and write contacts is needed for application to function properly")
+                .setColoredCircle(R.color.white)
+                .setDialogIconOnly(R.drawable.ic_app_icon)
+                .setCancelable(false)
+                .setPositiveButtonText(getString(R.string.give_permissions))
+                .setPositiveButtonbackgroundColor(R.color.dialogSuccessBackgroundColor)
+                .setPositiveButtonTextColor(R.color.white)
+                .setNegativeButtonText(getString(R.string.dialog_no_button))
+                .setNegativeButtonbackgroundColor(R.color.dialogErrorBackgroundColor)
+                .setNegativeButtonTextColor(R.color.white)
+                .setPositiveButtonClick(new Closure() {
+                    @Override
+                    public void exec() {
+                        //click
+                        onClickGoToAppSettings();
+                    }
+                })
+                .setNegativeButtonClick(new Closure() {
+                    @Override
+                    public void exec() {
+
+                    }
+                })
+                .show();
+
+    }
+
+    public void onClickGoToAppSettings() {
+        PermissionsManager.get()
+                .intentToAppSettings(getActivity());
+    }
+
+    private void initDownloadTask(ImageModel fileToDownload, String uid){
+
+
+        mStorageReference.getReference("images").child(uid).child(fileToDownload.getKey());
+        File storageLoc = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+//        mImagesStorageReference.child(uid).child(fileToDownload.getKey()).getFile(storageLoc).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+//            @Override
+//            public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+//                Log.d(TAG,"file raenda") ;
+//            }
+//        }).addOnFailureListener(new OnFailureListener() {
+//
+//            @Override
+//            public void onFailure(@NonNull Exception e) {
+//
+//            }
+//        });
+        StorageReference localReferencePath = mImagesStorageReference.child(uid).child(fileToDownload.getName());
+        localReferencePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+
+            Log.e(TAG,uri.toString());
+                String path = "";
+                String  downloadUrl= "";
+            path = uri.getPath().toString();
+            downloadUrl = uri.getEncodedPath().toString();
+                Log.e(TAG,path);
+
+            }
+        });
+
+        File localFile;
+        String ext = FilenameUtils.getExtension(fileToDownload.getName());
+        try {
+             localFile = File.createTempFile("album2", ext );
+            localReferencePath.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(getActivity(),"Error Downloading File", Toast.LENGTH_LONG);
+                }
+            });
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(getActivity(),"Error Downloading File", Toast.LENGTH_LONG);
+        }
+
+
+
+//        DownloadManager downloadManager = (DownloadManager) getActivity().getSystemService(DOWNLOAD_SERVICE);
+        //imageUri is a valid Uri
+//        DownloadManager.Request r =  new DownloadManager.Request(imageUri);
+        //without this line, it works
+      //  r.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
+        //subpath is valid
+
+//        r.setDestinationInExternalFilesDir(getActivity(), null, storageLoc.getPath());
+//        downloadManager.enqueue(r);
     }
 }

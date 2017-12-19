@@ -8,17 +8,19 @@ public class ImageModel {
     private String url;
     private String name;
     private Long sizeInBytes;
+    private String key;
 
-    public ImageModel(String url , String name , Long sizeInBytes) {
-        this.url = url;
-        this.name = name;
-        this.sizeInBytes = sizeInBytes;
-    }
 
 
     public ImageModel() {
     }
 
+    public ImageModel(String downloadUrl, String name, Long sizeInBytes, String key) {
+        this.url = downloadUrl;
+        this.name = name;
+        this.sizeInBytes = sizeInBytes;
+        this.key = key;
+    }
 
 
     public String getUrl() {
@@ -43,5 +45,13 @@ public class ImageModel {
 
     public void setSizeInBytes(Long sizeInBytes) {
         this.sizeInBytes = sizeInBytes;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
 }

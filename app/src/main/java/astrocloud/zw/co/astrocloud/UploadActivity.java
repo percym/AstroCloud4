@@ -92,13 +92,13 @@ public class UploadActivity extends AppCompatActivity {
 
     private ArrayList<ContactModel> arrayListContacts = new ArrayList<>();
     private DatabaseReference contactsDatabase;
-    DatabaseReference contactsChildReference;
-    DatabaseReference uploadedFilesChildReference;
-    String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+    private DatabaseReference contactsChildReference;
+    private DatabaseReference uploadedFilesChildReference;
+    private String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
     private AwesomeInfoDialog awesomeInfoDialog;
     private AwesomeInfoDialog awesomeInfocontacts;
-    ArrayList<ContactModel> arrayListWithContacts;
-    CoordinatorLayout main_content;
+    private ArrayList<ContactModel> arrayListWithContacts;
+    private CoordinatorLayout main_content;
     private AwesomeInfoDialog awesomeErrorDialog;
     private FirebaseStorage mStorageReference;
     private StorageReference mImagesStorageReference;
@@ -121,7 +121,6 @@ public class UploadActivity extends AppCompatActivity {
             finish();
 
         }
-//        PermissionsManager.init(this);
 
     }
 
@@ -163,7 +162,7 @@ public class UploadActivity extends AppCompatActivity {
 
         contactsDatabase = FirebaseDatabase.getInstance().getReference();
         contactsChildReference= contactsDatabase.child("contacts");
-        uploadedFilesChildReference = contactsChildReference.child("fileUrls");
+     //   uploadedFilesChildReference = contactsChildReference.child("fileUrls");
         
         //Storage for images
       //  mStorageReference = FirebaseStorage.getInstance().getReference(AppConfig.FIRESTOREDBURL);
@@ -795,10 +794,11 @@ public class UploadActivity extends AppCompatActivity {
     private void writeNewUpload(String downloadUrl, String name, Long sizeInBytes){
 
         String key = uploadedFilesChildReference.push().getKey();
-        ImageModel imageModel = new ImageModel(downloadUrl, name, sizeInBytes);
+        ImageModel imageModel = new ImageModel(downloadUrl, name, sizeInBytes, key);
         uploadedFilesChildReference.child(key).setValue(imageModel);
 
     }
+
 }
 
 

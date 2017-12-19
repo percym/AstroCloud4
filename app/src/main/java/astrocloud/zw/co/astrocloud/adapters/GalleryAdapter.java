@@ -3,6 +3,7 @@ package astrocloud.zw.co.astrocloud.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -28,6 +29,7 @@ import java.util.List;
 
 ;import astrocloud.zw.co.astrocloud.App;
 import astrocloud.zw.co.astrocloud.R;
+import astrocloud.zw.co.astrocloud.fragments.SlideshowDialogFragment;
 import astrocloud.zw.co.astrocloud.models.ContactModel;
 import astrocloud.zw.co.astrocloud.models.Image;
 import astrocloud.zw.co.astrocloud.models.ImageModel;
@@ -42,6 +44,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.MyViewHo
     private Context mContext;
     private List<ImageModel> mOriginalPhotoValues = new ArrayList<>();  // Original Values
     private List<ImageModel> mDisplayedPhotoValues = new ArrayList<>();
+    private String TAG = SlideshowDialogFragment.class.getSimpleName();
 
     // Values to be displayed
     public GalleryAdapter( Context context, DatabaseReference ref) {
@@ -68,6 +71,22 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.MyViewHo
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
+                String picKey = dataSnapshot.getKey();
+                int picIndex = -1;
+                for(int i= 0 ; i < mDisplayedPhotoValues.size(); i ++ ){
+                    if(mDisplayedPhotoValues.get(i).getKey().contains(picKey)){
+                        picIndex= i;
+                    }
+                }
+                if(picIndex > -1 ){
+                    mDisplayedPhotoValues.remove(picIndex);
+                    mOriginalPhotoValues.remove(picIndex);
+                    notifyDataSetChanged();
+                }else{
+                    Log.d(TAG, "no value found");
+                }
+
+
                 notifyDataSetChanged();
             }
 
@@ -224,8 +243,8 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.MyViewHo
 
             //   Log.e(TAG, ds.toString());
             ImageModel imageModel = dataSnapshot.getValue(ImageModel.class);
-            mDisplayedPhotoValues.add(new ImageModel(imageModel.getUrl(), imageModel.getName(), imageModel.getSizeInBytes()));
-            mOriginalPhotoValues.add(new ImageModel(imageModel.getUrl(), imageModel.getName(),imageModel.getSizeInBytes()));
+            mDisplayedPhotoValues.add(new ImageModel(imageModel.getUrl(), imageModel.getName(), imageModel.getSizeInBytes(),imageModel.getKey()));
+            mOriginalPhotoValues.add(new ImageModel(imageModel.getUrl(), imageModel.getName(),imageModel.getSizeInBytes(),imageModel.getKey()));
 
         notifyDataSetChanged();
     }

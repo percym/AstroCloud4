@@ -47,6 +47,7 @@ dependencies {
     compile 'com.droidninja:filepicker:2.1.1'
     compile 'com.github.rubensousa:bottomsheetbuilder:1.4'
     compile 'com.mcxiaoke.volley:library-aar:1.0.0'
+    compile 'org.apache.commons:commons-collections4:4.1'
 }
 
 
