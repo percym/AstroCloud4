@@ -16,6 +16,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -42,6 +43,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
 
 import net.ralphpina.permissionsmanager.PermissionsManager;
 import net.ralphpina.permissionsmanager.PermissionsResult;
@@ -84,6 +86,7 @@ public class FragmentContacts extends Fragment {
     RelativeLayout folder_state_container;
     private Paint p = new Paint();
     String name, phonenumber;
+    private DividerItemDecoration mDividerItemDecoration;
 
     @Nullable
     @Override
@@ -167,7 +170,13 @@ public class FragmentContacts extends Fragment {
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
         contactsRecyclerView.setLayoutManager(mLayoutManager);
         contactsRecyclerView.setItemAnimator(new DefaultItemAnimator());
+//        mDividerItemDecoration = new DividerItemDecoration(
+//                container.getContext(),1
+//        );
+//        contactsRecyclerView.addItemDecoration(mDividerItemDecoration);
+
         contactsRecyclerView.setAdapter(adapter);
+        contactsRecyclerView.addItemDecoration(new HorizontalDividerItemDecoration.Builder(getContext()).color(Color.parseColor("#4bde90")).sizeResId(R.dimen.divider).marginResId(R.dimen.leftmargin, R.dimen.rightmargin).build());
 
         initSwipe();
         return view;

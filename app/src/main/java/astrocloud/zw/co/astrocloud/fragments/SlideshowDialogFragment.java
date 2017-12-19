@@ -263,7 +263,7 @@ public class SlideshowDialogFragment extends DialogFragment {
                                                         .setDialogIconOnly(R.drawable.ic_app_icon)
                                                         .setColoredCircle(R.color.white)
                                                         .setCancelable(false)
-                                                        .setPositiveButtonText(getString(R.string.restore))
+                                                        .setPositiveButtonText(getString(R.string.delete))
                                                         .setPositiveButtonbackgroundColor(R.color.dialogSuccessBackgroundColor)
                                                         .setPositiveButtonTextColor(R.color.white)
                                                         .setNegativeButtonText(getString(R.string.cancel))
@@ -319,7 +319,7 @@ public class SlideshowDialogFragment extends DialogFragment {
                                                                 final Intent shareIntent = new Intent(Intent.ACTION_SEND);
                                                                 shareIntent.setType("image/jpg");
                                                                 shareIntent.putExtra(Intent.EXTRA_STREAM, getImageLocal(imageViewPreview));
-                                                                shareIntent.putExtra(Intent.EXTRA_TITLE,"Shared  from Astrocloud");
+                                                              // shareIntent.putExtra(Intent.EXTRA_TITLE,"Shared  from Astrocloud");
                                                                 // shareIntent.putExtra(Intent.EXTRA_SUBJECT,"Shared  from Astrocloud");
                                                                 startActivity(Intent.createChooser(shareIntent, "Share image using"));
 

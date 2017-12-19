@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -17,6 +18,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.RelativeLayout;
 
+import com.appolica.flubber.Flubber;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -32,6 +34,7 @@ import astrocloud.zw.co.astrocloud.R;
 import astrocloud.zw.co.astrocloud.adapters.GalleryAdapter;
 import astrocloud.zw.co.astrocloud.models.ImageModel;
 import astrocloud.zw.co.astrocloud.utils.AppConfig;
+import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * Created by Percy M on 11/9/2016.
@@ -54,6 +57,10 @@ public class FragmentPhotos extends Fragment {
     private DatabaseReference userfilesDatabase;
     private DatabaseReference contactsChildReference;
     private DatabaseReference uploadedFilesChildReference;
+    CircleImageView emptyfolder, imageUploadContacts;
+    Handler h = new Handler();
+    int delay = 15000; //15 seconds
+    Runnable runnable;
 
 
     public FragmentPhotos() {
@@ -80,6 +87,15 @@ public class FragmentPhotos extends Fragment {
         setHasOptionsMenu(true);
         recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         folder_state_container = (RelativeLayout) view.findViewById(R.id.folder_state_container);
+        emptyfolder = view.findViewById(R.id.empty_folder_icon);
+        imageUploadContacts = view.findViewById(R.id.imageUploadContacts);
+        imageUploadContacts.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
         //initialise the FireStore
         //mStorageReference = FirebaseStorage.getInstance().getReference(AppConfig.FIRESTOREDBURL);
         mStorageReference = FirebaseStorage.getInstance(AppConfig.FIRESTOREDBURL);
@@ -119,10 +135,38 @@ public class FragmentPhotos extends Fragment {
             }
         }));
 
-    //    fetchImages();
-
+//    //    fetchImages();
+//        if (mAdapter.getmDisplayedPhotoValues().size() > 0 ){
+//            folder_state_container.setVisibility(View.GONE);
+//            recyclerView.setVisibility(View.VISIBLE);
+//        }else{
+//            folder_state_container.setVisibility(View.VISIBLE);
+//            recyclerView.setVisibility(View.GONE);
+//
+//        }
+        refreshScreen();
 
         return view;
+    }
+
+
+    private void refreshScreen(){
+        if (mAdapter.getmDisplayedPhotoValues().size() > 0 ){
+            folder_state_container.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+        }else{
+            folder_state_container.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.GONE);
+            Flubber.with()
+                    .animation(Flubber.AnimationPreset.ROTATION)
+                    .interpolator(Flubber.Curve.BZR_EASE_IN_OUT_CUBIC)
+                    .repeatCount(2)
+                    .duration(2000)
+                    .autoStart(true)
+                    .createFor(emptyfolder);
+
+        }
+
     }
     public void setFullscreen() {
         setFullscreen(getActivity());
@@ -228,6 +272,16 @@ public class FragmentPhotos extends Fragment {
     public void onResume() {
         super.onResume();
 
+        h.postDelayed(new Runnable() {
+            public void run() {
+            refreshScreen();
+
+                runnable=this;
+
+                h.postDelayed(runnable, delay);
+            }
+        }, delay);
+
     }
 //    @Override
 //    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -253,4 +307,12 @@ public class FragmentPhotos extends Fragment {
 //            }
 //        });
 //    }
+
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        h.removeCallbacks(runnable); //stop handler when activity not visible
+        super.onPause();
+    }
 }

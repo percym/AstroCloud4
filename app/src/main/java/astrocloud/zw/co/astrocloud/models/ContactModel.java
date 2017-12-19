@@ -1,9 +1,11 @@
 package astrocloud.zw.co.astrocloud.models;
 
+import java.io.Serializable;
+
 /**
  * Created by Percy M on 6/27/2016.
  */
-public class ContactModel {
+public class ContactModel  implements Serializable{
     public String name, number;
 
     public String getName() {

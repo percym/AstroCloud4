@@ -4,4 +4,7 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="appbar_padding_top">8dp</dimen>
+    <dimen name="divider">1dp</dimen>
+    <dimen name="leftmargin">74dp</dimen>
+    <dimen name="rightmargin">8dp</dimen>
 </resources>

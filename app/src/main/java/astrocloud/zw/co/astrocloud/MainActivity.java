@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
                                    PhoneAuthProvider.ForceResendingToken token) {
                 Log.d(TAG, "onCodeSent:" + verificationId);
                 btn_start_verification.setClickable(false);
-                editCode.setClickable(true);
+                editCode.setEnabled(true);
                 mVerificationId = verificationId;
                 mResendToken = token;
             }

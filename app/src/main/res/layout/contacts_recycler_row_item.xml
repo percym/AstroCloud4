@@ -1,18 +1,21 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="?android:attr/listPreferredItemHeight"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/contacts_layout"
-    android:padding="6dip" >
+    android:padding="6dip">
 
-    <ImageView
+    <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/icon"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentTop="true"
         android:layout_marginRight="6dip"
         android:contentDescription="TODO"
-        android:src="@drawable/ic_user_green" />
+        android:src="@drawable/ic_user_green"
+        app:civ_border_color="@color/colorPrimary"
+        app:civ_border_width="1dp"/>
 
 
 
@@ -23,6 +26,7 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:layout_marginTop="5dp"
+        android:layout_marginLeft="5dp"
         android:layout_alignWithParentIfMissing="true"
         android:layout_toRightOf="@id/icon"
         android:gravity="center_vertical"
@@ -40,6 +44,7 @@
         android:layout_toRightOf="@id/icon"
         android:singleLine="true"
         android:text="Description"
+        android:layout_marginLeft="5dp"
         android:maxLines="1"
         android:textSize="13sp" />
 

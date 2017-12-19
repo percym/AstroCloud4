@@ -1,10 +1,12 @@
 package astrocloud.zw.co.astrocloud.models;
 
+import java.io.Serializable;
+
 /**
  * Created by Percy M on 12/13/2017.
  */
 
-public class ImageModel {
+public class ImageModel  implements Serializable{
     private String url;
     private String name;
     private Long sizeInBytes;

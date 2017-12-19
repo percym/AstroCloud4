@@ -11,4 +11,6 @@
     <string name="give_permissions">Review Security Settings</string>
     <string name="restore">Restore</string>
     <string name="cancel">Cancel</string>
+    <string name="upload">Upload</string>
+    <string name="delete">Delete</string>
 </resources>

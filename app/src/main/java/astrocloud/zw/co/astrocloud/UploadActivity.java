@@ -371,7 +371,7 @@ public class UploadActivity extends AppCompatActivity {
                                         .setDialogIconOnly(R.drawable.ic_app_icon)
                                         .setColoredCircle(R.color.white)
                                         .setCancelable(false)
-                                        .setPositiveButtonText(getString(R.string.restore))
+                                        .setPositiveButtonText(getString(R.string.upload))
                                         .setPositiveButtonbackgroundColor(R.color.dialogSuccessBackgroundColor)
                                         .setPositiveButtonTextColor(R.color.white)
                                         .setNegativeButtonText(getString(R.string.cancel))
