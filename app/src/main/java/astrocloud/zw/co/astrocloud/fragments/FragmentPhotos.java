@@ -135,15 +135,6 @@ public class FragmentPhotos extends Fragment {
             }
         }));
 
-//    //    fetchImages();
-//        if (mAdapter.getmDisplayedPhotoValues().size() > 0 ){
-//            folder_state_container.setVisibility(View.GONE);
-//            recyclerView.setVisibility(View.VISIBLE);
-//        }else{
-//            folder_state_container.setVisibility(View.VISIBLE);
-//            recyclerView.setVisibility(View.GONE);
-//
-//        }
         refreshScreen();
 
         return view;
@@ -190,63 +181,6 @@ public class FragmentPhotos extends Fragment {
         }
     }
 
-
-//    private void fetchImages() {
-//
-//        pDialog.setMessage("Downloading pictures");
-//        pDialog.show();
-//        //do not delete to be
-//        media_url=AppConfig.URL_GET_USER_FILES + "?user_account_id=" + GlobalDeclarations.UserAccountID+"&content_type=img";
-//        Log.d(TAG, media_url);
-//        JsonArrayRequest req = new JsonArrayRequest(media_url,
-//                new Response.Listener<JSONArray>() {
-//                    @Override
-//                    public void onResponse(JSONArray response) {
-//                        Log.d(TAG, response.toString());
-//                        pDialog.hide();
-//
-//                        images.clear();
-//                        if(response.length()>0) {
-//                            for (int i = 0; i < response.length(); i++) {
-//                                try {
-//                                    JSONObject object = response.getJSONObject(i);
-//                                    Image image = new Image();
-//                                    image.setName(object.getString("name"));
-//
-//                                    JSONObject url = object.getJSONObject("url");
-//                                    image.setSmall(Uri.decode(url.getString("small")));
-//                                    String del = Uri.decode(url.getString("small"));
-//                                    //image.setMedium(url.getString("medium"));
-//                                    image.setLarge(Uri.decode(url.getString("large")));
-//                                    String del2 = Uri.decode(url.getString("large"));
-//                                    image.setTimestamp(object.getString("timestamp"));
-//
-//                                    images.add(image);
-//
-//                                } catch (JSONException e) {
-//                                    recyclerView.setVisibility(View.GONE);
-//                                    folder_state_container.setVisibility(View.VISIBLE);
-//                                }
-//                            }
-//
-//                            mAdapter.notifyDataSetChanged();
-//                        }else{
-//                            recyclerView.setVisibility(View.GONE);
-//                            folder_state_container.setVisibility(View.VISIBLE);
-//                        }
-//                    }
-//                }, new Response.ErrorListener() {
-//            @Override
-//            public void onErrorResponse(VolleyError error) {
-//                Log.e(TAG, "Error: " + error.getMessage());
-//                pDialog.hide();
-//            }
-//
-//        });
-//
-//        // Adding request to request queue
-//        AppController.getInstance().addToRequestQueue(req);
-//    }
     private static String convertToHex(byte[] data) {
         StringBuilder buf = new StringBuilder();
         for (byte b : data) {

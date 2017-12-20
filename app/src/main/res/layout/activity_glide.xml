@@ -22,11 +22,12 @@
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/empty_folder_icon"
-            android:src="@drawable/ic_image_upload"
+            android:src="@drawable/ic_image_up"
             android:layout_width="125dp"
             android:layout_height="125dp"
             android:layout_marginTop="60dp"
             android:layout_centerHorizontal="true"
+            android:padding="5dp"
             app:civ_border_color="@color/colorPrimary"
             app:civ_border_width="1dp" />
 

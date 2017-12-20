@@ -11,6 +11,7 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -87,6 +88,9 @@ public class FragmentContacts extends Fragment {
     private Paint p = new Paint();
     String name, phonenumber;
     private DividerItemDecoration mDividerItemDecoration;
+    Handler h = new Handler();
+    int delay = 15000; //15 seconds
+    Runnable runnable;
 
     @Nullable
     @Override
@@ -155,14 +159,7 @@ public class FragmentContacts extends Fragment {
         contactsDatabase = FirebaseDatabase.getInstance().getReference();
         contactsChildReference = contactsDatabase.child("contacts");
 
-        folder_state_container.setVisibility(View.VISIBLE);
-        Flubber.with()
-                .animation(Flubber.AnimationPreset.ROTATION)
-                .interpolator(Flubber.Curve.BZR_EASE_IN_OUT_CUBIC)
-                .repeatCount(2)
-                .duration(2000)
-                .autoStart(true)
-                .createFor(emptyfolder);
+
         showFetchcontactsDialogue();
         arrayListContactsToDisplay = new ArrayList<>();
         getContacts();
@@ -179,7 +176,31 @@ public class FragmentContacts extends Fragment {
         contactsRecyclerView.addItemDecoration(new HorizontalDividerItemDecoration.Builder(getContext()).color(Color.parseColor("#4bde90")).sizeResId(R.dimen.divider).marginResId(R.dimen.leftmargin, R.dimen.rightmargin).build());
 
         initSwipe();
+        refreshView();
         return view;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        h.removeCallbacks(runnable); //stop handler when activity not visible
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        super.onResume();
+
+        h.postDelayed(new Runnable() {
+            public void run() {
+                refreshView();
+
+                runnable=this;
+
+                h.postDelayed(runnable, delay);
+            }
+        }, delay);
     }
 
     public static FragmentContacts newInstance(int val) {
@@ -249,47 +270,11 @@ public class FragmentContacts extends Fragment {
 
             //   Log.e(TAG, ds.toString());
             ContactModel contactModel = dataSnapshot.getValue(ContactModel.class);
-            if (!arrayListContactsToDisplay.contains(contactModel)) {
-                arrayListContactsToDisplay.add(contactModel);
-            }
-        if ((arrayListContactsToDisplay.size() > 0)) {
-            awesomeInfoDialog.hide();
-            contactsRecyclerView.setVisibility(View.VISIBLE);
-            folder_state_container.setVisibility(View.GONE);
-        } else {
-            awesomeInfoDialog.hide();
-            contactsRecyclerView.setVisibility(View.GONE);
-            folder_state_container.setVisibility(View.VISIBLE);
-            Flubber.with()
-                    .animation(Flubber.AnimationPreset.ROTATION)
-                    .interpolator(Flubber.Curve.BZR_EASE_IN_OUT_CUBIC)
-                    .repeatCount(2)
-                    .duration(2000)
-                    .autoStart(true)
-                    .createFor(emptyfolder);
 
-        }
-        contactsRecyclerView.invalidate();
-        contactsRecyclerView.invalidate();
+                arrayListContactsToDisplay.add(contactModel);
+
         adapter.notifyDataSetChanged();
 
-        contactsRecyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
-            @Override
-            public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-                return false;
-            }
-
-            @Override
-            public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-
-
-            }
-
-            @Override
-            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-
-            }
-        });
     }
 
     public void showFetchcontactsDialogue() {
@@ -633,6 +618,29 @@ public class FragmentContacts extends Fragment {
             }
         }
         return name;
+    }
+
+    private void refreshView(){
+
+        if ((arrayListContactsToDisplay.size() > 0)) {
+            awesomeInfoDialog.hide();
+            contactsRecyclerView.setVisibility(View.VISIBLE);
+            folder_state_container.setVisibility(View.GONE);
+        } else {
+            awesomeInfoDialog.hide();
+            contactsRecyclerView.setVisibility(View.GONE);
+            folder_state_container.setVisibility(View.VISIBLE);
+            Flubber.with()
+                    .animation(Flubber.AnimationPreset.ROTATION)
+                    .interpolator(Flubber.Curve.BZR_EASE_IN_OUT_CUBIC)
+                    .repeatCount(2)
+                    .duration(2000)
+                    .autoStart(true)
+                    .createFor(emptyfolder);
+
+        }
+       adapter.notifyDataSetChanged();
+
     }
 }
 
