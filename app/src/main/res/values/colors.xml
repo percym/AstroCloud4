@@ -5,4 +5,5 @@
     <color name="colorAccent">#808080</color>
     <color name="grey">#808080</color>
     <color name="mainGreen">#4bde90</color>
+    <color name="video_thumbnail_placeholder_color">#cccccc</color>
 </resources>

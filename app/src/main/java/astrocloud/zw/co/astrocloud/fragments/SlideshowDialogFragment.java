@@ -553,8 +553,8 @@ public class SlideshowDialogFragment extends DialogFragment {
                 case "rtf" : fileType =  "Documents"; break;
                 case "txt" : fileType =  "Documents"; break;
                 case "mp3" : fileType =  "Music"; break;
-                case "mp4" : fileType =  "Video"; break;
-                case "avi" : fileType =  "Video"; break;
+                case "mp4" : fileType =  "VideoItem"; break;
+                case "avi" : fileType =  "VideoItem"; break;
                 case "png" : fileType =  "Pictures"; break;
                 case "jpg" : fileType =  "Pictures"; break;
             }

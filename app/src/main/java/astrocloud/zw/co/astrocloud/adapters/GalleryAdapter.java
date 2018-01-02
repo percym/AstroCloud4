@@ -238,10 +238,8 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.MyViewHo
         }
     }
 
-    private void fillArrayListWithContactsDB(DataSnapshot dataSnapshot) {
+  private void fillArrayListWithContactsDB(DataSnapshot dataSnapshot) {
 
-
-            //   Log.e(TAG, ds.toString());
             ImageModel imageModel = dataSnapshot.getValue(ImageModel.class);
             mDisplayedPhotoValues.add(new ImageModel(imageModel.getUrl(), imageModel.getName(), imageModel.getSizeInBytes(),imageModel.getKey()));
             mOriginalPhotoValues.add(new ImageModel(imageModel.getUrl(), imageModel.getName(),imageModel.getSizeInBytes(),imageModel.getKey()));

@@ -49,6 +49,11 @@ dependencies {
     compile 'com.mcxiaoke.volley:library-aar:1.0.0'
     compile 'org.apache.commons:commons-collections4:4.1'
     compile 'com.yqritc:recyclerview-flexibledivider:1.4.0'
+    compile 'com.github.danylovolokh:list-visibility-utils:0.2.0'
+    compile 'com.github.danylovolokh:video-player-manager:0.2.0'
+    compile 'net.alhazmy13.MediaPicker:libary:2.4.0'
+    compile 'com.devbrackets.android:exomedia:4.1.0'
+
 }
 
 
