@@ -31,7 +31,6 @@ import java.util.ArrayList;
 
 import astrocloud.zw.co.astrocloud.R;
 import astrocloud.zw.co.astrocloud.adapters.VideosAdapter;
-import astrocloud.zw.co.astrocloud.interfaces.VideoItem;
 import astrocloud.zw.co.astrocloud.models.VideoModel;
 import astrocloud.zw.co.astrocloud.utils.AppConfig;
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -40,8 +39,8 @@ import de.hdodenhof.circleimageview.CircleImageView;
  * Created by Percy M on 11/9/2016.
  */
 
-public class FragmentVideos extends Fragment {
-    private String TAG = FragmentVideos.class.getSimpleName();
+public class FragmentMusic extends Fragment {
+    private String TAG = FragmentMusic.class.getSimpleName();
 
     private ProgressDialog pDialog;
     private VideosAdapter mAdapter;
@@ -49,7 +48,7 @@ public class FragmentVideos extends Fragment {
     private RelativeLayout folder_state_container;
     String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
     private FirebaseStorage mStorageReference;
-    private StorageReference mVideosStorageReference;
+    private StorageReference mMusicStorageReference;
     private StorageReference mUserStorageReference;
     private DatabaseReference userfilesDatabase;
     private DatabaseReference contactsChildReference;
@@ -63,13 +62,13 @@ public class FragmentVideos extends Fragment {
     ArrayList<VideoModel> videos = new ArrayList<>();
 
 
-    public FragmentVideos() {
+    public FragmentMusic() {
         // Required empty public constructor
 
     }
 
-    public static FragmentVideos newInstance(int val) {
-        FragmentVideos fr = new FragmentVideos();
+    public static FragmentMusic newInstance(int val) {
+        FragmentMusic fr = new FragmentMusic();
         Bundle args = new Bundle();
         args.putInt("val", val);
         fr.setArguments(args);
@@ -84,7 +83,7 @@ public class FragmentVideos extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_video, container, false);
+        View view = inflater.inflate(R.layout.fragment_music, container, false);
         setHasOptionsMenu(true);
         recyclerView = (RecyclerView) view.findViewById(R.id.videoRecyclerView);
         folder_state_container = (RelativeLayout) view.findViewById(R.id.folder_state_container);
@@ -100,8 +99,8 @@ public class FragmentVideos extends Fragment {
         //initialise the FireStore
         //mStorageReference = FirebaseStorage.getInstance().getReference(AppConfig.FIRESTOREDBURL);
         mStorageReference = FirebaseStorage.getInstance(AppConfig.FIRESTOREDBURL);
-        mVideosStorageReference = mStorageReference.getReference("videos");
-        mUserStorageReference = mVideosStorageReference.child(userId);
+        mMusicStorageReference = mStorageReference.getReference("videos");
+        mUserStorageReference = mMusicStorageReference.child(userId);
 
         userfilesDatabase = FirebaseDatabase.getInstance().getReference();
         contactsChildReference = userfilesDatabase.child("user_files");

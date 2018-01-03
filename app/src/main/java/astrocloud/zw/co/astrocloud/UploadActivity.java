@@ -62,6 +62,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 import astrocloud.zw.co.astrocloud.fragments.FragmentContacts;
+import astrocloud.zw.co.astrocloud.fragments.FragmentMusic;
 import astrocloud.zw.co.astrocloud.fragments.FragmentPhotos;
 import astrocloud.zw.co.astrocloud.fragments.FragmentVideos;
 import astrocloud.zw.co.astrocloud.models.ContactModel;
@@ -190,9 +191,9 @@ public class UploadActivity extends AppCompatActivity {
 
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-
+            int p = mSectionsPagerAdapter.getCount();
         for(int i = 0 ; i < mSectionsPagerAdapter.getCount();i++) {
-            tabLayout.getTabAt(i).setText(mSectionsPagerAdapter.getPageTitle(i+1));
+            tabLayout.getTabAt(i).setText(mSectionsPagerAdapter.getPageTitle(1+i));
         }
 
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
@@ -838,15 +839,20 @@ public class UploadActivity extends AppCompatActivity {
                     return FragmentContacts.newInstance(position);
                 case 1:
                     return FragmentPhotos.newInstance(position);
-                default:return FragmentVideos.newInstance(position);
+                case 2:
+                    return FragmentVideos.newInstance(position);
+                case 3:
+                    return FragmentMusic.newInstance(position);
+
+                default:return FragmentMusic.newInstance(position);
             }
 
         }
 
         @Override
         public int getCount() {
-            // Show 3 total pages.
-            return 3;
+            // Show 4 total pages.
+            return 4;
         }
 
         @Nullable
@@ -859,8 +865,10 @@ public class UploadActivity extends AppCompatActivity {
                     return "Photos";
                 case 3:
                     return "Videos";
+                case 4:
+                    return "Music ";
             }
-            return super.getPageTitle(position);
+            return null;
         }
 
 

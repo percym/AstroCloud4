@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/green_back">
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/videoRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical"
+        android:background="#fff">
+
+    </android.support.v7.widget.RecyclerView>
+    <RelativeLayout
+    android:visibility="gone"
+    android:id="@+id/folder_state_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/empty_folder_icon"
+        android:src="@drawable/ic_music_player"
+        android:layout_width="125dp"
+        android:layout_height="125dp"
+        android:layout_marginTop="60dp"
+        android:padding="5dp"
+        android:layout_centerHorizontal="true"
+        app:civ_border_color="@color/colorPrimary"
+        app:civ_border_width="1dp" />
+
+
+
+    <TextView
+        android:id="@+id/tvone"
+        android:layout_below="@+id/empty_folder_icon"
+        android:layout_marginTop="10dp"
+        android:textSize="16sp"
+        android:text="It seems you haven't backup your contacts yet . "
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="30dp"
+        android:textAlignment="center"/>
+
+    <TextView
+        android:id="@+id/sometext"
+        android:layout_below="@+id/tvone"
+        android:layout_marginTop="10dp"
+        android:textSize="16sp"
+        android:text="Upload your contacts to your cloud account to keep them safe , or share them across multiple devices "
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:padding="5dp"
+        android:layout_marginBottom="10dp"/>
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/imageUploadContacts"
+        android:layout_below="@+id/sometext"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_centerHorizontal="true"
+        app:civ_border_color="@color/colorPrimary"
+        app:civ_border_width="1dp"
+        android:src="@drawable/ic_music"
+        android:layout_marginTop="10dp"/>
+
+</RelativeLayout>
+</RelativeLayout>

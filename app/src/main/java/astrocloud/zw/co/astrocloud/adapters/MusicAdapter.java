@@ -26,7 +26,7 @@ import java.util.List;
 import astrocloud.zw.co.astrocloud.R;
 import astrocloud.zw.co.astrocloud.fragments.SlideshowDialogFragment;
 import astrocloud.zw.co.astrocloud.models.Image;
-import astrocloud.zw.co.astrocloud.models.VideoModel;
+import astrocloud.zw.co.astrocloud.models.MusicModel;
 
 ;
 
@@ -34,23 +34,23 @@ import astrocloud.zw.co.astrocloud.models.VideoModel;
  * Created by Lincoln on 31/03/16.
  */
 
-public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.MyViewHolder> implements Filterable {
+public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MyViewHolder> implements Filterable {
 
     private DatabaseReference databaseReference ;
     private Context mContext;
-    private List<VideoModel> mOriginalPhotoValues = new ArrayList<>();  // Original Values
-    private List<VideoModel> mDisplayedPhotoValues = new ArrayList<>();
+    private List<MusicModel> mOriginalPhotoValues = new ArrayList<>();  // Original Values
+    private List<MusicModel> mDisplayedPhotoValues = new ArrayList<>();
     private String TAG = SlideshowDialogFragment.class.getSimpleName();
 
     // Values to be displayed
-    public VideosAdapter(Context context, DatabaseReference ref) {
+    public MusicAdapter(Context context, DatabaseReference ref) {
         mContext = context;
         databaseReference = ref;
 
         // Create child event listener
         // [START child_event_listener_recycler]
-        Query photosQuery = databaseReference;
-        photosQuery.addChildEventListener(new ChildEventListener() {
+        Query musicQuery = databaseReference;
+        musicQuery.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
 
@@ -108,7 +108,7 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.MyViewHold
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
 
-                mDisplayedPhotoValues = (List<VideoModel>) results.values; // has the filtered values
+                mDisplayedPhotoValues = (List<MusicModel>) results.values; // has the filtered values
                 notifyDataSetChanged();  // notifies the data with new filtered values
             }
 
@@ -174,7 +174,7 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.MyViewHold
     public void onBindViewHolder(MyViewHolder holder, int position) {
 
 
-        Glide.with(VideosAdapter.this.mContext).load(mDisplayedPhotoValues.get(position).getUrl())
+        Glide.with(MusicAdapter.this.mContext).load(mDisplayedPhotoValues.get(position).getUrl())
                 .thumbnail(0.5f)
                 .into(holder.thumbnail);
 
@@ -194,9 +194,9 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.MyViewHold
     public static class RecyclerTouchListener implements RecyclerView.OnItemTouchListener {
 
         private GestureDetector gestureDetector;
-        private VideosAdapter.ClickListener clickListener;
+        private MusicAdapter.ClickListener clickListener;
 
-        public RecyclerTouchListener(Context context, final RecyclerView recyclerView, final VideosAdapter.ClickListener clickListener) {
+        public RecyclerTouchListener(Context context, final RecyclerView recyclerView, final MusicAdapter.ClickListener clickListener) {
             this.clickListener = clickListener;
             gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
                 @Override
@@ -236,26 +236,26 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.MyViewHold
 
     private void fillArrayListWithContactsDB(DataSnapshot dataSnapshot) {
 
-        VideoModel VideoModel = dataSnapshot.getValue(VideoModel.class);
-        mDisplayedPhotoValues.add(new VideoModel(VideoModel.getUrl(), VideoModel.getName(), VideoModel.getSizeInBytes(),VideoModel.getKey()));
-        mOriginalPhotoValues.add(new VideoModel(VideoModel.getUrl(), VideoModel.getName(),VideoModel.getSizeInBytes(),VideoModel.getKey()));
+        MusicModel MusicModel = dataSnapshot.getValue(MusicModel.class);
+        mDisplayedPhotoValues.add(new MusicModel(MusicModel.getUrl(), MusicModel.getName(), MusicModel.getSizeInBytes(),MusicModel.getKey()));
+        mOriginalPhotoValues.add(new MusicModel(MusicModel.getUrl(), MusicModel.getName(),MusicModel.getSizeInBytes(),MusicModel.getKey()));
 
         notifyDataSetChanged();
     }
 
-    public List<VideoModel> getmOriginalPhotoValues() {
+    public List<MusicModel> getmOriginalPhotoValues() {
         return mOriginalPhotoValues;
     }
 
-    public void setmOriginalPhotoValues(List<VideoModel> mOriginalPhotoValues) {
+    public void setmOriginalPhotoValues(List<MusicModel> mOriginalPhotoValues) {
         this.mOriginalPhotoValues = mOriginalPhotoValues;
     }
 
-    public List<VideoModel> getmDisplayedPhotoValues() {
+    public List<MusicModel> getmDisplayedPhotoValues() {
         return mDisplayedPhotoValues;
     }
 
-    public void setmDisplayedPhotoValues(List<VideoModel> mDisplayedPhotoValues) {
+    public void setmDisplayedPhotoValues(List<MusicModel> mDisplayedPhotoValues) {
         this.mDisplayedPhotoValues = mDisplayedPhotoValues;
     }
 }
