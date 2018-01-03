@@ -173,7 +173,7 @@ public class FragmentContacts extends Fragment {
 //        contactsRecyclerView.addItemDecoration(mDividerItemDecoration);
 
         contactsRecyclerView.setAdapter(adapter);
-        contactsRecyclerView.addItemDecoration(new HorizontalDividerItemDecoration.Builder(getContext()).color(Color.parseColor("#4bde90")).sizeResId(R.dimen.divider).marginResId(R.dimen.leftmargin, R.dimen.rightmargin).build());
+//        contactsRecyclerView.addItemDecoration(new HorizontalDividerItemDecoration.Builder(getContext()).color(Color.parseColor("#4bde90")).sizeResId(R.dimen.divider).marginResId(R.dimen.leftmargin, R.dimen.rightmargin).build());
 
         initSwipe();
         refreshView();

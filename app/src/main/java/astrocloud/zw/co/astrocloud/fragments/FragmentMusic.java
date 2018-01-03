@@ -30,8 +30,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
 import astrocloud.zw.co.astrocloud.R;
+import astrocloud.zw.co.astrocloud.adapters.MusicAdapter;
 import astrocloud.zw.co.astrocloud.adapters.VideosAdapter;
-import astrocloud.zw.co.astrocloud.models.VideoModel;
+import astrocloud.zw.co.astrocloud.models.MusicModel;
 import astrocloud.zw.co.astrocloud.utils.AppConfig;
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -43,7 +44,7 @@ public class FragmentMusic extends Fragment {
     private String TAG = FragmentMusic.class.getSimpleName();
 
     private ProgressDialog pDialog;
-    private VideosAdapter mAdapter;
+    private MusicAdapter mAdapter;
     private RecyclerView recyclerView;
     private RelativeLayout folder_state_container;
     String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -59,7 +60,7 @@ public class FragmentMusic extends Fragment {
     Runnable runnable;
 
     private LinearLayoutManager mLayoutManager;
-    ArrayList<VideoModel> videos = new ArrayList<>();
+    ArrayList<MusicModel> music = new ArrayList<>();
 
 
     public FragmentMusic() {
@@ -99,15 +100,15 @@ public class FragmentMusic extends Fragment {
         //initialise the FireStore
         //mStorageReference = FirebaseStorage.getInstance().getReference(AppConfig.FIRESTOREDBURL);
         mStorageReference = FirebaseStorage.getInstance(AppConfig.FIRESTOREDBURL);
-        mMusicStorageReference = mStorageReference.getReference("videos");
+        mMusicStorageReference = mStorageReference.getReference("music");
         mUserStorageReference = mMusicStorageReference.child(userId);
 
         userfilesDatabase = FirebaseDatabase.getInstance().getReference();
         contactsChildReference = userfilesDatabase.child("user_files");
-        uploadedFilesChildReference = contactsChildReference.child(userId).child("videos");
+        uploadedFilesChildReference = contactsChildReference.child(userId).child("music");
         pDialog = new ProgressDialog(getActivity());
-        mAdapter = new VideosAdapter(getContext(),uploadedFilesChildReference);
-        mLayoutManager = new GridLayoutManager(getActivity(),2);
+        mAdapter = new MusicAdapter(getContext(),uploadedFilesChildReference);
+        mLayoutManager = new GridLayoutManager(getActivity(),1);
         // StaggeredGridLayoutManager staggeredGridLayoutManager = new StaggeredGridLayoutManager(2, LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -115,13 +116,13 @@ public class FragmentMusic extends Fragment {
         recyclerView.addOnItemTouchListener(new VideosAdapter.RecyclerTouchListener(getActivity(), recyclerView, new VideosAdapter.ClickListener() {
             @Override
             public void onClick(View view, int position) {
-                videos= new ArrayList<>();
-                videos.addAll(mAdapter.getmDisplayedPhotoValues());
+                music = new ArrayList<>();
+                music.addAll(mAdapter.getmDisplayedPhotoValues());
                 Bundle bundle = new Bundle();
-                bundle.putSerializable("videos", videos);
+                bundle.putSerializable("music", music);
                 bundle.putInt("position", position);
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
-                VideoSlideshowDialogFragment newFragment = VideoSlideshowDialogFragment.newInstance();
+                MusicSlideshowDialogFragment newFragment = MusicSlideshowDialogFragment.newInstance();
                 newFragment.setArguments(bundle);
                 newFragment.show(ft, "slideshow");
 

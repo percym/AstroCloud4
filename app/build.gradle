@@ -53,6 +53,7 @@ dependencies {
     compile 'com.github.danylovolokh:video-player-manager:0.2.0'
     compile 'net.alhazmy13.MediaPicker:libary:2.4.0'
     compile 'com.devbrackets.android:exomedia:4.1.0'
+    compile 'com.kbeanie:multipicker:1.1.31@aar'
 
 }
 

@@ -50,6 +50,10 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.kbeanie.multipicker.api.AudioPicker;
+import com.kbeanie.multipicker.api.Picker;
+import com.kbeanie.multipicker.api.callbacks.AudioPickerCallback;
+import com.kbeanie.multipicker.api.entity.ChosenAudio;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionButton;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
 import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
@@ -60,6 +64,7 @@ import net.ralphpina.permissionsmanager.PermissionsResult;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import astrocloud.zw.co.astrocloud.fragments.FragmentContacts;
 import astrocloud.zw.co.astrocloud.fragments.FragmentMusic;
@@ -68,6 +73,7 @@ import astrocloud.zw.co.astrocloud.fragments.FragmentVideos;
 import astrocloud.zw.co.astrocloud.models.ContactModel;
 import astrocloud.zw.co.astrocloud.models.Image;
 import astrocloud.zw.co.astrocloud.models.ImageModel;
+import astrocloud.zw.co.astrocloud.models.MusicModel;
 import astrocloud.zw.co.astrocloud.utils.AppConfig;
 import astrocloud.zw.co.astrocloud.utils.GLOBALDECLARATIONS;
 import droidninja.filepicker.FilePickerBuilder;
@@ -115,6 +121,11 @@ public class UploadActivity extends AppCompatActivity {
     private NotificationCompat.Builder mBuilder;
     private ArrayList<String> videoPaths;
     private StorageReference mVideosStorageReference;
+   
+    private ArrayList<String> musicPaths;
+    private AudioPicker audioPicker;
+    private StorageReference mMusicStorageReference;
+    private DatabaseReference uploadedMusicChildReference;
 
     @Override
     protected void onStart() {
@@ -158,29 +169,31 @@ public class UploadActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_upload);
-
+         audioPicker = new AudioPicker(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
 
         contactsDatabase = FirebaseDatabase.getInstance().getReference();
-        contactsChildReference= contactsDatabase.child("contacts");
-     //   uploadedFilesChildReference = contactsChildReference.child("fileUrls");
-        
+        contactsChildReference = contactsDatabase.child("contacts");
+        //   uploadedFilesChildReference = contactsChildReference.child("fileUrls");
+
         //Storage for images
-      //  mStorageReference = FirebaseStorage.getInstance().getReference(AppConfig.FIRESTOREDBURL);
+        //  mStorageReference = FirebaseStorage.getInstance().getReference(AppConfig.FIRESTOREDBURL);
         mStorageReference = FirebaseStorage.getInstance(AppConfig.FIRESTOREDBURL);
         mImagesStorageReference = mStorageReference.getReference("images");
         mVideosStorageReference = mStorageReference.getReference("videos");
+        mMusicStorageReference = mStorageReference.getReference("videos");
         uploadedFilesChildReference = contactsDatabase.child("user_files").child(userId).child("images");
         uploadedVideoChildReference = contactsDatabase.child("user_files").child(userId).child("videos");
+        uploadedMusicChildReference = contactsDatabase.child("user_files").child(userId).child("music");
 
 
         // Create the adapter that will return a fragment
         // for each of the three
         // primary sections of the activity.
 
-        main_content= findViewById(R.id.main_content);
+        main_content = findViewById(R.id.main_content);
 
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
@@ -189,11 +202,10 @@ public class UploadActivity extends AppCompatActivity {
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
 
-
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-            int p = mSectionsPagerAdapter.getCount();
-        for(int i = 0 ; i < mSectionsPagerAdapter.getCount();i++) {
-            tabLayout.getTabAt(i).setText(mSectionsPagerAdapter.getPageTitle(1+i));
+        int p = mSectionsPagerAdapter.getCount();
+        for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
+            tabLayout.getTabAt(i).setText(mSectionsPagerAdapter.getPageTitle(1 + i));
         }
 
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
@@ -207,13 +219,13 @@ public class UploadActivity extends AppCompatActivity {
                 .build();
 
         SubActionButton.Builder rLSubBuilder = new SubActionButton.Builder(this);
-        final ImageView rlIcon0 = new ImageView( this);
-        final ImageView rlIcon1 = new ImageView( this);
-        final ImageView rlIcon2 = new ImageView( this);
+        final ImageView rlIcon0 = new ImageView(this);
+        final ImageView rlIcon1 = new ImageView(this);
+        final ImageView rlIcon2 = new ImageView(this);
         final ImageView rlIcon3 = new ImageView(this);
 
 
-     //   rlIcon1.setImageDrawable(getResources().getDrawable(R.drawable.ic_upload_contacts));
+        //   rlIcon1.setImageDrawable(getResources().getDrawable(R.drawable.ic_upload_contacts));
 
         rlIcon0.setImageDrawable(getResources().getDrawable(R.drawable.ic_search));
         rlIcon1.setImageDrawable(getResources().getDrawable(R.drawable.ic_download));
@@ -227,514 +239,418 @@ public class UploadActivity extends AppCompatActivity {
                 .addSubActionView(rLSubBuilder.setContentView(rlIcon3).build())
                 .attachTo(rightLowerButton)
                 .build();
-            mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
-            tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-                @Override
-                public void onTabSelected(TabLayout.Tab tab) {
-                    switch (tab.getPosition()){
-                        case 0:
-                            rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_upload_contacts));
-                            if(rightLowerMenu.isOpen()){
-                                rightLowerMenu.close(true);
+        mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                switch (tab.getPosition()) {
+                    case 0:
+                        rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_upload_contacts));
+                        if (rightLowerMenu.isOpen()) {
+                            rightLowerMenu.close(true);
 
-                            }
-
-
-                            rlIcon1.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    Fragment fragmentWithContactsToRestore = mSectionsPagerAdapter.getItem(0);
-                                    if(fragmentWithContactsToRestore instanceof FragmentContacts){
-                                        //   ((FragmentContacts)fragmentWithContactsToRestore).getArrayListContactsToDisplay();
-                                        arrayListWithContacts= GLOBALDECLARATIONS.GLOBAL_CONTACTS_ARRAYLIST;
-                                        if(arrayListWithContacts != null) {
-                                            if (PermissionsManager.get().isContactsGranted()){
-                                                rightLowerMenu.close(true);
-
-                                                showcontactsRestoration();
-                                                contactsRestorer(arrayListWithContacts);
-                                                dismissRestoration();
-                                            }else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)){
-
-                                                showPermissionsDialogue();
-                                            }else {
-                                                PermissionsManager.get().requestContactsPermission()
-                                                        .subscribe(new Action1<PermissionsResult>() {
-                                                            @Override
-                                                            public void call(PermissionsResult permissionsResult) {
-                                                                if (!permissionsResult.isGranted()) {
-                                                                    showPermissionsDialogue();
-
-                                                                }else {
-                                                                    rightLowerMenu.close(true);
-                                                                    showcontactsRestoration();
-                                                                    contactsRestorer(arrayListContacts);
-                                                                    dismissRestoration();
-                                                                }
-                                                            }
-                                                        });
-
-                                            }
-
-                                        }else {
-                                            snackShower("No contacts found");
-                                        }
-
-                                    }
-                                }
-                            });
-
-
-                            rlIcon3.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-
-                                    rightLowerMenu.close(true);
-
-                                    if (PermissionsManager.get().isContactsGranted()) {
-
-                                        awesomeErrorDialog = new AwesomeInfoDialog(UploadActivity.this);
-                                        awesomeErrorDialog
-                                                .setTitle(R.string.app_name)
-                                                .setMessage(" Do you want to upload your contacts to your cloud account ?")
-                                                .setDialogIconOnly(R.drawable.ic_app_icon)
-                                                .setColoredCircle(R.color.white)
-                                                .setCancelable(false)
-                                                .setPositiveButtonText(getString(R.string.upload))
-                                                .setPositiveButtonbackgroundColor(R.color.dialogSuccessBackgroundColor)
-                                                .setPositiveButtonTextColor(R.color.white)
-                                                .setNegativeButtonText(getString(R.string.cancel))
-                                                .setNegativeButtonbackgroundColor(R.color.dialogErrorBackgroundColor)
-                                                .setNegativeButtonTextColor(R.color.white)
-                                                .setPositiveButtonClick(new Closure() {
-                                                    @Override
-                                                    public void exec() {
-                                                        writecontacts();
-                                                    }
-                                                })
-                                                .setNegativeButtonClick(new Closure() {
-                                                    @Override
-                                                    public void exec() {
-
-                                                    }
-                                                })
-                                                .show();
-
-                                    } else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)) {
-
-                                        showFetchcontactsDialogue();
-                                    } else {
-                                        PermissionsManager.get().requestContactsPermission()
-                                                .subscribe(new Action1<PermissionsResult>() {
-                                                    @Override
-                                                    public void call(PermissionsResult permissionsResult) {
-                                                        if (!permissionsResult.isGranted()) {
-                                                            showPermissionsDialogue();
-
-                                                        }else {
-                                                            writecontacts();
-
-                                                        }
-                                                    }
-                                                });
-
-
-                                    }
-
-                                }
-                            });
-
-
-                            break;
-
-                        case 1: {
-                            rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_image_upload));
-                            if (rightLowerMenu.isOpen()) {
-                                rightLowerMenu.close(true);
-
-                            }
-                            if (rightLowerMenu.isOpen()) {
-                                rightLowerMenu.updateItemPositions();
-                            }
-                            rlIcon3.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    if (PermissionsManager.get().isStorageGranted()) {
-                                        photoPaths = new ArrayList<>();
-                                        FilePickerBuilder.getInstance().setMaxCount(20)
-                                                .setSelectedFiles(photoPaths)
-                                                .setActivityTheme(R.style.AppTheme_PopupOverlay)
-                                                .pickPhoto(UploadActivity.this);
-                                      //  imageUploaderToFireStore(photoPaths);
-
-                                    }else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)){
-
-                                        showPermissionsDialogueStorage();
-
-                                    }else {
-                                        PermissionsManager.get().requestContactsPermission()
-                                                .subscribe(new Action1<PermissionsResult>() {
-                                                    @Override
-                                                    public void call(PermissionsResult permissionsResult) {
-                                                        if (!permissionsResult.isGranted()) {
-                                                            showPermissionsDialogueStorage();
-
-                                                        }else {
-                                                            imageUploaderToFireStore(photoPaths);
-
-                                                        }
-                                                    }
-                                                });
-                                    }
-                                }
-                            });
-                            break;
                         }
-                        case 2:{
-                                rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_video_upload));
-                                if (rightLowerMenu.isOpen()) {
-                                    rightLowerMenu.close(true);
 
-                                }
-                                if (rightLowerMenu.isOpen()) {
-                                    rightLowerMenu.updateItemPositions();
-                                }
-                                rlIcon3.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                        if (PermissionsManager.get().isStorageGranted()) {
-                                            videoPaths = new ArrayList<>();
-                                            new VideoPicker.Builder(UploadActivity.this)
-                                                    .mode(VideoPicker.Mode.CAMERA_AND_GALLERY)
-                                                    .directory(VideoPicker.Directory.DEFAULT)
-                                                    .extension(VideoPicker.Extension.MP4)
-                                                    .enableDebuggingMode(true)
-                                                    .build();
 
-                                            //  imageUploaderToFireStore(photoPaths);
+                        rlIcon1.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                Fragment fragmentWithContactsToRestore = mSectionsPagerAdapter.getItem(0);
+                                if (fragmentWithContactsToRestore instanceof FragmentContacts) {
+                                    //   ((FragmentContacts)fragmentWithContactsToRestore).getArrayListContactsToDisplay();
+                                    arrayListWithContacts = GLOBALDECLARATIONS.GLOBAL_CONTACTS_ARRAYLIST;
+                                    if (arrayListWithContacts != null) {
+                                        if (PermissionsManager.get().isContactsGranted()) {
+                                            rightLowerMenu.close(true);
 
-                                        }else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)){
+                                            showcontactsRestoration();
+                                            contactsRestorer(arrayListWithContacts);
+                                            dismissRestoration();
+                                        } else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)) {
 
-                                            showPermissionsDialogueStorage();
-
-                                        }else {
+                                            showPermissionsDialogue();
+                                        } else {
                                             PermissionsManager.get().requestContactsPermission()
                                                     .subscribe(new Action1<PermissionsResult>() {
                                                         @Override
                                                         public void call(PermissionsResult permissionsResult) {
                                                             if (!permissionsResult.isGranted()) {
-                                                                showPermissionsDialogueStorage();
+                                                                showPermissionsDialogue();
 
-                                                            }else {
-                                                                videoUploaderToFireStore(videoPaths);
-
+                                                            } else {
+                                                                rightLowerMenu.close(true);
+                                                                showcontactsRestoration();
+                                                                contactsRestorer(arrayListContacts);
+                                                                dismissRestoration();
                                                             }
                                                         }
                                                     });
+
                                         }
+
+                                    } else {
+                                        snackShower("No contacts found");
                                     }
-                                });
-                                break;
 
-                        }
+                                }
+                            }
+                        });
 
-                        default:{
 
-                            rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_upload_contacts));
-                            if(rightLowerMenu.isOpen()){
+                        rlIcon3.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+
                                 rightLowerMenu.close(true);
 
-                            }
+                                if (PermissionsManager.get().isContactsGranted()) {
 
+                                    awesomeErrorDialog = new AwesomeInfoDialog(UploadActivity.this);
+                                    awesomeErrorDialog
+                                            .setTitle(R.string.app_name)
+                                            .setMessage(" Do you want to upload your contacts to your cloud account ?")
+                                            .setDialogIconOnly(R.drawable.ic_app_icon)
+                                            .setColoredCircle(R.color.white)
+                                            .setCancelable(false)
+                                            .setPositiveButtonText(getString(R.string.upload))
+                                            .setPositiveButtonbackgroundColor(R.color.dialogSuccessBackgroundColor)
+                                            .setPositiveButtonTextColor(R.color.white)
+                                            .setNegativeButtonText(getString(R.string.cancel))
+                                            .setNegativeButtonbackgroundColor(R.color.dialogErrorBackgroundColor)
+                                            .setNegativeButtonTextColor(R.color.white)
+                                            .setPositiveButtonClick(new Closure() {
+                                                @Override
+                                                public void exec() {
+                                                    writecontacts();
+                                                }
+                                            })
+                                            .setNegativeButtonClick(new Closure() {
+                                                @Override
+                                                public void exec() {
 
-                            rlIcon1.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    Fragment fragmentWithContactsToRestore = mSectionsPagerAdapter.getItem(0);
-                                    if(fragmentWithContactsToRestore instanceof FragmentContacts){
-                                        //   ((FragmentContacts)fragmentWithContactsToRestore).getArrayListContactsToDisplay();
-                                        arrayListWithContacts= GLOBALDECLARATIONS.GLOBAL_CONTACTS_ARRAYLIST;
-                                        if(arrayListWithContacts != null) {
-                                            if (PermissionsManager.get().isContactsGranted()){
-                                                rightLowerMenu.close(true);
+                                                }
+                                            })
+                                            .show();
 
-                                                showcontactsRestoration();
-                                                contactsRestorer(arrayListWithContacts);
-                                                dismissRestoration();
-                                            }else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)){
+                                } else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)) {
 
-                                                showPermissionsDialogue();
-                                            }else {
-                                                PermissionsManager.get().requestContactsPermission()
-                                                        .subscribe(new Action1<PermissionsResult>() {
-                                                            @Override
-                                                            public void call(PermissionsResult permissionsResult) {
-                                                                if (!permissionsResult.isGranted()) {
-                                                                    showPermissionsDialogue();
+                                    showFetchcontactsDialogue();
+                                } else {
+                                    PermissionsManager.get().requestContactsPermission()
+                                            .subscribe(new Action1<PermissionsResult>() {
+                                                @Override
+                                                public void call(PermissionsResult permissionsResult) {
+                                                    if (!permissionsResult.isGranted()) {
+                                                        showPermissionsDialogue();
 
-                                                                }else {
-                                                                    rightLowerMenu.close(true);
-                                                                    showcontactsRestoration();
-                                                                    contactsRestorer(arrayListContacts);
-                                                                    dismissRestoration();
-                                                                }
-                                                            }
-                                                        });
-
-                                            }
-
-                                        }else {
-                                            snackShower("No contacts found");
-                                        }
-
-                                    }
-                                }
-                            });
-
-
-                            rlIcon3.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-
-                                    rightLowerMenu.close(true);
-
-                                    if (PermissionsManager.get().isContactsGranted()) {
-
-                                        awesomeErrorDialog = new AwesomeInfoDialog(UploadActivity.this);
-                                        awesomeErrorDialog
-                                                .setTitle(R.string.app_name)
-                                                .setMessage(" Do you want to upload your contacts to your cloud account ?")
-                                                .setDialogIconOnly(R.drawable.ic_app_icon)
-                                                .setColoredCircle(R.color.white)
-                                                .setCancelable(false)
-                                                .setPositiveButtonText(getString(R.string.upload))
-                                                .setPositiveButtonbackgroundColor(R.color.dialogSuccessBackgroundColor)
-                                                .setPositiveButtonTextColor(R.color.white)
-                                                .setNegativeButtonText(getString(R.string.cancel))
-                                                .setNegativeButtonbackgroundColor(R.color.dialogErrorBackgroundColor)
-                                                .setNegativeButtonTextColor(R.color.white)
-                                                .setPositiveButtonClick(new Closure() {
-                                                    @Override
-                                                    public void exec() {
+                                                    } else {
                                                         writecontacts();
-                                                    }
-                                                })
-                                                .setNegativeButtonClick(new Closure() {
-                                                    @Override
-                                                    public void exec() {
 
                                                     }
-                                                })
-                                                .show();
+                                                }
+                                            });
 
-                                    } else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)) {
 
-                                        showFetchcontactsDialogue();
-                                    } else {
-                                        PermissionsManager.get().requestContactsPermission()
-                                                .subscribe(new Action1<PermissionsResult>() {
-                                                    @Override
-                                                    public void call(PermissionsResult permissionsResult) {
-                                                        if (!permissionsResult.isGranted()) {
-                                                            showPermissionsDialogue();
+                                }
 
-                                                        }else {
-                                                            writecontacts();
+                            }
+                        });
 
+
+                        break;
+
+                    case 1: {
+                        rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_image_upload));
+                        if (rightLowerMenu.isOpen()) {
+                            rightLowerMenu.close(true);
+
+                        }
+                        if (rightLowerMenu.isOpen()) {
+                            rightLowerMenu.updateItemPositions();
+                        }
+                        rlIcon3.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                if (PermissionsManager.get().isStorageGranted()) {
+                                    photoPaths = new ArrayList<>();
+                                    FilePickerBuilder.getInstance().setMaxCount(20)
+                                            .setSelectedFiles(photoPaths)
+                                            .setActivityTheme(R.style.AppTheme_PopupOverlay)
+                                            .pickPhoto(UploadActivity.this);
+                                    //  imageUploaderToFireStore(photoPaths);
+
+                                } else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)) {
+
+                                    showPermissionsDialogueStorage();
+
+                                } else {
+                                    PermissionsManager.get().requestContactsPermission()
+                                            .subscribe(new Action1<PermissionsResult>() {
+                                                @Override
+                                                public void call(PermissionsResult permissionsResult) {
+                                                    if (!permissionsResult.isGranted()) {
+                                                        showPermissionsDialogueStorage();
+
+                                                    } else {
+                                                        imageUploaderToFireStore(photoPaths);
+
+                                                    }
+                                                }
+                                            });
+                                }
+                            }
+                        });
+                        break;
+                    }
+                    case 2: {
+                        rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_video_upload));
+                        if (rightLowerMenu.isOpen()) {
+                            rightLowerMenu.close(true);
+
+                        }
+                        if (rightLowerMenu.isOpen()) {
+                            rightLowerMenu.updateItemPositions();
+                        }
+                        rlIcon3.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                if (PermissionsManager.get().isStorageGranted()) {
+                                    videoPaths = new ArrayList<>();
+                                    new VideoPicker.Builder(UploadActivity.this)
+                                            .mode(VideoPicker.Mode.CAMERA_AND_GALLERY)
+                                            .directory(VideoPicker.Directory.DEFAULT)
+                                            .extension(VideoPicker.Extension.MP4)
+                                            .enableDebuggingMode(true)
+                                            .build();
+
+                                    //  imageUploaderToFireStore(photoPaths);
+
+                                } else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)) {
+
+                                    showPermissionsDialogueStorage();
+
+                                } else {
+                                    PermissionsManager.get().requestContactsPermission()
+                                            .subscribe(new Action1<PermissionsResult>() {
+                                                @Override
+                                                public void call(PermissionsResult permissionsResult) {
+                                                    if (!permissionsResult.isGranted()) {
+                                                        showPermissionsDialogueStorage();
+
+                                                    } else {
+                                                        videoUploaderToFireStore(videoPaths);
+
+                                                    }
+                                                }
+                                            });
+                                }
+                            }
+                        });
+                        break;
+
+                    }
+
+                    default: {
+
+                        rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_upload_contacts));
+                        if (rightLowerMenu.isOpen()) {
+                            rightLowerMenu.close(true);
+
+                        }
+
+
+                        rlIcon1.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                Fragment fragmentWithContactsToRestore = mSectionsPagerAdapter.getItem(0);
+                                if (fragmentWithContactsToRestore instanceof FragmentContacts) {
+                                    //   ((FragmentContacts)fragmentWithContactsToRestore).getArrayListContactsToDisplay();
+                                    arrayListWithContacts = GLOBALDECLARATIONS.GLOBAL_CONTACTS_ARRAYLIST;
+                                    if (arrayListWithContacts != null) {
+                                        if (PermissionsManager.get().isContactsGranted()) {
+                                            rightLowerMenu.close(true);
+
+                                            showcontactsRestoration();
+                                            contactsRestorer(arrayListWithContacts);
+                                            dismissRestoration();
+                                        } else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)) {
+
+                                            showPermissionsDialogue();
+                                        } else {
+                                            PermissionsManager.get().requestContactsPermission()
+                                                    .subscribe(new Action1<PermissionsResult>() {
+                                                        @Override
+                                                        public void call(PermissionsResult permissionsResult) {
+                                                            if (!permissionsResult.isGranted()) {
+                                                                showPermissionsDialogue();
+
+                                                            } else {
+                                                                rightLowerMenu.close(true);
+                                                                showcontactsRestoration();
+                                                                contactsRestorer(arrayListContacts);
+                                                                dismissRestoration();
+                                                            }
                                                         }
-                                                    }
-                                                });
+                                                    });
 
+                                        }
 
+                                    } else {
+                                        snackShower("No contacts found");
                                     }
 
                                 }
-                            });
-                            break;
+                            }
+                        });
+
+
+                        rlIcon3.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+
+                                rightLowerMenu.close(true);
+
+                                if (PermissionsManager.get().isContactsGranted()) {
+
+                                    awesomeErrorDialog = new AwesomeInfoDialog(UploadActivity.this);
+                                    awesomeErrorDialog
+                                            .setTitle(R.string.app_name)
+                                            .setMessage(" Do you want to upload your contacts to your cloud account ?")
+                                            .setDialogIconOnly(R.drawable.ic_app_icon)
+                                            .setColoredCircle(R.color.white)
+                                            .setCancelable(false)
+                                            .setPositiveButtonText(getString(R.string.upload))
+                                            .setPositiveButtonbackgroundColor(R.color.dialogSuccessBackgroundColor)
+                                            .setPositiveButtonTextColor(R.color.white)
+                                            .setNegativeButtonText(getString(R.string.cancel))
+                                            .setNegativeButtonbackgroundColor(R.color.dialogErrorBackgroundColor)
+                                            .setNegativeButtonTextColor(R.color.white)
+                                            .setPositiveButtonClick(new Closure() {
+                                                @Override
+                                                public void exec() {
+                                                    writecontacts();
+                                                }
+                                            })
+                                            .setNegativeButtonClick(new Closure() {
+                                                @Override
+                                                public void exec() {
+
+                                                }
+                                            })
+                                            .show();
+
+                                } else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)) {
+
+                                    showFetchcontactsDialogue();
+                                } else {
+                                    PermissionsManager.get().requestContactsPermission()
+                                            .subscribe(new Action1<PermissionsResult>() {
+                                                @Override
+                                                public void call(PermissionsResult permissionsResult) {
+                                                    if (!permissionsResult.isGranted()) {
+                                                        showPermissionsDialogue();
+
+                                                    } else {
+                                                        writecontacts();
+
+                                                    }
+                                                }
+                                            });
+
+
+                                }
+
+                            }
+                        });
+                        break;
+
+                    }
+
+                    case 3:{
+                        rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_music));
+                        if (rightLowerMenu.isOpen()) {
+                            rightLowerMenu.close(true);
 
                         }
+                        if (rightLowerMenu.isOpen()) {
+                            rightLowerMenu.updateItemPositions();
+                        }
+                        rlIcon3.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                if (PermissionsManager.get().isStorageGranted()) {
+                                    musicPaths = new ArrayList<>();
 
-
-                    }
-                }
-
-                @Override
-                public void onTabUnselected(TabLayout.Tab tab) {
-
-                }
-
-                @Override
-                public void onTabReselected(TabLayout.Tab tab) {
-
-                }
-            });
-
-
-
-        switch (mViewPager.getCurrentItem()){
-            case 0:
-/*
-                rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_upload_contacts));
-                rlIcon0.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        snackShower("pano");
-
-                    }
-                });
-                rlIcon2.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        FragmentContacts.newInstance(0);
-                    }
-                });
-*/
-
-
-//                rlIcon1.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View view) {
-//                        Fragment fragmentWithContactsToRestore = mSectionsPagerAdapter.getItem(0);
-//                        if(fragmentWithContactsToRestore instanceof FragmentContacts){
-//                         //   ((FragmentContacts)fragmentWithContactsToRestore).getArrayListContactsToDisplay();
-//                            arrayListWithContacts= GLOBALDECLARATIONS.GLOBAL_CONTACTS_ARRAYLIST;
-//                            if(arrayListWithContacts != null) {
-//                                if (PermissionsManager.get().isContactsGranted()){
-//                                    rightLowerMenu.close(true);
-//
-//                                    showcontactsRestoration();
-//                                    contactsRestorer(arrayListWithContacts);
-//                                    dismissRestoration();
-//                                }else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)){
-//
-//                                    showPermissionsDialogue();
-//                                }else {
-//                                    PermissionsManager.get().requestContactsPermission()
-//                                            .subscribe(new Action1<PermissionsResult>() {
-//                                                @Override
-//                                                public void call(PermissionsResult permissionsResult) {
-//                                                    if (!permissionsResult.isGranted()) {
-//                                                        showPermissionsDialogue();
-//
-//                                                    }else {
-//                                                        rightLowerMenu.close(true);
-//                                                        showcontactsRestoration();
-//                                                        contactsRestorer(arrayListContacts);
-//                                                        dismissRestoration();
-//                                                    }
-//                                                }
-//                                            });
-//
-//                                }
-//
-//                            }else {
-//                                snackShower("No contacts found");
-//                            }
-//
-//                        }
-//                    }
-//                });
-
-                /*rlIcon3.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-
-                        rightLowerMenu.close(true);
-
-                        if (PermissionsManager.get().isContactsGranted()) {
-
-                                awesomeErrorDialog = new AwesomeInfoDialog(UploadActivity.this);
-                                awesomeErrorDialog
-                                        .setTitle(R.string.app_name)
-                                        .setMessage(" Do you want to upload your contacts to your cloud account ?")
-                                        .setDialogIconOnly(R.drawable.ic_app_icon)
-                                        .setColoredCircle(R.color.white)
-                                        .setCancelable(false)
-                                        .setPositiveButtonText(getString(R.string.upload))
-                                        .setPositiveButtonbackgroundColor(R.color.dialogSuccessBackgroundColor)
-                                        .setPositiveButtonTextColor(R.color.white)
-                                        .setNegativeButtonText(getString(R.string.cancel))
-                                        .setNegativeButtonbackgroundColor(R.color.dialogErrorBackgroundColor)
-                                        .setNegativeButtonTextColor(R.color.white)
-                                        .setPositiveButtonClick(new Closure() {
-                                            @Override
-                                            public void exec() {
-                                                writecontacts();
-                                            }
-                                        })
-                                        .setNegativeButtonClick(new Closure() {
-                                            @Override
-                                            public void exec() {
-
-                                            }
-                                        })
-                                        .show();
-
-                        } else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)) {
-
-                            showFetchcontactsDialogue();
-                        } else {
-                            PermissionsManager.get().requestContactsPermission()
-                                    .subscribe(new Action1<PermissionsResult>() {
+                                    audioPicker.setAudioPickerCallback(new AudioPickerCallback() {
                                         @Override
-                                        public void call(PermissionsResult permissionsResult) {
-                                            if (!permissionsResult.isGranted()) {
-                                                showPermissionsDialogue();
-
-                                            }else {
-                                             writecontacts();
+                                        public void onAudiosChosen(List<ChosenAudio> audios) {
+                                            // Display Files;
+                                            for(ChosenAudio audio :audios){
+                                                musicPaths.add(audio.getOriginalPath());
 
                                             }
+                                            if(musicPaths!= null){
+                                                musicUploaderToFireStore(musicPaths);
+                                            }
+
+
+                                        }
+
+                                        @Override
+                                        public void onError(String message) {
+                                            // Handle errors
                                         }
                                     });
 
+                                    audioPicker.pickAudio();
 
-                        }
+                                    //  imageUploaderToFireStore(photoPaths);
+
+                                } else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)) {
+
+                                    showPermissionsDialogueStorage();
+
+                                } else {
+                                    PermissionsManager.get().requestContactsPermission()
+                                            .subscribe(new Action1<PermissionsResult>() {
+                                                @Override
+                                                public void call(PermissionsResult permissionsResult) {
+                                                    if (!permissionsResult.isGranted()) {
+                                                        showPermissionsDialogueStorage();
+
+                                                    } else {
+                                                        videoUploaderToFireStore(videoPaths);
+
+                                                    }
+                                                }
+                                            });
+                                }
+                            }
+                        });
+                        break;
+
+
 
                     }
-                });*/
-                break;
 
-            case 1: {
-/*
-                rlIcon3.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        if (PermissionsManager.get().isStorageGranted()) {
-                            photoPaths = new ArrayList<>();
-                            FilePickerBuilder.getInstance().setMaxCount(20)
-                                    .setSelectedFiles(photoPaths)
-                                    .setActivityTheme(R.style.AppTheme_PopupOverlay)
-                                    .pickPhoto(UploadActivity.this);
-                            //  imageUploaderToFireStore(photoPaths);
 
-                        } else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)) {
-
-                            showPermissionsDialogueStorage();
-
-                        } else {
-                            PermissionsManager.get().requestContactsPermission()
-                                    .subscribe(new Action1<PermissionsResult>() {
-                                        @Override
-                                        public void call(PermissionsResult permissionsResult) {
-                                            if (!permissionsResult.isGranted()) {
-                                                showPermissionsDialogueStorage();
-
-                                            } else {
-                                                imageUploaderToFireStore(photoPaths);
-
-                                            }
-                                        }
-                                    });
-                        }
-                    }
-                });*/
-                break;
+                }
             }
-        }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
 
 
     }
+
     private void writeNewUser(ArrayList<ContactModel> arrayListContactsTobeWritten) {
 
         if (!TextUtils.isEmpty(userId)) {
@@ -1046,8 +962,68 @@ public class UploadActivity extends AppCompatActivity {
             videoPaths = (ArrayList<String>) data.getSerializableExtra(VideoPicker.EXTRA_VIDEO_PATH);
             videoUploaderToFireStore(videoPaths);
         }
+
+        if (requestCode == Picker.PICK_AUDIO && resultCode == RESULT_OK) {
+            audioPicker.submit(data);
+
+        }
     }
 
+    private void musicUploaderToFireStore(ArrayList<String> arrayListPhotos){
+        final int id =1;
+
+        for (String looper : arrayListPhotos){
+            mNotifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            mBuilder = new NotificationCompat.Builder(getApplicationContext(),"AstroCloud")
+                    .setContentTitle("AstroCloud")
+                    .setContentText("Uploading audio to your cloud account" )
+                    .setAutoCancel(true)
+                    .setSmallIcon(R.drawable.ic_stat_cloud_upload);
+
+            file = Uri.fromFile(new File(looper));
+            metadata = new StorageMetadata.Builder()
+                    .setContentType("audio/mpeg")
+                    .build();
+            uploadTask = mMusicStorageReference.child(userId + "/"+file.getLastPathSegment()).putFile(file,metadata);
+
+            uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                    Double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                    mBuilder.setProgress(100, progress.intValue(), false);
+                    mBuilder.setContentText("Uploading audio");
+                    // Displays the progress bar for the first time.
+                    mNotifyManager.notify(id, mBuilder.build());
+
+                }
+            }).addOnPausedListener(new OnPausedListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onPaused(UploadTask.TaskSnapshot taskSnapshot) {
+                    mBuilder.setContentText("Upload paused");
+                    mNotifyManager.notify(id, mBuilder.build());
+                }
+            }).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                    writeNewUploadMusic(task.getResult().getDownloadUrl().toString(), task.getResult().getMetadata().getName(),
+                            task.getResult().getMetadata().getSizeBytes());
+                    mBuilder.setContentText("Upload completed");
+                    mNotifyManager.notify(id, mBuilder.build());
+
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    mBuilder.setContentText("Upload failed " + e.getMessage());
+                    mNotifyManager.notify(id, mBuilder.build());
+
+                }
+            });
+        }
+
+       musicPaths = new ArrayList<>();
+
+    }
     private void videoUploaderToFireStore(ArrayList<String> arrayListPhotos){
         final int id =1;
 
@@ -1061,7 +1037,7 @@ public class UploadActivity extends AppCompatActivity {
 
             file = Uri.fromFile(new File(looper));
             metadata = new StorageMetadata.Builder()
-                    .setContentType("image/jpeg")
+                    .setContentType("video/mpeg")
                     .build();
             uploadTask = mVideosStorageReference.child(userId + "/"+file.getLastPathSegment()).putFile(file,metadata);
 
@@ -1160,7 +1136,6 @@ public class UploadActivity extends AppCompatActivity {
     }
 
     private void writeNewUpload(String downloadUrl, String name, Long sizeInBytes){
-
         String key = uploadedFilesChildReference.push().getKey();
         ImageModel imageModel = new ImageModel(downloadUrl, name, sizeInBytes, key);
         uploadedFilesChildReference.child(key).setValue(imageModel);
@@ -1168,13 +1143,17 @@ public class UploadActivity extends AppCompatActivity {
     }
 
     private void writeNewVideoUpload(String downloadUrl, String name, Long sizeInBytes){
-
         String key = uploadedVideoChildReference.push().getKey();
         ImageModel imageModel = new ImageModel(downloadUrl, name, sizeInBytes, key);
         uploadedVideoChildReference.child(key).setValue(imageModel);
 
     }
+    private void writeNewUploadMusic(String downloadUrl, String name, Long sizeInBytes){
+        String key = uploadedMusicChildReference.push().getKey();
+        MusicModel musicModel = new MusicModel(downloadUrl, name, sizeInBytes, key);
+        uploadedMusicChildReference.child(key).setValue(musicModel);
 
+    }
 
 }
 
