@@ -11,4 +11,6 @@
     <string name="cancel">Cancel</string>
     <string name="upload">Upload</string>
     <string name="delete">Delete</string>
+    <string name="download_file">Download</string>
+    <string name="delete_file">Delete</string>
 </resources>

@@ -12,6 +12,7 @@ public class MusicModel implements Serializable{
     private String name;
     private Long sizeInBytes;
     private String key;
+    private String type;
 
     public MusicModel() {
     }
@@ -22,6 +23,15 @@ public class MusicModel implements Serializable{
         this.name = name;
         this.sizeInBytes = sizeInBytes;
         this.key = key;
+    }
+
+    public MusicModel(String downloadUrl, String name, Long sizeInBytes, String key , String type) {
+
+        this.url = downloadUrl;
+        this.name = name;
+        this.sizeInBytes = sizeInBytes;
+        this.key = key;
+        this.type = type;
     }
 
 
@@ -58,5 +68,11 @@ public class MusicModel implements Serializable{
         this.key = key;
     }
 
+    public String getType() {
+        return type;
+    }
 
+    public void setType(String type) {
+        this.type = type;
+    }
 }

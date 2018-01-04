@@ -42,6 +42,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MyViewHolder
     private List<MusicModel> mOriginalPhotoValues = new ArrayList<>();  // Original Values
     private List<MusicModel> mDisplayedPhotoValues = new ArrayList<>();
     private String TAG = SlideshowDialogFragment.class.getSimpleName();
+    int[] file_formats = new int[]{ R.drawable.mp3, R.drawable.ogpp,R.drawable.gpp};
 
     // Values to be displayed
     public MusicAdapter(Context context, DatabaseReference ref) {

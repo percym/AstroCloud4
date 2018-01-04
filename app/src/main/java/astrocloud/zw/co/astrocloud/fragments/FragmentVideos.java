@@ -100,12 +100,12 @@ public class FragmentVideos extends Fragment {
         //initialise the FireStore
         //mStorageReference = FirebaseStorage.getInstance().getReference(AppConfig.FIRESTOREDBURL);
         mStorageReference = FirebaseStorage.getInstance(AppConfig.FIRESTOREDBURL);
-        mVideosStorageReference = mStorageReference.getReference("music");
+        mVideosStorageReference = mStorageReference.getReference("videos");
         mUserStorageReference = mVideosStorageReference.child(userId);
 
         userfilesDatabase = FirebaseDatabase.getInstance().getReference();
         contactsChildReference = userfilesDatabase.child("user_files");
-        uploadedFilesChildReference = contactsChildReference.child(userId).child("music");
+        uploadedFilesChildReference = contactsChildReference.child(userId).child("videos");
         pDialog = new ProgressDialog(getActivity());
         mAdapter = new VideosAdapter(getContext(),uploadedFilesChildReference);
         mLayoutManager = new GridLayoutManager(getActivity(),2);

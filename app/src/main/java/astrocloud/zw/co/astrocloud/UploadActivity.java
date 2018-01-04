@@ -53,7 +53,10 @@ import com.google.firebase.storage.UploadTask;
 import com.kbeanie.multipicker.api.AudioPicker;
 import com.kbeanie.multipicker.api.Picker;
 import com.kbeanie.multipicker.api.callbacks.AudioPickerCallback;
+import com.kbeanie.multipicker.api.callbacks.VideoPickerCallback;
 import com.kbeanie.multipicker.api.entity.ChosenAudio;
+import com.kbeanie.multipicker.api.entity.ChosenImage;
+import com.kbeanie.multipicker.api.entity.ChosenVideo;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionButton;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
 import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
@@ -126,6 +129,7 @@ public class UploadActivity extends AppCompatActivity {
     private AudioPicker audioPicker;
     private StorageReference mMusicStorageReference;
     private DatabaseReference uploadedMusicChildReference;
+    private com.kbeanie.multipicker.api.VideoPicker videoPickers;
 
     @Override
     protected void onStart() {
@@ -183,7 +187,7 @@ public class UploadActivity extends AppCompatActivity {
         mStorageReference = FirebaseStorage.getInstance(AppConfig.FIRESTOREDBURL);
         mImagesStorageReference = mStorageReference.getReference("images");
         mVideosStorageReference = mStorageReference.getReference("videos");
-        mMusicStorageReference = mStorageReference.getReference("videos");
+        mMusicStorageReference = mStorageReference.getReference("music");
         uploadedFilesChildReference = contactsDatabase.child("user_files").child(userId).child("images");
         uploadedVideoChildReference = contactsDatabase.child("user_files").child(userId).child("videos");
         uploadedMusicChildReference = contactsDatabase.child("user_files").child(userId).child("music");
@@ -416,14 +420,29 @@ public class UploadActivity extends AppCompatActivity {
                             public void onClick(View view) {
                                 if (PermissionsManager.get().isStorageGranted()) {
                                     videoPaths = new ArrayList<>();
-                                    new VideoPicker.Builder(UploadActivity.this)
-                                            .mode(VideoPicker.Mode.CAMERA_AND_GALLERY)
-                                            .directory(VideoPicker.Directory.DEFAULT)
-                                            .extension(VideoPicker.Extension.MP4)
-                                            .enableDebuggingMode(true)
-                                            .build();
+                                 videoPickers = new com.kbeanie.multipicker.api.VideoPicker(UploadActivity.this);
+                                 videoPickers.setVideoPickerCallback(new VideoPickerCallback() {
+                                     @Override
+                                     public void onVideosChosen(List<ChosenVideo> videos) {
+                                         for(ChosenVideo video :videos){
+                                             videoPaths.add(video.getOriginalPath());
 
-                                    //  imageUploaderToFireStore(photoPaths);
+                                         }
+                                         if(videoPaths!= null){
+                                             videoUploaderToFireStore(videoPaths);
+                                         }
+
+
+
+                                     }
+
+                                     @Override
+                                     public void onError(String s) {
+
+                                     }
+                                 });
+                                 videoPickers.allowMultiple();
+                                 videoPickers.pickVideo();
 
                                 } else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)) {
 
@@ -585,7 +604,9 @@ public class UploadActivity extends AppCompatActivity {
                                         @Override
                                         public void onAudiosChosen(List<ChosenAudio> audios) {
                                             // Display Files;
+
                                             for(ChosenAudio audio :audios){
+
                                                 musicPaths.add(audio.getOriginalPath());
 
                                             }
@@ -601,7 +622,7 @@ public class UploadActivity extends AppCompatActivity {
                                             // Handle errors
                                         }
                                     });
-
+                                    audioPicker.allowMultiple();
                                     audioPicker.pickAudio();
 
                                     //  imageUploaderToFireStore(photoPaths);
@@ -967,6 +988,12 @@ public class UploadActivity extends AppCompatActivity {
             audioPicker.submit(data);
 
         }
+
+        if(resultCode == RESULT_OK) {
+            if(requestCode == Picker.PICK_VIDEO_DEVICE) {
+                videoPickers.submit(data);
+            }
+        }
     }
 
     private void musicUploaderToFireStore(ArrayList<String> arrayListPhotos){
@@ -1006,7 +1033,7 @@ public class UploadActivity extends AppCompatActivity {
                 @Override
                 public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                     writeNewUploadMusic(task.getResult().getDownloadUrl().toString(), task.getResult().getMetadata().getName(),
-                            task.getResult().getMetadata().getSizeBytes());
+                            task.getResult().getMetadata().getSizeBytes(),task.getResult().getMetadata().getPath());
                     mBuilder.setContentText("Upload completed");
                     mNotifyManager.notify(id, mBuilder.build());
 
@@ -1148,9 +1175,9 @@ public class UploadActivity extends AppCompatActivity {
         uploadedVideoChildReference.child(key).setValue(imageModel);
 
     }
-    private void writeNewUploadMusic(String downloadUrl, String name, Long sizeInBytes){
+    private void writeNewUploadMusic(String downloadUrl, String name, Long sizeInBytes, String path){
         String key = uploadedMusicChildReference.push().getKey();
-        MusicModel musicModel = new MusicModel(downloadUrl, name, sizeInBytes, key);
+        MusicModel musicModel = new MusicModel(downloadUrl, name, sizeInBytes, key, path);
         uploadedMusicChildReference.child(key).setValue(musicModel);
 
     }
