@@ -182,7 +182,7 @@ public class UploadActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_upload);
-         audioPicker = new AudioPicker(this);
+        audioPicker = new AudioPicker(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -197,7 +197,7 @@ public class UploadActivity extends AppCompatActivity {
         mImagesStorageReference = mStorageReference.getReference("images");
         mVideosStorageReference = mStorageReference.getReference("videos");
         mMusicStorageReference = mStorageReference.getReference("music");
-        mDocumentsStorageReference= mStorageReference.getReference("documents");
+        mDocumentsStorageReference = mStorageReference.getReference("documents");
 
         uploadedFilesChildReference = contactsDatabase.child("user_files").child(userId).child("images");
         uploadedVideoChildReference = contactsDatabase.child("user_files").child(userId).child("videos");
@@ -480,122 +480,6 @@ public class UploadActivity extends AppCompatActivity {
 
                     }
 
-                    default: {
-
-                        rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_upload_contacts));
-                        if (rightLowerMenu.isOpen()) {
-                            rightLowerMenu.close(true);
-
-                        }
-
-
-                        rlIcon1.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                Fragment fragmentWithContactsToRestore = mSectionsPagerAdapter.getItem(0);
-                                if (fragmentWithContactsToRestore instanceof FragmentContacts) {
-                                    //   ((FragmentContacts)fragmentWithContactsToRestore).getArrayListContactsToDisplay();
-                                    arrayListWithContacts = GLOBALDECLARATIONS.GLOBAL_CONTACTS_ARRAYLIST;
-                                    if (arrayListWithContacts != null) {
-                                        if (PermissionsManager.get().isContactsGranted()) {
-                                            rightLowerMenu.close(true);
-
-                                            showcontactsRestoration();
-                                            contactsRestorer(arrayListWithContacts);
-                                            dismissRestoration();
-                                        } else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)) {
-
-                                            showPermissionsDialogue();
-                                        } else {
-                                            PermissionsManager.get().requestContactsPermission()
-                                                    .subscribe(new Action1<PermissionsResult>() {
-                                                        @Override
-                                                        public void call(PermissionsResult permissionsResult) {
-                                                            if (!permissionsResult.isGranted()) {
-                                                                showPermissionsDialogue();
-
-                                                            } else {
-                                                                rightLowerMenu.close(true);
-                                                                showcontactsRestoration();
-                                                                contactsRestorer(arrayListContacts);
-                                                                dismissRestoration();
-                                                            }
-                                                        }
-                                                    });
-
-                                        }
-
-                                    } else {
-                                        snackShower("No contacts found");
-                                    }
-
-                                }
-                            }
-                        });
-
-
-                        rlIcon3.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-
-                                rightLowerMenu.close(true);
-
-                                if (PermissionsManager.get().isContactsGranted()) {
-
-                                    awesomeErrorDialog = new AwesomeInfoDialog(UploadActivity.this);
-                                    awesomeErrorDialog
-                                            .setTitle(R.string.app_name)
-                                            .setMessage(" Do you want to upload your contacts to your cloud account ?")
-                                            .setDialogIconOnly(R.drawable.ic_app_icon)
-                                            .setColoredCircle(R.color.white)
-                                            .setCancelable(false)
-                                            .setPositiveButtonText(getString(R.string.upload))
-                                            .setPositiveButtonbackgroundColor(R.color.dialogSuccessBackgroundColor)
-                                            .setPositiveButtonTextColor(R.color.white)
-                                            .setNegativeButtonText(getString(R.string.cancel))
-                                            .setNegativeButtonbackgroundColor(R.color.dialogErrorBackgroundColor)
-                                            .setNegativeButtonTextColor(R.color.white)
-                                            .setPositiveButtonClick(new Closure() {
-                                                @Override
-                                                public void exec() {
-                                                    writecontacts();
-                                                }
-                                            })
-                                            .setNegativeButtonClick(new Closure() {
-                                                @Override
-                                                public void exec() {
-
-                                                }
-                                            })
-                                            .show();
-
-                                } else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)) {
-
-                                    showFetchcontactsDialogue();
-                                } else {
-                                    PermissionsManager.get().requestContactsPermission()
-                                            .subscribe(new Action1<PermissionsResult>() {
-                                                @Override
-                                                public void call(PermissionsResult permissionsResult) {
-                                                    if (!permissionsResult.isGranted()) {
-                                                        showPermissionsDialogue();
-
-                                                    } else {
-                                                        writecontacts();
-
-                                                    }
-                                                }
-                                            });
-
-
-                                }
-
-                            }
-                        });
-                        break;
-
-                    }
-
 
                     case 1: {
                         rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_music));
@@ -709,6 +593,49 @@ public class UploadActivity extends AppCompatActivity {
                         });
                         break;
                     }
+                    default :{
+                        rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_image_upload));
+                        if (rightLowerMenu.isOpen()) {
+                            rightLowerMenu.close(true);
+
+                        }
+                        if (rightLowerMenu.isOpen()) {
+                            rightLowerMenu.updateItemPositions();
+                        }
+                        rlIcon3.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                if (PermissionsManager.get().isStorageGranted()) {
+                                    documentPaths = new ArrayList<>();
+                                    FilePickerBuilder.getInstance().setMaxCount(20)
+                                            .setSelectedFiles(documentPaths)
+                                            .setActivityTheme(R.style.AppTheme_PopupOverlay)
+                                            .pickPhoto(UploadActivity.this);
+                                    //  imageUploaderToFireStore(photoPaths);
+
+                                } else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)) {
+
+                                    showPermissionsDialogueStorage();
+
+                                } else {
+                                    PermissionsManager.get().requestContactsPermission()
+                                            .subscribe(new Action1<PermissionsResult>() {
+                                                @Override
+                                                public void call(PermissionsResult permissionsResult) {
+                                                    if (!permissionsResult.isGranted()) {
+                                                        showPermissionsDialogueStorage();
+
+                                                    } else {
+                                                        imageUploaderToFireStore(photoPaths);
+
+                                                    }
+                                                }
+                                            });
+                                }
+                            }
+                        });
+                        break;
+                    }
 
                 }
 
@@ -771,6 +698,7 @@ public class UploadActivity extends AppCompatActivity {
 
             }
         });
+
 
 
     }
@@ -888,7 +816,7 @@ public class UploadActivity extends AppCompatActivity {
                     return FragmentContacts.newInstance(position);
 
 
-                default:return FragmentContacts.newInstance(position);
+                default:return FragmentPhotos.newInstance(position);
             }
 
         }

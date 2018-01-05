@@ -101,8 +101,8 @@ public class FragmentDocument extends Fragment {
 
     }
 
-    public static FragmentMusic newInstance(int val) {
-        FragmentMusic fr = new FragmentMusic();
+    public static FragmentDocument newInstance(int val) {
+        FragmentDocument fr = new FragmentDocument();
         Bundle args = new Bundle();
         args.putInt("val", val);
         fr.setArguments(args);
