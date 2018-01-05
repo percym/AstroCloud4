@@ -53,8 +53,10 @@ import com.google.firebase.storage.UploadTask;
 import com.kbeanie.multipicker.api.AudioPicker;
 import com.kbeanie.multipicker.api.Picker;
 import com.kbeanie.multipicker.api.callbacks.AudioPickerCallback;
+import com.kbeanie.multipicker.api.callbacks.FilePickerCallback;
 import com.kbeanie.multipicker.api.callbacks.VideoPickerCallback;
 import com.kbeanie.multipicker.api.entity.ChosenAudio;
+import com.kbeanie.multipicker.api.entity.ChosenFile;
 import com.kbeanie.multipicker.api.entity.ChosenImage;
 import com.kbeanie.multipicker.api.entity.ChosenVideo;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionButton;
@@ -70,10 +72,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import astrocloud.zw.co.astrocloud.fragments.FragmentContacts;
+import astrocloud.zw.co.astrocloud.fragments.FragmentDocument;
 import astrocloud.zw.co.astrocloud.fragments.FragmentMusic;
 import astrocloud.zw.co.astrocloud.fragments.FragmentPhotos;
 import astrocloud.zw.co.astrocloud.fragments.FragmentVideos;
 import astrocloud.zw.co.astrocloud.models.ContactModel;
+import astrocloud.zw.co.astrocloud.models.DocumentModel;
+import astrocloud.zw.co.astrocloud.models.FileUploadModel;
 import astrocloud.zw.co.astrocloud.models.Image;
 import astrocloud.zw.co.astrocloud.models.ImageModel;
 import astrocloud.zw.co.astrocloud.models.MusicModel;
@@ -115,6 +120,7 @@ public class UploadActivity extends AppCompatActivity {
     private AwesomeInfoDialog awesomeErrorDialog;
     private FirebaseStorage mStorageReference;
     private StorageReference mImagesStorageReference;
+    private StorageReference mDocumentsStorageReference;
     private StorageReference mUserStorageReference;
     private ArrayList<String> photoPaths;
     private Uri file;
@@ -125,11 +131,14 @@ public class UploadActivity extends AppCompatActivity {
     private ArrayList<String> videoPaths;
     private StorageReference mVideosStorageReference;
    
-    private ArrayList<String> musicPaths;
+    private ArrayList<FileUploadModel> musicPaths;
+    private ArrayList<String> documentPaths;
     private AudioPicker audioPicker;
     private StorageReference mMusicStorageReference;
     private DatabaseReference uploadedMusicChildReference;
     private com.kbeanie.multipicker.api.VideoPicker videoPickers;
+    private DatabaseReference uploadedDocumentChildReference;
+
 
     @Override
     protected void onStart() {
@@ -188,9 +197,12 @@ public class UploadActivity extends AppCompatActivity {
         mImagesStorageReference = mStorageReference.getReference("images");
         mVideosStorageReference = mStorageReference.getReference("videos");
         mMusicStorageReference = mStorageReference.getReference("music");
+        mDocumentsStorageReference= mStorageReference.getReference("documents");
+
         uploadedFilesChildReference = contactsDatabase.child("user_files").child(userId).child("images");
         uploadedVideoChildReference = contactsDatabase.child("user_files").child(userId).child("videos");
         uploadedMusicChildReference = contactsDatabase.child("user_files").child(userId).child("music");
+        uploadedDocumentChildReference = contactsDatabase.child("user_files").child(userId).child("documents");
 
 
         // Create the adapter that will return a fragment
@@ -248,7 +260,7 @@ public class UploadActivity extends AppCompatActivity {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 switch (tab.getPosition()) {
-                    case 0:
+                    case 4:
                         rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_upload_contacts));
                         if (rightLowerMenu.isOpen()) {
                             rightLowerMenu.close(true);
@@ -363,7 +375,7 @@ public class UploadActivity extends AppCompatActivity {
 
                         break;
 
-                    case 1: {
+                    case 0: {
                         rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_image_upload));
                         if (rightLowerMenu.isOpen()) {
                             rightLowerMenu.close(true);
@@ -376,9 +388,9 @@ public class UploadActivity extends AppCompatActivity {
                             @Override
                             public void onClick(View view) {
                                 if (PermissionsManager.get().isStorageGranted()) {
-                                    photoPaths = new ArrayList<>();
+                                    documentPaths = new ArrayList<>();
                                     FilePickerBuilder.getInstance().setMaxCount(20)
-                                            .setSelectedFiles(photoPaths)
+                                            .setSelectedFiles(documentPaths)
                                             .setActivityTheme(R.style.AppTheme_PopupOverlay)
                                             .pickPhoto(UploadActivity.this);
                                     //  imageUploaderToFireStore(photoPaths);
@@ -420,29 +432,28 @@ public class UploadActivity extends AppCompatActivity {
                             public void onClick(View view) {
                                 if (PermissionsManager.get().isStorageGranted()) {
                                     videoPaths = new ArrayList<>();
-                                 videoPickers = new com.kbeanie.multipicker.api.VideoPicker(UploadActivity.this);
-                                 videoPickers.setVideoPickerCallback(new VideoPickerCallback() {
-                                     @Override
-                                     public void onVideosChosen(List<ChosenVideo> videos) {
-                                         for(ChosenVideo video :videos){
-                                             videoPaths.add(video.getOriginalPath());
+                                    videoPickers = new com.kbeanie.multipicker.api.VideoPicker(UploadActivity.this);
+                                    videoPickers.setVideoPickerCallback(new VideoPickerCallback() {
+                                        @Override
+                                        public void onVideosChosen(List<ChosenVideo> videos) {
+                                            for (ChosenVideo video : videos) {
+                                                videoPaths.add(video.getOriginalPath());
 
-                                         }
-                                         if(videoPaths!= null){
-                                             videoUploaderToFireStore(videoPaths);
-                                         }
+                                            }
+                                            if (videoPaths != null) {
+                                                videoUploaderToFireStore(videoPaths);
+                                            }
 
 
+                                        }
 
-                                     }
+                                        @Override
+                                        public void onError(String s) {
 
-                                     @Override
-                                     public void onError(String s) {
-
-                                     }
-                                 });
-                                 videoPickers.allowMultiple();
-                                 videoPickers.pickVideo();
+                                        }
+                                    });
+                                    videoPickers.allowMultiple();
+                                    videoPickers.pickVideo();
 
                                 } else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)) {
 
@@ -585,7 +596,8 @@ public class UploadActivity extends AppCompatActivity {
 
                     }
 
-                    case 3:{
+
+                    case 1: {
                         rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_music));
                         if (rightLowerMenu.isOpen()) {
                             rightLowerMenu.close(true);
@@ -605,12 +617,13 @@ public class UploadActivity extends AppCompatActivity {
                                         public void onAudiosChosen(List<ChosenAudio> audios) {
                                             // Display Files;
 
-                                            for(ChosenAudio audio :audios){
+                                            for (ChosenAudio audio : audios) {
 
-                                                musicPaths.add(audio.getOriginalPath());
+
+                                                musicPaths.add(new FileUploadModel(audio.getOriginalPath(), audio.getOriginalPath()));
 
                                             }
-                                            if(musicPaths!= null){
+                                            if (musicPaths != null) {
                                                 musicUploaderToFireStore(musicPaths);
                                             }
 
@@ -651,11 +664,101 @@ public class UploadActivity extends AppCompatActivity {
                         break;
 
 
-
                     }
 
+                    case 3: {
+                        rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_cloud_document));
+                        if (rightLowerMenu.isOpen()) {
+                            rightLowerMenu.close(true);
+
+                        }
+                        if (rightLowerMenu.isOpen()) {
+                            rightLowerMenu.updateItemPositions();
+                        }
+                        rlIcon3.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                if (PermissionsManager.get().isStorageGranted()) {
+                                    documentPaths = new ArrayList<>();
+                                    FilePickerBuilder.getInstance().setMaxCount(20)
+                                            .setSelectedFiles(documentPaths)
+                                            .setActivityTheme(R.style.AppTheme_PopupOverlay)
+                                            .pickFile(UploadActivity.this);
+                                    //  imageUploaderToFireStore(photoPaths);
+
+                                } else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)) {
+
+                                    showPermissionsDialogueStorage();
+
+                                } else {
+                                    PermissionsManager.get().requestContactsPermission()
+                                            .subscribe(new Action1<PermissionsResult>() {
+                                                @Override
+                                                public void call(PermissionsResult permissionsResult) {
+                                                    if (!permissionsResult.isGranted()) {
+                                                        showPermissionsDialogueStorage();
+
+                                                    } else {
+                                                        imageUploaderToFireStore(photoPaths);
+
+                                                    }
+                                                }
+                                            });
+                                }
+                            }
+                        });
+                        break;
+                    }
 
                 }
+
+//                    case 0: {
+//                        rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_image_upload));
+//                        if (rightLowerMenu.isOpen()) {
+//                            rightLowerMenu.close(true);
+//
+//                        }
+//                        if (rightLowerMenu.isOpen()) {
+//                            rightLowerMenu.updateItemPositions();
+//                        }
+//                        rlIcon3.setOnClickListener(new View.OnClickListener() {
+//                            @Override
+//                            public void onClick(View view) {
+//                                if (PermissionsManager.get().isStorageGranted()) {
+//                                    photoPaths = new ArrayList<>();
+//                                    FilePickerBuilder.getInstance().setMaxCount(20)
+//                                            .setSelectedFiles(photoPaths)
+//                                            .setActivityTheme(R.style.AppTheme_PopupOverlay)
+//                                            .pickPhoto(UploadActivity.this);
+//                                    //  imageUploaderToFireStore(photoPaths);
+//
+//                                } else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)) {
+//
+//                                    showPermissionsDialogueStorage();
+//
+//                                } else {
+//                                    PermissionsManager.get().requestContactsPermission()
+//                                            .subscribe(new Action1<PermissionsResult>() {
+//                                                @Override
+//                                                public void call(PermissionsResult permissionsResult) {
+//                                                    if (!permissionsResult.isGranted()) {
+//                                                        showPermissionsDialogueStorage();
+//
+//                                                    } else {
+//                                                        imageUploaderToFireStore(photoPaths);
+//
+//                                                    }
+//                                                }
+//                                            });
+//                                }
+//                            }
+//                        });
+//                        break;
+//                    }
+//
+//
+//
+//                }
             }
 
             @Override
@@ -671,6 +774,7 @@ public class UploadActivity extends AppCompatActivity {
 
 
     }
+
 
     private void writeNewUser(ArrayList<ContactModel> arrayListContactsTobeWritten) {
 
@@ -773,23 +877,26 @@ public class UploadActivity extends AppCompatActivity {
 
             switch (position){
                 case 0:
-                    return FragmentContacts.newInstance(position);
-                case 1:
                     return FragmentPhotos.newInstance(position);
+                case 1:
+                    return FragmentMusic.newInstance(position);
                 case 2:
                     return FragmentVideos.newInstance(position);
                 case 3:
-                    return FragmentMusic.newInstance(position);
+                    return FragmentDocument.newInstance(position);
+                case 4:
+                    return FragmentContacts.newInstance(position);
 
-                default:return FragmentMusic.newInstance(position);
+
+                default:return FragmentContacts.newInstance(position);
             }
 
         }
 
         @Override
         public int getCount() {
-            // Show 4 total pages.
-            return 4;
+            // Show 5 total pages.
+            return 5;
         }
 
         @Nullable
@@ -797,13 +904,15 @@ public class UploadActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             switch (position){
                 case 1:
-                    return "Contacts";
+                    return "Images";
                 case 2:
-                    return "Photos";
+                    return "Music";
                 case 3:
                     return "Videos";
                 case 4:
-                    return "Music ";
+                    return "Documents ";
+                case 5:
+                    return "Contacts";
             }
             return null;
         }
@@ -977,6 +1086,15 @@ public class UploadActivity extends AppCompatActivity {
                 }
                 break;
 
+            case FilePickerConst.REQUEST_CODE_DOC:
+                if(resultCode== Activity.RESULT_OK && data!=null)
+                {
+                    documentPaths = new ArrayList<>();
+                    documentPaths.addAll(data.getStringArrayListExtra(FilePickerConst.KEY_SELECTED_DOCS));
+                    documentUploaderToFireStore(documentPaths);
+
+                }
+                break;
 
         }
         if (requestCode == VideoPicker.VIDEO_PICKER_REQUEST_CODE && resultCode == RESULT_OK) {
@@ -996,10 +1114,10 @@ public class UploadActivity extends AppCompatActivity {
         }
     }
 
-    private void musicUploaderToFireStore(ArrayList<String> arrayListPhotos){
+    private void musicUploaderToFireStore(ArrayList<FileUploadModel> arrayListPhotos){
         final int id =1;
 
-        for (String looper : arrayListPhotos){
+        for (final FileUploadModel looper : arrayListPhotos){
             mNotifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             mBuilder = new NotificationCompat.Builder(getApplicationContext(),"AstroCloud")
                     .setContentTitle("AstroCloud")
@@ -1007,7 +1125,7 @@ public class UploadActivity extends AppCompatActivity {
                     .setAutoCancel(true)
                     .setSmallIcon(R.drawable.ic_stat_cloud_upload);
 
-            file = Uri.fromFile(new File(looper));
+            file = Uri.fromFile(new File(looper.getUrl()));
             metadata = new StorageMetadata.Builder()
                     .setContentType("audio/mpeg")
                     .build();
@@ -1033,7 +1151,7 @@ public class UploadActivity extends AppCompatActivity {
                 @Override
                 public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                     writeNewUploadMusic(task.getResult().getDownloadUrl().toString(), task.getResult().getMetadata().getName(),
-                            task.getResult().getMetadata().getSizeBytes(),task.getResult().getMetadata().getPath());
+                            task.getResult().getMetadata().getSizeBytes(),looper.getType());
                     mBuilder.setContentText("Upload completed");
                     mNotifyManager.notify(id, mBuilder.build());
 
@@ -1175,10 +1293,72 @@ public class UploadActivity extends AppCompatActivity {
         uploadedVideoChildReference.child(key).setValue(imageModel);
 
     }
-    private void writeNewUploadMusic(String downloadUrl, String name, Long sizeInBytes, String path){
+    private void writeNewUploadMusic(String downloadUrl, String name, Long sizeInBytes, String type){
         String key = uploadedMusicChildReference.push().getKey();
-        MusicModel musicModel = new MusicModel(downloadUrl, name, sizeInBytes, key, path);
+        MusicModel musicModel = new MusicModel(downloadUrl, name, sizeInBytes, key, type);
         uploadedMusicChildReference.child(key).setValue(musicModel);
+
+    }
+
+    private void documentUploaderToFireStore(ArrayList<String> arrayListPhotos){
+        final int id =1;
+
+        for (String looper : arrayListPhotos){
+            mNotifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            mBuilder = new NotificationCompat.Builder(getApplicationContext(),"AstroCloud")
+                    .setContentTitle("AstroCloud")
+                    .setContentText("Uploading document to your cloud account" )
+                    .setAutoCancel(true)
+                    .setSmallIcon(R.drawable.ic_stat_cloud_upload);
+
+            file = Uri.fromFile(new File(looper));
+            metadata = new StorageMetadata.Builder()
+                    .setContentType("docx")
+                    .build();
+            uploadTask = mDocumentsStorageReference.child(userId + "/"+file.getLastPathSegment()).putFile(file,metadata);
+
+            uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                    Double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                    mBuilder.setProgress(100, progress.intValue(), false);
+                    mBuilder.setContentText("Uploading document");
+                    // Displays the progress bar for the first time.
+                    mNotifyManager.notify(id, mBuilder.build());
+
+                }
+            }).addOnPausedListener(new OnPausedListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onPaused(UploadTask.TaskSnapshot taskSnapshot) {
+                    mBuilder.setContentText("Upload paused");
+                    mNotifyManager.notify(id, mBuilder.build());
+                }
+            }).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                    writeNewUploadDocument(task.getResult().getDownloadUrl().toString(), task.getResult().getMetadata().getName(),
+                            task.getResult().getMetadata().getSizeBytes());
+                    mBuilder.setContentText("Upload completed");
+                    mNotifyManager.notify(id, mBuilder.build());
+
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    mBuilder.setContentText("Upload failed " + e.getMessage());
+                    mNotifyManager.notify(id, mBuilder.build());
+
+                }
+            });
+        }
+
+        documentPaths = new ArrayList<>();
+
+    }
+    private void writeNewUploadDocument(String downloadUrl, String name, Long sizeInBytes){
+        String key = uploadedDocumentChildReference.push().getKey();
+        DocumentModel documentModel = new DocumentModel(downloadUrl, name, sizeInBytes, key);
+        uploadedDocumentChildReference.child(key).setValue(documentModel);
 
     }
 

@@ -1,37 +1,63 @@
 package astrocloud.zw.co.astrocloud.fragments;
 
 import android.app.Activity;
+import android.app.DownloadManager;
+import android.app.NotificationManager;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.appolica.flubber.Flubber;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeInfoDialog;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.interfaces.Closure;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnPausedListener;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
 import astrocloud.zw.co.astrocloud.R;
+import astrocloud.zw.co.astrocloud.adapters.DocumentAdapter;
+import astrocloud.zw.co.astrocloud.adapters.MusicAdapter;
 import astrocloud.zw.co.astrocloud.adapters.VideosAdapter;
-import astrocloud.zw.co.astrocloud.interfaces.VideoItem;
+import astrocloud.zw.co.astrocloud.models.DocumentModel;
 import astrocloud.zw.co.astrocloud.models.VideoModel;
 import astrocloud.zw.co.astrocloud.utils.AppConfig;
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -40,16 +66,16 @@ import de.hdodenhof.circleimageview.CircleImageView;
  * Created by Percy M on 11/9/2016.
  */
 
-public class FragmentVideos extends Fragment {
-    private String TAG = FragmentVideos.class.getSimpleName();
+public class FragmentDocument extends Fragment {
+    private String TAG = FragmentMusic.class.getSimpleName();
 
     private ProgressDialog pDialog;
-    private VideosAdapter mAdapter;
+    private DocumentAdapter mAdapter;
     private RecyclerView recyclerView;
     private RelativeLayout folder_state_container;
     String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
     private FirebaseStorage mStorageReference;
-    private StorageReference mVideosStorageReference;
+    private StorageReference mMusicStorageReference;
     private StorageReference mUserStorageReference;
     private DatabaseReference userfilesDatabase;
     private DatabaseReference contactsChildReference;
@@ -59,17 +85,24 @@ public class FragmentVideos extends Fragment {
     int delay = 15000; //15 seconds
     Runnable runnable;
 
+
     private LinearLayoutManager mLayoutManager;
-    ArrayList<VideoModel> videos = new ArrayList<>();
+    ArrayList<DocumentModel> music = new ArrayList<>();
+    private DocumentModel musicFile;
+    private AwesomeInfoDialog awesomeErrorDialog;
+    private NotificationManager mNotifyManager;
+    private NotificationCompat.Builder mBuilder;
+    private DownloadManager downloadManager     ;
+    private long refid;
 
 
-    public FragmentVideos() {
+    public FragmentDocument() {
         // Required empty public constructor
 
     }
 
-    public static FragmentVideos newInstance(int val) {
-        FragmentVideos fr = new FragmentVideos();
+    public static FragmentMusic newInstance(int val) {
+        FragmentMusic fr = new FragmentMusic();
         Bundle args = new Bundle();
         args.putInt("val", val);
         fr.setArguments(args);
@@ -84,7 +117,7 @@ public class FragmentVideos extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_video, container, false);
+        View view = inflater.inflate(R.layout.fragment_music, container, false);
         setHasOptionsMenu(true);
         recyclerView = (RecyclerView) view.findViewById(R.id.videoRecyclerView);
         folder_state_container = (RelativeLayout) view.findViewById(R.id.folder_state_container);
@@ -96,35 +129,93 @@ public class FragmentVideos extends Fragment {
 
             }
         });
-
+        downloadManager = (DownloadManager) getActivity().getSystemService(Context.DOWNLOAD_SERVICE);
         //initialise the FireStore
         //mStorageReference = FirebaseStorage.getInstance().getReference(AppConfig.FIRESTOREDBURL);
         mStorageReference = FirebaseStorage.getInstance(AppConfig.FIRESTOREDBURL);
-        mVideosStorageReference = mStorageReference.getReference("videos");
-        mUserStorageReference = mVideosStorageReference.child(userId);
+        mMusicStorageReference = mStorageReference.getReference("documents");
+        mUserStorageReference = mMusicStorageReference.child(userId);
 
         userfilesDatabase = FirebaseDatabase.getInstance().getReference();
         contactsChildReference = userfilesDatabase.child("user_files");
-        uploadedFilesChildReference = contactsChildReference.child(userId).child("videos");
+        uploadedFilesChildReference = contactsChildReference.child(userId).child("documents");
         pDialog = new ProgressDialog(getActivity());
-        mAdapter = new VideosAdapter(getContext(),uploadedFilesChildReference);
-        mLayoutManager = new GridLayoutManager(getActivity(),2);
+        mAdapter = new DocumentAdapter(getContext(),uploadedFilesChildReference);
+        mLayoutManager = new GridLayoutManager(getActivity(),1);
         // StaggeredGridLayoutManager staggeredGridLayoutManager = new StaggeredGridLayoutManager(2, LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(mAdapter);
-        recyclerView.addOnItemTouchListener(new VideosAdapter.RecyclerTouchListener(getActivity(), recyclerView, new VideosAdapter.ClickListener() {
+        recyclerView.addOnItemTouchListener(new MusicAdapter.RecyclerTouchListener(getActivity(), recyclerView, new MusicAdapter.ClickListener() {
             @Override
-            public void onClick(View view, int position) {
-                videos= new ArrayList<>();
-                videos.addAll(mAdapter.getmDisplayedPhotoValues());
-                Bundle bundle = new Bundle();
-                bundle.putSerializable("documents", videos);
-                bundle.putInt("position", position);
-                FragmentTransaction ft = getFragmentManager().beginTransaction();
-                VideoSlideshowDialogFragment newFragment = VideoSlideshowDialogFragment.newInstance();
-                newFragment.setArguments(bundle);
-                newFragment.show(ft, "slideshow");
+            public void onClick(View view, final int position) {
+                musicFile= new DocumentModel();
+
+                musicFile= mAdapter.getmDisplayedPhotoValues().get(position);
+                PopupMenu popupMenu = new PopupMenu(getActivity(),view, Gravity.CENTER);
+                MenuInflater inflater = getActivity().getMenuInflater();
+                inflater.inflate(R.menu.menu_file_options,popupMenu.getMenu());
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        switch (item.getItemId()) {
+                            case R.id.download_file:
+                                //download the file
+                                // instantiate it within the onCreate method
+                                Uri Download_Uri = Uri.parse(musicFile.getUrl());
+
+                                DownloadManager.Request request = new DownloadManager.Request(Download_Uri);
+                                request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
+                                request.setAllowedOverRoaming(false);
+                                request.setTitle("AstroCloud Downloading ");
+                                request.setDescription(musicFile.getName ());
+                                request.setVisibleInDownloadsUi(true);
+                                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_MUSIC,musicFile.getName()+ musicFile.getType());
+
+
+                                refid = downloadManager.enqueue(request);
+
+
+                                return true;
+                            case R.id.delete_file:
+                                //delete file
+                                awesomeErrorDialog = new AwesomeInfoDialog(getContext());
+                                awesomeErrorDialog
+                                        .setTitle(R.string.app_name)
+                                        .setMessage(" Are you sure you want to delete " + musicFile.getName() + "?")
+                                        .setDialogIconOnly(R.drawable.ic_app_icon)
+                                        .setColoredCircle(R.color.white)
+                                        .setCancelable(false)
+                                        .setPositiveButtonText(getString(R.string.delete))
+                                        .setPositiveButtonbackgroundColor(R.color.dialogSuccessBackgroundColor)
+                                        .setPositiveButtonTextColor(R.color.white)
+                                        .setNegativeButtonText(getString(R.string.cancel))
+                                        .setNegativeButtonbackgroundColor(R.color.dialogErrorBackgroundColor)
+                                        .setNegativeButtonTextColor(R.color.white)
+                                        .setPositiveButtonClick(new Closure() {
+                                            @Override
+                                            public void exec() {
+                                                fileChewer(musicFile, userId, position);
+                                            }
+                                        })
+                                        .setNegativeButtonClick(new Closure() {
+                                            @Override
+                                            public void exec() {
+
+                                            }
+                                        })
+                                        .show();
+
+                                return true;
+                        }
+
+
+                        return false;
+                    }
+                });
+                popupMenu.show();
+
+
 
             }
 
@@ -244,6 +335,39 @@ public class FragmentVideos extends Fragment {
 //        });
 //    }
 
+    private void fileChewer(final DocumentModel fileToDelete, String uid , final int pos){
+        StorageReference localReferencePath = mMusicStorageReference.child(uid).child(fileToDelete.getName());
+        localReferencePath.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                music.remove(pos);
+                dataChewer(fileToDelete.getKey());
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(getContext(), "Deletion error" , Toast.LENGTH_LONG);
+
+            }
+        });
+
+    }
+
+    private void dataChewer(String ref){
+        DatabaseReference localReference = uploadedFilesChildReference.child(ref);
+        localReference.setValue(null).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+
+            }
+        });
+    }
 
     @Override
     public void onPause() {
@@ -251,5 +375,7 @@ public class FragmentVideos extends Fragment {
         h.removeCallbacks(runnable); //stop handler when activity not visible
         super.onPause();
     }
+
+
 
 }

@@ -20,6 +20,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -150,7 +151,7 @@ public class FragmentMusic extends Fragment {
                  musicFile= new MusicModel();
 
           musicFile= mAdapter.getmDisplayedPhotoValues().get(position);
-                PopupMenu popupMenu = new PopupMenu(getActivity(),view);
+                PopupMenu popupMenu = new PopupMenu(getActivity(),view, Gravity.CENTER);
                 MenuInflater inflater = getActivity().getMenuInflater();
                 inflater.inflate(R.menu.menu_file_options,popupMenu.getMenu());
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {

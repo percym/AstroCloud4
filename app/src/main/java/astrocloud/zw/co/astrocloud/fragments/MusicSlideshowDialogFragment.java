@@ -111,13 +111,13 @@ public class MusicSlideshowDialogFragment extends DialogFragment  {
 
         //intialise database
         contactsDatabase = FirebaseDatabase.getInstance().getReference();
-        uploadedFilesChildReference = contactsDatabase.child("user_files").child(userId).child("music");
+        uploadedFilesChildReference = contactsDatabase.child("user_files").child(userId).child("documents");
 
         //Storage for images
         //  mStorageReference = FirebaseStorage.getInstance().getReference(AppConfig.FIRESTOREDBURL);
         mStorageReference = FirebaseStorage.getInstance(AppConfig.FIRESTOREDBURL);
-        mVideosStorageReference = mStorageReference.getReference("music");
-        videos = (ArrayList<VideoModel>) getArguments().getSerializable("music");
+        mVideosStorageReference = mStorageReference.getReference("documents");
+        videos = (ArrayList<VideoModel>) getArguments().getSerializable("documents");
         selectedPosition = getArguments().getInt("position");
 
 
