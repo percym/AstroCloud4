@@ -24,10 +24,10 @@
     </style>
 
     <style name="AppTheme.BottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">
-    <item name="android:background">@color/colorPrimary</item>
-    <item name="behavior_hideable">true</item>
-    <item name="behavior_skipCollapsed">true</item>
-    <item name="android:backgroundDimAmount">0.5</item>
+        <item name="android:background">@color/colorPrimary</item>
+        <item name="behavior_hideable">true</item>
+        <item name="behavior_skipCollapsed">true</item>
+        <item name="android:backgroundDimAmount">0.5</item>
     </style>
 
     <style name="card_style">

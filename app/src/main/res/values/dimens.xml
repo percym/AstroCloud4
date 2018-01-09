@@ -6,4 +6,5 @@
     <dimen name="divider">1dp</dimen>
     <dimen name="leftmargin">74dp</dimen>
     <dimen name="rightmargin">8dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
 </resources>

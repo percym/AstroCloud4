@@ -13,4 +13,5 @@
     <string name="delete">Delete</string>
     <string name="download_file">Download</string>
     <string name="delete_file">Delete</string>
+    <string name="title_activity_usage">AstroCloud</string>
 </resources>
