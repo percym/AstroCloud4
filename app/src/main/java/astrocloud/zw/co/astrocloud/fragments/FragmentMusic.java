@@ -167,9 +167,9 @@ public class FragmentMusic extends Fragment {
                                 request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
                                 request.setAllowedOverRoaming(false);
                                 request.setTitle("AstroCloud Downloading ");
-                                request.setDescription(musicFile.getName ());
+                                request.setDescription(musicFile.getName());
                                 request.setVisibleInDownloadsUi(true);
-                                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_MUSIC,musicFile.getName()+ musicFile.getType());
+                                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_MUSIC,musicFile.getName());
 
 
                                 refid = downloadManager.enqueue(request);
@@ -339,7 +339,7 @@ public class FragmentMusic extends Fragment {
         localReferencePath.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-                music.remove(pos);
+                mAdapter.getmDisplayedPhotoValues().remove(pos);
                 dataChewer(fileToDelete.getKey());
 
             }

@@ -117,12 +117,12 @@ public class SlideshowDialogFragment extends DialogFragment {
 
         //intialise database
         contactsDatabase = FirebaseDatabase.getInstance().getReference();
-        uploadedFilesChildReference = contactsDatabase.child("user_files").child(userId).child("images");
+        uploadedFilesChildReference = contactsDatabase.child("user_files").child(userId).child("pictures");
 
         //Storage for images
         //  mStorageReference = FirebaseStorage.getInstance().getReference(AppConfig.FIRESTOREDBURL);
         mStorageReference = FirebaseStorage.getInstance(AppConfig.FIRESTOREDBURL);
-        mImagesStorageReference = mStorageReference.getReference(userId+"/images");
+        mImagesStorageReference = mStorageReference.getReference("user_files/"+userId+"/pictures");
         images = (ArrayList<ImageModel>) getArguments().getSerializable("images");
         selectedPosition = getArguments().getInt("position");
 
@@ -573,7 +573,7 @@ public class SlideshowDialogFragment extends DialogFragment {
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-                Toast.makeText(getContext(), "Deletion error" , Toast.LENGTH_LONG);
+                Toast.makeText(getContext(), "Deletion error" , Toast.LENGTH_LONG).show();
 
                 }
             });

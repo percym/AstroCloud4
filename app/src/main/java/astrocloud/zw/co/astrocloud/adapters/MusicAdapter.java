@@ -250,8 +250,8 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MyViewHolder
     private void fillArrayListWithContactsDB(DataSnapshot dataSnapshot) {
 
         MusicModel MusicModel = dataSnapshot.getValue(MusicModel.class);
-        mDisplayedPhotoValues.add(new MusicModel(MusicModel.getUrl(), MusicModel.getName(), MusicModel.getSizeInBytes(),MusicModel.getKey()));
-        mOriginalPhotoValues.add(new MusicModel(MusicModel.getUrl(), MusicModel.getName(),MusicModel.getSizeInBytes(),MusicModel.getKey()));
+        mDisplayedPhotoValues.add(new MusicModel(MusicModel.getUrl(), MusicModel.getName(), MusicModel.getSizeInBytes(),MusicModel.getKey(),MusicModel.getType()));
+        mOriginalPhotoValues.add(new MusicModel(MusicModel.getUrl(), MusicModel.getName(),MusicModel.getSizeInBytes(),MusicModel.getKey(),MusicModel.getType()));
 
         notifyDataSetChanged();
     }

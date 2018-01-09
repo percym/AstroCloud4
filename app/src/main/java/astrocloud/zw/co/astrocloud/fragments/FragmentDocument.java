@@ -170,7 +170,7 @@ public class FragmentDocument extends Fragment {
                                 request.setTitle("AstroCloud Downloading ");
                                 request.setDescription(musicFile.getName ());
                                 request.setVisibleInDownloadsUi(true);
-                                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_MUSIC,musicFile.getName()+ musicFile.getType());
+                                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOCUMENTS,musicFile.getName());
 
 
                                 refid = downloadManager.enqueue(request);
@@ -340,7 +340,7 @@ public class FragmentDocument extends Fragment {
         localReferencePath.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-                music.remove(pos);
+              mAdapter.getmDisplayedPhotoValues().remove(pos);
                 dataChewer(fileToDelete.getKey());
 
             }

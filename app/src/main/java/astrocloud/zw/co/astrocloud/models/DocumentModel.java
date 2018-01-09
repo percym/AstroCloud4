@@ -17,13 +17,13 @@ public class DocumentModel implements Serializable{
     public DocumentModel() {
     }
 
-    public DocumentModel(String downloadUrl, String name, Long sizeInBytes, String key) {
-
-        this.url = downloadUrl;
-        this.name = name;
-        this.sizeInBytes = sizeInBytes;
-        this.key = key;
-    }
+//    public DocumentModel(String downloadUrl, String name, Long sizeInBytes, String key) {
+//
+//        this.url = downloadUrl;
+//        this.name = name;
+//        this.sizeInBytes = sizeInBytes;
+//        this.key = key;
+//    }
 
     public DocumentModel(String downloadUrl, String name, Long sizeInBytes, String key , String type) {
 

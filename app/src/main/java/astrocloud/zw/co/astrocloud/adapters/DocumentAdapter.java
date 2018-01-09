@@ -270,8 +270,9 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.MyView
     private void fillArrayListWithContactsDB(DataSnapshot dataSnapshot) {
 
         DocumentModel DocumentModel = dataSnapshot.getValue(DocumentModel.class);
-        mDisplayedPhotoValues.add(new DocumentModel(DocumentModel.getUrl(), DocumentModel.getName(), DocumentModel.getSizeInBytes(),DocumentModel.getKey()));
-        mOriginalPhotoValues.add(new DocumentModel(DocumentModel.getUrl(), DocumentModel.getName(),DocumentModel.getSizeInBytes(),DocumentModel.getKey()));
+
+        mDisplayedPhotoValues.add(new DocumentModel(DocumentModel.getUrl(), DocumentModel.getName(), DocumentModel.getSizeInBytes(),DocumentModel.getKey(),DocumentModel.getType()));
+        mOriginalPhotoValues.add(new DocumentModel(DocumentModel.getUrl(), DocumentModel.getName(),DocumentModel.getSizeInBytes(),DocumentModel.getKey(),DocumentModel.getType()));
 
         notifyDataSetChanged();
     }

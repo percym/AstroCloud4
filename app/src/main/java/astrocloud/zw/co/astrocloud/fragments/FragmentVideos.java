@@ -119,7 +119,7 @@ public class FragmentVideos extends Fragment {
                 videos= new ArrayList<>();
                 videos.addAll(mAdapter.getmDisplayedPhotoValues());
                 Bundle bundle = new Bundle();
-                bundle.putSerializable("documents", videos);
+                bundle.putSerializable("videos", videos);
                 bundle.putInt("position", position);
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
                 VideoSlideshowDialogFragment newFragment = VideoSlideshowDialogFragment.newInstance();
