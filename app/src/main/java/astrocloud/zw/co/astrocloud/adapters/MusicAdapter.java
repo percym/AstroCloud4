@@ -14,7 +14,6 @@ import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -42,7 +41,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MyViewHolder
     private List<MusicModel> mOriginalPhotoValues = new ArrayList<>();  // Original Values
     private List<MusicModel> mDisplayedPhotoValues = new ArrayList<>();
     private String TAG = SlideshowDialogFragment.class.getSimpleName();
-    int[] file_formats = new int[]{ R.drawable.mp3, R.drawable.ogpp,R.drawable.gpp};
+    int[] file_formats = new int[]{ R.drawable.mp3, R.drawable.ogpp,R.drawable.threegpp,R.drawable.wav};
 
     // Values to be displayed
     public MusicAdapter(Context context, DatabaseReference ref) {
@@ -177,8 +176,21 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MyViewHolder
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
-        holder.thumbnail.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_music_player));
-        holder.file_name.setText(mDisplayedPhotoValues.get(position).getName().toString());
+        if(mDisplayedPhotoValues.get(position).getName()!=null) {
+            if(mDisplayedPhotoValues.get(position).getName().endsWith("mp3")){
+                holder.thumbnail.setImageDrawable(mContext.getResources().getDrawable(R.drawable.mp3));
+            }else if(mDisplayedPhotoValues.get(position).getName().endsWith("ogg")) {
+                holder.thumbnail.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ogpp));
+            }else if(mDisplayedPhotoValues.get(position).getName().endsWith("3gpp")) {
+            holder.thumbnail.setImageDrawable(mContext.getResources().getDrawable(R.drawable.threegpp));
+            }else if(mDisplayedPhotoValues.get(position).getName().endsWith("wav")) {
+                holder.thumbnail.setImageDrawable(mContext.getResources().getDrawable(R.drawable.wav));
+            }else{
+            holder.thumbnail.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_music_player));
+            }
+
+            holder.file_name.setText(mDisplayedPhotoValues.get(position).getName().toString());
+        }
     }
 
     @Override

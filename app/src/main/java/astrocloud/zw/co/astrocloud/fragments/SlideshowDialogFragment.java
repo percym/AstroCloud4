@@ -122,7 +122,7 @@ public class SlideshowDialogFragment extends DialogFragment {
         //Storage for images
         //  mStorageReference = FirebaseStorage.getInstance().getReference(AppConfig.FIRESTOREDBURL);
         mStorageReference = FirebaseStorage.getInstance(AppConfig.FIRESTOREDBURL);
-        mImagesStorageReference = mStorageReference.getReference("images");
+        mImagesStorageReference = mStorageReference.getReference(userId+"/images");
         images = (ArrayList<ImageModel>) getArguments().getSerializable("images");
         selectedPosition = getArguments().getInt("position");
 
@@ -562,7 +562,7 @@ public class SlideshowDialogFragment extends DialogFragment {
         }
 
         private void fileChewer(final ImageModel fileToDelete, String uid , final int pos){
-            StorageReference localReferencePath = mImagesStorageReference.child(uid).child(fileToDelete.getName());
+            StorageReference localReferencePath = mImagesStorageReference.child(fileToDelete.getName());
             localReferencePath.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void aVoid) {
@@ -635,7 +635,7 @@ public class SlideshowDialogFragment extends DialogFragment {
     private void initDownloadTask(ImageModel fileToDownload, String uid){
 
 
-        mStorageReference.getReference("images").child(uid).child(fileToDownload.getKey());
+        mStorageReference.getReference(uid).child("images").child(fileToDownload.getKey());
         File storageLoc = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 //        mImagesStorageReference.child(uid).child(fileToDownload.getKey()).getFile(storageLoc).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
 //            @Override

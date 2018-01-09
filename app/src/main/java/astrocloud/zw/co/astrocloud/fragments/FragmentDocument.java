@@ -117,7 +117,7 @@ public class FragmentDocument extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_music, container, false);
+        View view = inflater.inflate(R.layout.fragment_documents, container, false);
         setHasOptionsMenu(true);
         recyclerView = (RecyclerView) view.findViewById(R.id.videoRecyclerView);
         folder_state_container = (RelativeLayout) view.findViewById(R.id.folder_state_container);
@@ -133,8 +133,8 @@ public class FragmentDocument extends Fragment {
         //initialise the FireStore
         //mStorageReference = FirebaseStorage.getInstance().getReference(AppConfig.FIRESTOREDBURL);
         mStorageReference = FirebaseStorage.getInstance(AppConfig.FIRESTOREDBURL);
-        mMusicStorageReference = mStorageReference.getReference("documents");
-        mUserStorageReference = mMusicStorageReference.child(userId);
+        mMusicStorageReference = mStorageReference.getReference("user_files/"+userId+"/documents");
+        mUserStorageReference = mMusicStorageReference;
 
         userfilesDatabase = FirebaseDatabase.getInstance().getReference();
         contactsChildReference = userfilesDatabase.child("user_files");
@@ -336,7 +336,7 @@ public class FragmentDocument extends Fragment {
 //    }
 
     private void fileChewer(final DocumentModel fileToDelete, String uid , final int pos){
-        StorageReference localReferencePath = mMusicStorageReference.child(uid).child(fileToDelete.getName());
+        StorageReference localReferencePath = mMusicStorageReference.child(fileToDelete.getName());
         localReferencePath.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {

@@ -36,12 +36,12 @@ import astrocloud.zw.co.astrocloud.models.DocumentModel;
 
 public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.MyViewHolder> implements Filterable {
 
-    private DatabaseReference databaseReference ;
+    private DatabaseReference databaseReference;
     private Context mContext;
     private List<DocumentModel> mOriginalPhotoValues = new ArrayList<>();  // Original Values
     private List<DocumentModel> mDisplayedPhotoValues = new ArrayList<>();
     private String TAG = SlideshowDialogFragment.class.getSimpleName();
-    int[] file_formats = new int[]{ R.drawable.mp3, R.drawable.ogpp,R.drawable.gpp};
+    int[] file_formats = new int[]{R.drawable.doc, R.drawable.ppt, R.drawable.xls, R.drawable.txt, R.drawable.rtf, R.drawable.pdf, R.drawable.file};
 
     // Values to be displayed
     public DocumentAdapter(Context context, DatabaseReference ref) {
@@ -70,16 +70,16 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.MyView
             public void onChildRemoved(DataSnapshot dataSnapshot) {
                 String picKey = dataSnapshot.getKey();
                 int picIndex = -1;
-                for(int i= 0 ; i < mDisplayedPhotoValues.size(); i ++ ){
-                    if(mDisplayedPhotoValues.get(i).getKey().contains(picKey)){
-                        picIndex= i;
+                for (int i = 0; i < mDisplayedPhotoValues.size(); i++) {
+                    if (mDisplayedPhotoValues.get(i).getKey().contains(picKey)) {
+                        picIndex = i;
                     }
                 }
-                if(picIndex > -1 ){
+                if (picIndex > -1) {
                     mDisplayedPhotoValues.remove(picIndex);
                     mOriginalPhotoValues.remove(picIndex);
                     notifyDataSetChanged();
-                }else{
+                } else {
                     Log.d(TAG, "no value found");
                 }
 
@@ -99,8 +99,8 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.MyView
         });
 
 
-
     }
+
     @Override
     public Filter getFilter() {
         Filter filter = new Filter() {
@@ -138,7 +138,7 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.MyView
                     for (int i = 0; i < mOriginalPhotoValues.size(); i++) {
                         String data = mOriginalPhotoValues.get(i).getUrl();
                         if (data.toLowerCase().contains(constraint.toString())) {
-                            FilteredArrList.add(new Image(mOriginalPhotoValues.get(i).getUrl(), mOriginalPhotoValues.get(i).getUrl(),mOriginalPhotoValues.get(i).getUrl(),mOriginalPhotoValues.get(i).getUrl(),mOriginalPhotoValues.get(i).getUrl()));
+                            FilteredArrList.add(new Image(mOriginalPhotoValues.get(i).getUrl(), mOriginalPhotoValues.get(i).getUrl(), mOriginalPhotoValues.get(i).getUrl(), mOriginalPhotoValues.get(i).getUrl(), mOriginalPhotoValues.get(i).getUrl()));
                         }
                     }
                     // set the Filtered result to return
@@ -164,8 +164,6 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.MyView
     }
 
 
-
-
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext())
@@ -176,10 +174,45 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.MyView
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
-        holder.thumbnail.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_music_player));
-        holder.file_name.setText(mDisplayedPhotoValues.get(position).getName().toString());
-    }
+        if (mDisplayedPhotoValues.get(position).getName() != null) {
+            if (mDisplayedPhotoValues.get(position).getName().toString().endsWith("doc")) {
+                holder.thumbnail.setImageDrawable(mContext.getResources().getDrawable(R.drawable.doc));
+                holder.file_name.setText(mDisplayedPhotoValues.get(position).getName());
+            } else if (mDisplayedPhotoValues.get(position).getName().toString().endsWith("docx")) {
+                holder.thumbnail.setImageDrawable(mContext.getResources().getDrawable(R.drawable.doc));
+                holder.file_name.setText(mDisplayedPhotoValues.get(position).getName());
+            } else if (mDisplayedPhotoValues.get(position).getName().toString().endsWith("xls")) {
+                holder.thumbnail.setImageDrawable(mContext.getResources().getDrawable(R.drawable.xls));
+            } else if (mDisplayedPhotoValues.get(position).getName().toString().endsWith("xls")) {
+                holder.thumbnail.setImageDrawable(mContext.getResources().getDrawable(R.drawable.xls));
+                holder.file_name.setText(mDisplayedPhotoValues.get(position).getName());
+            } else if (mDisplayedPhotoValues.get(position).getName().toString().endsWith("ppt")) {
+                holder.thumbnail.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ppt));
+                holder.file_name.setText(mDisplayedPhotoValues.get(position).getName());
+            } else if (mDisplayedPhotoValues.get(position).getName().toString().endsWith("pptx")) {
+                holder.thumbnail.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ppt));
+                holder.file_name.setText(mDisplayedPhotoValues.get(position).getName());
+            } else if (mDisplayedPhotoValues.get(position).getName().toString().endsWith("pdf")) {
+                holder.thumbnail.setImageDrawable(mContext.getResources().getDrawable(R.drawable.pdf));
+                holder.file_name.setText(mDisplayedPhotoValues.get(position).getName());
+            } else if (mDisplayedPhotoValues.get(position).getName().toString().endsWith("pub")) {
+                holder.thumbnail.setImageDrawable(mContext.getResources().getDrawable(R.drawable.doc));
+                holder.file_name.setText(mDisplayedPhotoValues.get(position).getName());
+            } else if (mDisplayedPhotoValues.get(position).getName().toString().endsWith("rtf")) {
+                holder.thumbnail.setImageDrawable(mContext.getResources().getDrawable(R.drawable.rtf));
+                holder.file_name.setText(mDisplayedPhotoValues.get(position).getName());
+            } else if (mDisplayedPhotoValues.get(position).getName().toString().endsWith("txt")) {
+                holder.thumbnail.setImageDrawable(mContext.getResources().getDrawable(R.drawable.txt));
+                holder.file_name.setText(mDisplayedPhotoValues.get(position).getName());
+            } else {
+                holder.thumbnail.setImageDrawable(mContext.getResources().getDrawable(R.drawable.file));
+                holder.file_name.setText(mDisplayedPhotoValues.get(position).getName());
 
+            }
+        }
+
+
+    }
     @Override
     public int getItemCount() {
         return  mDisplayedPhotoValues.size();
@@ -257,5 +290,34 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.MyView
 
     public void setmDisplayedPhotoValues(List<DocumentModel> mDisplayedPhotoValues) {
         this.mDisplayedPhotoValues = mDisplayedPhotoValues;
+    }
+
+    public String getFileType(String fileName) {
+
+        String fileType = "";
+        if(fileName.endsWith("doc")) {
+            fileType = "Documents";
+        }else if(fileName.endsWith("docx")) {
+            fileType = "Documents";
+        }else if(fileName.endsWith("xls")) {
+            fileType = "Documents";
+        }else if(fileName.endsWith("xlsx")) {
+            fileType = "Documents";
+        }else if(fileName.endsWith("ppt")){
+            fileType = "Documents";
+        }else if(fileName.endsWith("pptx")){
+            fileType = "Documents";
+        }else if(fileName.endsWith("pdf")){
+            fileType = "Documents";
+        }else if(fileName.endsWith("pdf")){
+            fileType = "Documents";
+        }else if(fileName.endsWith("pub")){
+            fileType = "Documents";
+        }else if(fileName.endsWith("rtf")){
+            fileType = "Documents";
+        }else if(fileName.endsWith("txt")){
+            fileType = "Documents";
+        }
+        return fileType;
     }
 }

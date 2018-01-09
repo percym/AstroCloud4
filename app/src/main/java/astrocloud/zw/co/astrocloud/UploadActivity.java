@@ -90,7 +90,7 @@ import rx.functions.Action1;
 
 public class UploadActivity extends AppCompatActivity {
 
-    private static final int REQUEST_CONTACTS =101 ;
+    private static final int REQUEST_CONTACTS = 101;
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -130,7 +130,7 @@ public class UploadActivity extends AppCompatActivity {
     private NotificationCompat.Builder mBuilder;
     private ArrayList<String> videoPaths;
     private StorageReference mVideosStorageReference;
-   
+
     private ArrayList<FileUploadModel> musicPaths;
     private ArrayList<String> documentPaths;
     private AudioPicker audioPicker;
@@ -138,6 +138,7 @@ public class UploadActivity extends AppCompatActivity {
     private DatabaseReference uploadedMusicChildReference;
     private com.kbeanie.multipicker.api.VideoPicker videoPickers;
     private DatabaseReference uploadedDocumentChildReference;
+    int[] file_formats = new int[]{ R.drawable.mp3, R.drawable.ogpp, R.drawable.threegpp,R.drawable.wav};
 
 
     @Override
@@ -145,7 +146,7 @@ public class UploadActivity extends AppCompatActivity {
         super.onStart();
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if(currentUser == null || currentUser.isAnonymous()){
+        if (currentUser == null || currentUser.isAnonymous()) {
             FirebaseAuth.getInstance().signOut();
             startActivity(new Intent(UploadActivity.this, MainActivity.class));
             finish();
@@ -155,7 +156,7 @@ public class UploadActivity extends AppCompatActivity {
     }
 
     //----------------------------------------------contats
-    private void writecontacts(){
+    private void writecontacts() {
 
         Uri uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
         String[] projection = new String[]{ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
@@ -168,11 +169,11 @@ public class UploadActivity extends AppCompatActivity {
 
         //people.moveToFirst();
         arrayListContacts.clear();
-        for(people.moveToFirst(); !people.isAfterLast(); people.moveToNext()){
+        for (people.moveToFirst(); !people.isAfterLast(); people.moveToNext()) {
 
             String name = people.getString(indexName);
             String number = people.getString(indexNumber);
-            arrayListContacts.add(new ContactModel(name,number));
+            arrayListContacts.add(new ContactModel(name, number));
         }
         people.close();
         writeNewUser(arrayListContacts);
@@ -194,12 +195,12 @@ public class UploadActivity extends AppCompatActivity {
         //Storage for images
         //  mStorageReference = FirebaseStorage.getInstance().getReference(AppConfig.FIRESTOREDBURL);
         mStorageReference = FirebaseStorage.getInstance(AppConfig.FIRESTOREDBURL);
-        mImagesStorageReference = mStorageReference.getReference("images");
-        mVideosStorageReference = mStorageReference.getReference("videos");
-        mMusicStorageReference = mStorageReference.getReference("music");
-        mDocumentsStorageReference = mStorageReference.getReference("documents");
+        mImagesStorageReference = mStorageReference.getReference("user_files/" + userId + "/pictures");
+        mVideosStorageReference = mStorageReference.getReference("user_files/" + userId + "/videos");
+        mMusicStorageReference = mStorageReference.getReference("user_files/" + userId + "/music");
+        mDocumentsStorageReference = mStorageReference.getReference("user_files/" + userId + "/documents");
 
-        uploadedFilesChildReference = contactsDatabase.child("user_files").child(userId).child("images");
+        uploadedFilesChildReference = contactsDatabase.child("user_files").child(userId).child("pictures");
         uploadedVideoChildReference = contactsDatabase.child("user_files").child(userId).child("videos");
         uploadedMusicChildReference = contactsDatabase.child("user_files").child(userId).child("music");
         uploadedDocumentChildReference = contactsDatabase.child("user_files").child(userId).child("documents");
@@ -593,7 +594,7 @@ public class UploadActivity extends AppCompatActivity {
                         });
                         break;
                     }
-                    default :{
+                    default: {
                         rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_image_upload));
                         if (rightLowerMenu.isOpen()) {
                             rightLowerMenu.close(true);
@@ -700,7 +701,6 @@ public class UploadActivity extends AppCompatActivity {
         });
 
 
-
     }
 
 
@@ -716,16 +716,16 @@ public class UploadActivity extends AppCompatActivity {
                 }
             }
 
-        snackShower("Contacts Uploaded");
+            snackShower("Contacts Uploaded");
         }
     }
 
-    private String nameformater(String name){
-        String [] badChars = {".","#","$","[","]"};
-        for(int i =0; i < badChars.length; i++) {
-            if (name.contains((badChars[i]))){
-                String toBeReplaced = badChars[i] ;
-                name =name.replace(toBeReplaced,"");
+    private String nameformater(String name) {
+        String[] badChars = {".", "#", "$", "[", "]"};
+        for (int i = 0; i < badChars.length; i++) {
+            if (name.contains((badChars[i]))) {
+                String toBeReplaced = badChars[i];
+                name = name.replace(toBeReplaced, "");
             }
         }
         return name;
@@ -803,7 +803,7 @@ public class UploadActivity extends AppCompatActivity {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
 
-            switch (position){
+            switch (position) {
                 case 0:
                     return FragmentPhotos.newInstance(position);
                 case 1:
@@ -816,7 +816,8 @@ public class UploadActivity extends AppCompatActivity {
                     return FragmentContacts.newInstance(position);
 
 
-                default:return FragmentPhotos.newInstance(position);
+                default:
+                    return FragmentPhotos.newInstance(position);
             }
 
         }
@@ -830,7 +831,7 @@ public class UploadActivity extends AppCompatActivity {
         @Nullable
         @Override
         public CharSequence getPageTitle(int position) {
-            switch (position){
+            switch (position) {
                 case 1:
                     return "Images";
                 case 2:
@@ -852,7 +853,8 @@ public class UploadActivity extends AppCompatActivity {
         PermissionsManager.get()
                 .intentToAppSettings(this);
     }
-    public void showPermissionsDialogue(){
+
+    public void showPermissionsDialogue() {
         new AwesomeSuccessDialog(this)
                 .setTitle("AstroCloud")
                 .setMessage("Permission to read and write contacts is needed for application to function properly")
@@ -881,7 +883,8 @@ public class UploadActivity extends AppCompatActivity {
                 .show();
 
     }
-    public void showPermissionsDialogueStorage(){
+
+    public void showPermissionsDialogueStorage() {
         new AwesomeSuccessDialog(this)
                 .setTitle("AstroCloud")
                 .setMessage("Permission to read and write storage is needed for application to function properly")
@@ -912,7 +915,7 @@ public class UploadActivity extends AppCompatActivity {
     }
 
 
-    public void showUploadcontactsDialogue(){
+    public void showUploadcontactsDialogue() {
         awesomeInfoDialog = new AwesomeInfoDialog(this);
         awesomeInfoDialog
                 .setTitle(R.string.app_name)
@@ -924,8 +927,8 @@ public class UploadActivity extends AppCompatActivity {
 
     }
 
-    private void contactsRestorer(ArrayList<ContactModel> contactModelArrayList){
-        ArrayList<ContentProviderOperation>  ops= new ArrayList<ContentProviderOperation>();
+    private void contactsRestorer(ArrayList<ContactModel> contactModelArrayList) {
+        ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
         for (int i = 0; i <= contactModelArrayList.size() - 1; i++) {
             String name = contactModelArrayList.get(i).getName();
             String mobileno = contactModelArrayList.get(i).getNumber();
@@ -985,9 +988,10 @@ public class UploadActivity extends AppCompatActivity {
                 .show();
     }
 
-    public void dismissRestoration(){
+    public void dismissRestoration() {
         awesomeInfocontacts.hide();
     }
+
     public void showFetchcontactsDialogue() {
         awesomeInfoDialog = new AwesomeInfoDialog(this);
         awesomeInfoDialog
@@ -1003,20 +1007,19 @@ public class UploadActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode){
+        switch (requestCode) {
             case FilePickerConst.REQUEST_CODE_PHOTO:
-                if(resultCode == Activity.RESULT_OK && data != null){
+                if (resultCode == Activity.RESULT_OK && data != null) {
                     photoPaths = new ArrayList<>();
                     photoPaths.addAll(data.getStringArrayListExtra(FilePickerConst.KEY_SELECTED_MEDIA));
                     //start upload
-                   imageUploaderToFireStore(photoPaths);
+                    imageUploaderToFireStore(photoPaths);
 
                 }
                 break;
 
             case FilePickerConst.REQUEST_CODE_DOC:
-                if(resultCode== Activity.RESULT_OK && data!=null)
-                {
+                if (resultCode == Activity.RESULT_OK && data != null) {
                     documentPaths = new ArrayList<>();
                     documentPaths.addAll(data.getStringArrayListExtra(FilePickerConst.KEY_SELECTED_DOCS));
                     documentUploaderToFireStore(documentPaths);
@@ -1035,76 +1038,79 @@ public class UploadActivity extends AppCompatActivity {
 
         }
 
-        if(resultCode == RESULT_OK) {
-            if(requestCode == Picker.PICK_VIDEO_DEVICE) {
+        if (resultCode == RESULT_OK) {
+            if (requestCode == Picker.PICK_VIDEO_DEVICE) {
                 videoPickers.submit(data);
             }
         }
     }
 
-    private void musicUploaderToFireStore(ArrayList<FileUploadModel> arrayListPhotos){
-        final int id =1;
+    private void musicUploaderToFireStore(ArrayList<FileUploadModel> arrayListPhotos) {
+        final int id = 1;
 
-        for (final FileUploadModel looper : arrayListPhotos){
-            mNotifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            mBuilder = new NotificationCompat.Builder(getApplicationContext(),"AstroCloud")
-                    .setContentTitle("AstroCloud")
-                    .setContentText("Uploading audio to your cloud account" )
-                    .setAutoCancel(true)
-                    .setSmallIcon(R.drawable.ic_stat_cloud_upload);
+        for (final FileUploadModel looper : arrayListPhotos) {
+            final String extension = looper.getUrl().substring(looper.getUrl().lastIndexOf(".")+1);
+            if (!setFileExtensionIcon(looper.getUrl()).isEmpty()) {
+                mNotifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                mBuilder = new NotificationCompat.Builder(getApplicationContext(), "AstroCloud")
+                        .setContentTitle("AstroCloud")
+                        .setContentText("Uploading audio to your cloud account")
+                        .setAutoCancel(true)
+                        .setSmallIcon(R.drawable.ic_stat_cloud_upload);
 
-            file = Uri.fromFile(new File(looper.getUrl()));
-            metadata = new StorageMetadata.Builder()
-                    .setContentType("audio/mpeg")
-                    .build();
-            uploadTask = mMusicStorageReference.child(userId + "/"+file.getLastPathSegment()).putFile(file,metadata);
+                file = Uri.fromFile(new File(looper.getUrl()));
+                metadata = new StorageMetadata.Builder()
+                        .setContentType("audio/mpeg")
+                        .build();
+                uploadTask = mMusicStorageReference.child(file.getLastPathSegment()).putFile(file, metadata);
 
-            uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                    Double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
-                    mBuilder.setProgress(100, progress.intValue(), false);
-                    mBuilder.setContentText("Uploading audio");
-                    // Displays the progress bar for the first time.
-                    mNotifyManager.notify(id, mBuilder.build());
+                uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                        Double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                        mBuilder.setProgress(100, progress.intValue(), false);
+                        mBuilder.setContentText("Uploading audio");
+                        // Displays the progress bar for the first time.
+                        mNotifyManager.notify(id, mBuilder.build());
 
-                }
-            }).addOnPausedListener(new OnPausedListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onPaused(UploadTask.TaskSnapshot taskSnapshot) {
-                    mBuilder.setContentText("Upload paused");
-                    mNotifyManager.notify(id, mBuilder.build());
-                }
-            }).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                    writeNewUploadMusic(task.getResult().getDownloadUrl().toString(), task.getResult().getMetadata().getName(),
-                            task.getResult().getMetadata().getSizeBytes(),looper.getType());
-                    mBuilder.setContentText("Upload completed");
-                    mNotifyManager.notify(id, mBuilder.build());
+                    }
+                }).addOnPausedListener(new OnPausedListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onPaused(UploadTask.TaskSnapshot taskSnapshot) {
+                        mBuilder.setContentText("Upload paused");
+                        mNotifyManager.notify(id, mBuilder.build());
+                    }
+                }).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                        writeNewUploadMusic(task.getResult().getDownloadUrl().toString(), task.getResult().getMetadata().getName(),
+                                task.getResult().getMetadata().getSizeBytes(), extension);
+                        mBuilder.setContentText("Upload completed");
+                        mNotifyManager.notify(id, mBuilder.build());
 
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    mBuilder.setContentText("Upload failed " + e.getMessage());
-                    mNotifyManager.notify(id, mBuilder.build());
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        mBuilder.setContentText("Upload failed " + e.getMessage());
+                        mNotifyManager.notify(id, mBuilder.build());
 
-                }
-            });
+                    }
+                });
+            }
+
+            musicPaths = new ArrayList<>();
         }
-
-       musicPaths = new ArrayList<>();
-
     }
-    private void videoUploaderToFireStore(ArrayList<String> arrayListPhotos){
-        final int id =1;
 
-        for (String looper : arrayListPhotos){
+    private void videoUploaderToFireStore(ArrayList<String> arrayListPhotos) {
+        final int id = 1;
+
+        for (String looper : arrayListPhotos) {
             mNotifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            mBuilder = new NotificationCompat.Builder(getApplicationContext(),"AstroCloud")
+            mBuilder = new NotificationCompat.Builder(getApplicationContext(), "AstroCloud")
                     .setContentTitle("AstroCloud")
-                    .setContentText("Uploading image to your cloud account" )
+                    .setContentText("Uploading image to your cloud account")
                     .setAutoCancel(true)
                     .setSmallIcon(R.drawable.ic_stat_cloud_upload);
 
@@ -1112,7 +1118,7 @@ public class UploadActivity extends AppCompatActivity {
             metadata = new StorageMetadata.Builder()
                     .setContentType("video/mpeg")
                     .build();
-            uploadTask = mVideosStorageReference.child(userId + "/"+file.getLastPathSegment()).putFile(file,metadata);
+            uploadTask = mVideosStorageReference.child(file.getLastPathSegment()).putFile(file, metadata);
 
             uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
                 @Override
@@ -1152,14 +1158,14 @@ public class UploadActivity extends AppCompatActivity {
 
     }
 
-    private void imageUploaderToFireStore(ArrayList<String> arrayListPhotos){
-        final int id =1;
+    private void imageUploaderToFireStore(ArrayList<String> arrayListPhotos) {
+        final int id = 1;
 
-        for (String looper : arrayListPhotos){
+        for (String looper : arrayListPhotos) {
             mNotifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            mBuilder = new NotificationCompat.Builder(getApplicationContext(),"AstroCloud")
+            mBuilder = new NotificationCompat.Builder(getApplicationContext(), "AstroCloud")
                     .setContentTitle("AstroCloud")
-                    .setContentText("Uploading image to your cloud account" )
+                    .setContentText("Uploading image to your cloud account")
                     .setAutoCancel(true)
                     .setSmallIcon(R.drawable.ic_stat_cloud_upload);
 
@@ -1167,7 +1173,7 @@ public class UploadActivity extends AppCompatActivity {
             metadata = new StorageMetadata.Builder()
                     .setContentType("image/jpeg")
                     .build();
-            uploadTask = mImagesStorageReference.child(userId + "/"+file.getLastPathSegment()).putFile(file,metadata);
+            uploadTask = mImagesStorageReference.child(file.getLastPathSegment()).putFile(file, metadata);
 
             uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
                 @Override
@@ -1208,86 +1214,135 @@ public class UploadActivity extends AppCompatActivity {
 
     }
 
-    private void writeNewUpload(String downloadUrl, String name, Long sizeInBytes){
+    private void writeNewUpload(String downloadUrl, String name, Long sizeInBytes) {
         String key = uploadedFilesChildReference.push().getKey();
         ImageModel imageModel = new ImageModel(downloadUrl, name, sizeInBytes, key);
         uploadedFilesChildReference.child(key).setValue(imageModel);
 
     }
 
-    private void writeNewVideoUpload(String downloadUrl, String name, Long sizeInBytes){
+    private void writeNewVideoUpload(String downloadUrl, String name, Long sizeInBytes) {
         String key = uploadedVideoChildReference.push().getKey();
         ImageModel imageModel = new ImageModel(downloadUrl, name, sizeInBytes, key);
         uploadedVideoChildReference.child(key).setValue(imageModel);
 
     }
-    private void writeNewUploadMusic(String downloadUrl, String name, Long sizeInBytes, String type){
+
+    private void writeNewUploadMusic(String downloadUrl, String name, Long sizeInBytes, String type) {
         String key = uploadedMusicChildReference.push().getKey();
         MusicModel musicModel = new MusicModel(downloadUrl, name, sizeInBytes, key, type);
         uploadedMusicChildReference.child(key).setValue(musicModel);
 
     }
 
-    private void documentUploaderToFireStore(ArrayList<String> arrayListPhotos){
-        final int id =1;
+    private void documentUploaderToFireStore(ArrayList<String> arrayListPhotos) {
+        final int id = 1;
 
-        for (String looper : arrayListPhotos){
-            mNotifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            mBuilder = new NotificationCompat.Builder(getApplicationContext(),"AstroCloud")
-                    .setContentTitle("AstroCloud")
-                    .setContentText("Uploading document to your cloud account" )
-                    .setAutoCancel(true)
-                    .setSmallIcon(R.drawable.ic_stat_cloud_upload);
 
-            file = Uri.fromFile(new File(looper));
-            metadata = new StorageMetadata.Builder()
-                    .setContentType("docx")
-                    .build();
-            uploadTask = mDocumentsStorageReference.child(userId + "/"+file.getLastPathSegment()).putFile(file,metadata);
+        for (String looper : arrayListPhotos) {
+            final String extension = looper.substring(looper.lastIndexOf("."));
+            if (!getFileType(looper).isEmpty()) {
+                mNotifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                mBuilder = new NotificationCompat.Builder(getApplicationContext(), "AstroCloud")
+                        .setContentTitle("AstroCloud")
+                        .setContentText("Uploading document to your cloud account")
+                        .setAutoCancel(true)
+                        .setSmallIcon(R.drawable.ic_stat_cloud_upload);
 
-            uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                    Double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
-                    mBuilder.setProgress(100, progress.intValue(), false);
-                    mBuilder.setContentText("Uploading document");
-                    // Displays the progress bar for the first time.
-                    mNotifyManager.notify(id, mBuilder.build());
+                file = Uri.fromFile(new File(looper));
+                metadata = new StorageMetadata.Builder()
+                        .setContentType("docx")
+                        .build();
+                uploadTask = mDocumentsStorageReference.child(file.getLastPathSegment()).putFile(file, metadata);
 
-                }
-            }).addOnPausedListener(new OnPausedListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onPaused(UploadTask.TaskSnapshot taskSnapshot) {
-                    mBuilder.setContentText("Upload paused");
-                    mNotifyManager.notify(id, mBuilder.build());
-                }
-            }).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                    writeNewUploadDocument(task.getResult().getDownloadUrl().toString(), task.getResult().getMetadata().getName(),
-                            task.getResult().getMetadata().getSizeBytes());
-                    mBuilder.setContentText("Upload completed");
-                    mNotifyManager.notify(id, mBuilder.build());
+                uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                        Double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                        mBuilder.setProgress(100, progress.intValue(), false);
+                        mBuilder.setContentText("Uploading document");
+                        // Displays the progress bar for the first time.
+                        mNotifyManager.notify(id, mBuilder.build());
 
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    mBuilder.setContentText("Upload failed " + e.getMessage());
-                    mNotifyManager.notify(id, mBuilder.build());
+                    }
+                }).addOnPausedListener(new OnPausedListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onPaused(UploadTask.TaskSnapshot taskSnapshot) {
+                        mBuilder.setContentText("Upload paused");
+                        mNotifyManager.notify(id, mBuilder.build());
+                    }
+                }).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                        writeNewUploadDocument(task.getResult().getDownloadUrl().toString(), task.getResult().getMetadata().getName(),
+                                task.getResult().getMetadata().getSizeBytes(), extension);
+                        mBuilder.setContentText("Upload completed");
+                        mNotifyManager.notify(id, mBuilder.build());
 
-                }
-            });
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        mBuilder.setContentText("Upload failed " + e.getMessage());
+                        mNotifyManager.notify(id, mBuilder.build());
+
+                    }
+                });
+            }
+
+            documentPaths = new ArrayList<>();
         }
-
-        documentPaths = new ArrayList<>();
-
     }
-    private void writeNewUploadDocument(String downloadUrl, String name, Long sizeInBytes){
+
+    private void writeNewUploadDocument(String downloadUrl, String name, Long sizeInBytes, String extension) {
         String key = uploadedDocumentChildReference.push().getKey();
-        DocumentModel documentModel = new DocumentModel(downloadUrl, name, sizeInBytes, key);
+        DocumentModel documentModel = new DocumentModel(downloadUrl, name, sizeInBytes, key, extension);
         uploadedDocumentChildReference.child(key).setValue(documentModel);
 
+    }
+
+    public String getFileType(String fileName) {
+
+        String fileType = "";
+        if (fileName.endsWith("doc")) {
+            fileType = "Documents";
+        } else if (fileName.endsWith("docx")) {
+            fileType = "Documents";
+        } else if (fileName.endsWith("xls")) {
+            fileType = "Documents";
+        } else if (fileName.endsWith("xlsx")) {
+            fileType = "Documents";
+        } else if (fileName.endsWith("ppt")) {
+            fileType = "Documents";
+        } else if (fileName.endsWith("pptx")) {
+            fileType = "Documents";
+        } else if (fileName.endsWith("pdf")) {
+            fileType = "Documents";
+        } else if (fileName.endsWith("pdf")) {
+            fileType = "Documents";
+        } else if (fileName.endsWith("pub")) {
+            fileType = "Documents";
+        } else if (fileName.endsWith("rtf")) {
+            fileType = "Documents";
+        } else if (fileName.endsWith("txt")) {
+            fileType = "Documents";
+        }
+        return fileType;
+    }
+
+    public String setFileExtensionIcon(String fileName) {
+        String iconLocation = "";
+        if (fileName.endsWith("mp3")) {
+            iconLocation = Integer.toString(file_formats[0]);
+        } else if (fileName.endsWith("ogg")){
+            iconLocation = Integer.toString(file_formats[1]);
+        }else if(fileName.endsWith("3gpp")){
+            iconLocation = Integer.toString(file_formats[2]);
+
+        } else if(fileName.endsWith("wav")){
+        iconLocation = Integer.toString(file_formats[3]);
+    }
+        return iconLocation;
     }
 
 }

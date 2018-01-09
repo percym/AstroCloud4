@@ -9,22 +9,16 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
-            android:layout_marginTop="5dp">
+            android:padding="6dp">
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/thumbnail"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentTop="true"
-                android:layout_marginRight="6dip"
-                android:contentDescription="TODO"
-                android:padding="1dp"
                 android:src="@drawable/ic_user_green"
                 app:civ_border_color="@color/colorPrimary"
                 app:civ_border_width="1dp"/>
-
-
 
             <TextView
                 android:id="@+id/file_name"
@@ -40,8 +34,6 @@
                 android:maxLines="2"
                 android:text="Example application"
                 android:textSize="13sp" />
-
-
         </RelativeLayout>
 
 

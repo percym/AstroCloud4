@@ -99,12 +99,12 @@ public class FragmentPhotos extends Fragment {
         //initialise the FireStore
         //mStorageReference = FirebaseStorage.getInstance().getReference(AppConfig.FIRESTOREDBURL);
         mStorageReference = FirebaseStorage.getInstance(AppConfig.FIRESTOREDBURL);
-        mImagesStorageReference = mStorageReference.getReference("images");
-        mUserStorageReference = mImagesStorageReference.child(userId);
+        mImagesStorageReference = mStorageReference.getReference("user_files/"+userId+"/pictures");
+        mUserStorageReference = mImagesStorageReference;
 
         userfilesDatabase = FirebaseDatabase.getInstance().getReference();
         contactsChildReference= userfilesDatabase.child("user_files");
-        uploadedFilesChildReference = contactsChildReference.child(userId).child("images");
+        uploadedFilesChildReference = contactsChildReference.child(userId).child("pictures");
         pDialog = new ProgressDialog(getActivity());
         images = new ArrayList<>();
         mAdapter = new GalleryAdapter(getActivity(), uploadedFilesChildReference);

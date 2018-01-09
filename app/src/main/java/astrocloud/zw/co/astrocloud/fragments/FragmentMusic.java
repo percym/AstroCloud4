@@ -132,8 +132,8 @@ public class FragmentMusic extends Fragment {
         //initialise the FireStore
         //mStorageReference = FirebaseStorage.getInstance().getReference(AppConfig.FIRESTOREDBURL);
         mStorageReference = FirebaseStorage.getInstance(AppConfig.FIRESTOREDBURL);
-        mMusicStorageReference = mStorageReference.getReference("music");
-        mUserStorageReference = mMusicStorageReference.child(userId);
+        mMusicStorageReference = mStorageReference.getReference("user_files/"+userId+"/music");
+        mUserStorageReference = mMusicStorageReference;
 
         userfilesDatabase = FirebaseDatabase.getInstance().getReference();
         contactsChildReference = userfilesDatabase.child("user_files");
@@ -335,7 +335,7 @@ public class FragmentMusic extends Fragment {
 //    }
 
     private void fileChewer(final MusicModel fileToDelete, String uid , final int pos){
-        StorageReference localReferencePath = mMusicStorageReference.child(uid).child(fileToDelete.getName());
+        StorageReference localReferencePath = mMusicStorageReference.child(fileToDelete.getName());
         localReferencePath.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {

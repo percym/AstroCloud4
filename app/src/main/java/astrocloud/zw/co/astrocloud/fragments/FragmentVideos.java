@@ -100,8 +100,8 @@ public class FragmentVideos extends Fragment {
         //initialise the FireStore
         //mStorageReference = FirebaseStorage.getInstance().getReference(AppConfig.FIRESTOREDBURL);
         mStorageReference = FirebaseStorage.getInstance(AppConfig.FIRESTOREDBURL);
-        mVideosStorageReference = mStorageReference.getReference("videos");
-        mUserStorageReference = mVideosStorageReference.child(userId);
+        mVideosStorageReference = mStorageReference.getReference("user_files/"+userId+"/videos");
+        mUserStorageReference = mVideosStorageReference;
 
         userfilesDatabase = FirebaseDatabase.getInstance().getReference();
         contactsChildReference = userfilesDatabase.child("user_files");

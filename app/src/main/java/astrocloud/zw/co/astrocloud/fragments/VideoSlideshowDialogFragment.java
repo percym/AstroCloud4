@@ -116,7 +116,7 @@ public class VideoSlideshowDialogFragment extends DialogFragment  {
         //Storage for images
         //  mStorageReference = FirebaseStorage.getInstance().getReference(AppConfig.FIRESTOREDBURL);
         mStorageReference = FirebaseStorage.getInstance(AppConfig.FIRESTOREDBURL);
-        mVideosStorageReference = mStorageReference.getReference("documents");
+        mVideosStorageReference = mStorageReference.getReference(userId+"/documents");
         videos = (ArrayList<VideoModel>) getArguments().getSerializable("documents");
         selectedPosition = getArguments().getInt("position");
 
@@ -569,7 +569,7 @@ public class VideoSlideshowDialogFragment extends DialogFragment  {
         }
 
         private void fileChewer(final VideoModel fileToDelete, String uid , final int pos){
-            StorageReference localReferencePath = mVideosStorageReference.child(uid).child(fileToDelete.getName());
+            StorageReference localReferencePath = mVideosStorageReference.child(fileToDelete.getName());
             localReferencePath.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void aVoid) {
