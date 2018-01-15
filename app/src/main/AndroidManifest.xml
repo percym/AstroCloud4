@@ -37,7 +37,17 @@
         <activity
             android:name=".UsageActivity"
             android:label="@string/title_activity_usage"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar">
+
+        </activity>
+
+
+        <service android:name=".utils.FireSizeCalculator"
+                 android:enabled="true"
+                >
+            <!--android:process=":astrocloud"-->
+
+        </service>
     </application>
 
 </manifest>

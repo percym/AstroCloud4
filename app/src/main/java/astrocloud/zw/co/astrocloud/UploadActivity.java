@@ -1,6 +1,7 @@
 package astrocloud.zw.co.astrocloud;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.NotificationManager;
 import android.content.ContentProviderOperation;
 import android.content.Context;
@@ -32,7 +33,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeInfoDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeSuccessDialog;
@@ -53,11 +53,8 @@ import com.google.firebase.storage.UploadTask;
 import com.kbeanie.multipicker.api.AudioPicker;
 import com.kbeanie.multipicker.api.Picker;
 import com.kbeanie.multipicker.api.callbacks.AudioPickerCallback;
-import com.kbeanie.multipicker.api.callbacks.FilePickerCallback;
 import com.kbeanie.multipicker.api.callbacks.VideoPickerCallback;
 import com.kbeanie.multipicker.api.entity.ChosenAudio;
-import com.kbeanie.multipicker.api.entity.ChosenFile;
-import com.kbeanie.multipicker.api.entity.ChosenImage;
 import com.kbeanie.multipicker.api.entity.ChosenVideo;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionButton;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
@@ -79,10 +76,10 @@ import astrocloud.zw.co.astrocloud.fragments.FragmentVideos;
 import astrocloud.zw.co.astrocloud.models.ContactModel;
 import astrocloud.zw.co.astrocloud.models.DocumentModel;
 import astrocloud.zw.co.astrocloud.models.FileUploadModel;
-import astrocloud.zw.co.astrocloud.models.Image;
 import astrocloud.zw.co.astrocloud.models.ImageModel;
 import astrocloud.zw.co.astrocloud.models.MusicModel;
 import astrocloud.zw.co.astrocloud.utils.AppConfig;
+import astrocloud.zw.co.astrocloud.utils.FireSizeCalculator;
 import astrocloud.zw.co.astrocloud.utils.GLOBALDECLARATIONS;
 import droidninja.filepicker.FilePickerBuilder;
 import droidninja.filepicker.FilePickerConst;
@@ -186,7 +183,6 @@ public class UploadActivity extends AppCompatActivity {
         audioPicker = new AudioPicker(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
 
         contactsDatabase = FirebaseDatabase.getInstance().getReference();
         contactsChildReference = contactsDatabase.child("contacts");
@@ -699,7 +695,10 @@ public class UploadActivity extends AppCompatActivity {
 
             }
         });
-
+        boolean checkService = isMyServiceRunning(FireSizeCalculator.class);
+        if(!isMyServiceRunning(FireSizeCalculator.class)){
+            startService(new Intent(getBaseContext(), FireSizeCalculator.class));
+        }
 
     }
 
@@ -748,6 +747,9 @@ public class UploadActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
+        }else  if (id==R.id.my_cloud){
+           startActivity( new Intent(this, UsageActivity.class));
+
         }
 
         return super.onOptionsItemSelected(item);
@@ -1343,6 +1345,16 @@ public class UploadActivity extends AppCompatActivity {
         iconLocation = Integer.toString(file_formats[3]);
     }
         return iconLocation;
+    }
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

@@ -11,4 +11,11 @@ import astrocloud.zw.co.astrocloud.models.ContactModel;
 public class GLOBALDECLARATIONS {
     public static ArrayList<ContactModel> GLOBAL_CONTACTS_ARRAYLIST= new ArrayList<>();
     public static String FIRESTORE_DB_PATH= "gs://astrocloudzw.appspot.com/";
+    public static Long  TOTAL_AVAILABLE_SPACE= 10737418240L;
+    public static Long PICTURES_DATABASE_SIZE =0L;
+    public static Long  MUSIC_DATABASE_SIZE=0L;
+    public static Long  VIDEO_DATABASE_SIZE=0L;
+
+
+
 }

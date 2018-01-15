@@ -3,49 +3,32 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:orientation="vertical"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="astrocloud.zw.co.astrocloud.UsageActivity"
-    tools:showIn="@layout/activity_usage">
+    tools:showIn="@layout/activity_usage"
+    xmlns:lv="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/usage_border">
 
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/appbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="@dimen/appbar_padding_top"
-        android:theme="@style/AppTheme.AppBarOverlay">
-
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:layout_weight="1"
-        android:background="@drawable/green_back"
-        app:layout_scrollFlags="scroll|enterAlways"
-        app:popupTheme="@style/AppTheme.PopupOverlay"
-        app:title="@string/app_name">
-
-    </android.support.v7.widget.Toolbar>
-    </android.support.design.widget.AppBarLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="10dp">
+        android:layout_marginTop="5dp">
 
         <RelativeLayout
-
             android:id="@+id/photos_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="10dp"
             android:elevation="1dp"
-            android:layout_weight="0.3">
+            android:layout_weight="0.3"
+            android:layout_margin="1dp">
             <ImageView
                 android:id="@+id/im_photo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
                 android:src="@drawable/ic_image_up"
                 android:layout_centerHorizontal="true"
                 android:paddingBottom="5dp"/>
@@ -54,7 +37,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Pics"
-                android:textColor="#fff"
+                android:textColor="@color/colorPrimary"
                 android:layout_below="@+id/im_photo"
                 android:textSize="12dp"
                 android:layout_centerHorizontal="true"
@@ -63,8 +46,8 @@
             <TextView
                 android:id="@+id/tv_photo_count"
                 android:layout_centerHorizontal="true"
-                android:paddingBottom="5dp"
-                android:textColor="#fff"
+                android:paddingBottom="2dp"
+                android:textColor="@color/colorPrimary"
                 android:text="(0)"
                 android:textSize="12dp"
                 android:layout_width="wrap_content"
@@ -82,8 +65,8 @@
             android:layout_weight="0.3">
             <ImageView
                 android:id="@+id/im_music"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
                 android:src="@drawable/ic_music_player"
                 android:layout_centerHorizontal="true"
                 android:paddingBottom="5dp"/>
@@ -92,7 +75,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Music"
-                android:textColor="#fff"
+                android:textColor="@color/colorPrimary"
                 android:layout_below="@+id/im_music"
                 android:textSize="12dp"
                 android:layout_centerHorizontal="true"
@@ -101,8 +84,8 @@
             <TextView
                 android:id="@+id/tv_music_count"
                 android:layout_centerHorizontal="true"
-                android:paddingBottom="5dp"
-                android:textColor="#fff"
+                android:paddingBottom="2dp"
+                android:textColor="@color/colorPrimary"
                 android:text="(0)"
                 android:textSize="12dp"
                 android:layout_width="wrap_content"
@@ -120,8 +103,8 @@
             android:layout_weight="0.3">
             <ImageView
                 android:id="@+id/im_docs"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
                 android:src="@drawable/ic_document_not_there"
                 android:layout_centerHorizontal="true"
                 android:paddingBottom="5dp"/>
@@ -130,7 +113,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Docs"
-                android:textColor="#fff"
+                android:textColor="@color/colorPrimary"
                 android:layout_below="@+id/im_docs"
                 android:paddingBottom="5dp"
                 android:textSize="12dp"
@@ -139,10 +122,10 @@
             <TextView
                 android:id="@+id/tv_docs_count"
                 android:layout_centerHorizontal="true"
-                android:textColor="#fff"
+                android:textColor="@color/colorPrimary"
                 android:text="(0)"
                 android:textSize="12dp"
-                android:paddingBottom="5dp"
+                android:paddingBottom="2dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/tv_docs"/>
@@ -162,8 +145,8 @@
             android:layout_weight="0.3">
             <ImageView
                 android:id="@+id/im_contact"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
                 android:src="@drawable/ic_user_not_there"
                 android:layout_centerHorizontal="true"
                 android:paddingBottom="5dp"/>
@@ -172,7 +155,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Contacts"
-                android:textColor="#fff"
+                android:textColor="@color/colorPrimary"
                 android:layout_below="@+id/im_contact"
                 android:textSize="12dp"
                 android:layout_centerHorizontal="true"
@@ -181,8 +164,8 @@
             <TextView
                 android:id="@+id/tv_contact_count"
                 android:layout_centerHorizontal="true"
-                android:paddingBottom="5dp"
-                android:textColor="#fff"
+                android:paddingBottom="2dp"
+                android:textColor="@color/colorPrimary"
                 android:text="(0)"
                 android:textSize="12dp"
                 android:layout_width="wrap_content"
@@ -201,8 +184,8 @@
             android:layout_weight="0.3">
             <ImageView
                 android:id="@+id/im_video"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
                 android:src="@drawable/ic_video_not_there"
                 android:layout_centerHorizontal="true"
                 android:paddingBottom="5dp"/>
@@ -211,7 +194,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Videos"
-                android:textColor="#fff"
+                android:textColor="@color/colorPrimary"
                 android:layout_below="@+id/im_video"
                 android:textSize="12dp"
                 android:layout_centerHorizontal="true"
@@ -220,8 +203,8 @@
             <TextView
                 android:id="@+id/tv_video_count"
                 android:layout_centerHorizontal="true"
-                android:paddingBottom="5dp"
-                android:textColor="#fff"
+                android:paddingBottom="2dp"
+                android:textColor="@color/colorPrimary"
                 android:text="(0)"
                 android:textSize="12dp"
                 android:layout_width="wrap_content"
@@ -237,21 +220,19 @@
             android:layout_toRightOf="@+id/video_layout_layout"
             android:padding="10dp"
             android:layout_weight="0.3">
-
             <ImageView
                 android:id="@+id/im_recycle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:src="@drawable/ic_recycle"
                 android:layout_centerHorizontal="true"
-                android:paddingBottom="5dp"
-                android:src="@drawable/ic_recycle" />
+                android:paddingBottom="5dp"/>
             <TextView
                 android:id="@+id/tv_recycle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Trash"
-                android:textColor="#fff"
+                android:textColor="@color/colorPrimary"
                 android:layout_below="@+id/im_recycle"
                 android:textSize="12dp"
                 android:paddingBottom="5dp"
@@ -260,8 +241,8 @@
             <TextView
                 android:id="@+id/tv_recycle_count"
                 android:layout_centerHorizontal="true"
-                android:paddingBottom="5dp"
-                android:textColor="#fff"
+                android:paddingBottom="2dp"
+                android:textColor="@color/colorPrimary"
                 android:text="(0)"
                 android:textSize="12dp"
                 android:layout_width="wrap_content"
@@ -272,25 +253,52 @@
 
     </LinearLayout>
 
-    <!--<RelativeLayout-->
-        <!--android:id="@+id/cloud_layout"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:padding="10dp">-->
 
-        <!--<TextView-->
-            <!--android:id="@+id/tv_cloud"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:text="Storage Used"-->
-            <!--android:textColor="#fff"-->
-            <!--android:layout_centerHorizontal="true"-->
-            <!--android:textSize="12dp"-->
-            <!--android:paddingTop="7dp"-->
-            <!--android:paddingBottom="5dp"/>-->
+
+    <!--<RelativeLayout-->
+    <!--android:id="@+id/cloud_layout"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:padding="10dp">-->
+    <!--<TextView-->
+    <!--android:id="@+id/tv_cloud"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:text="Storage Used"-->
+    <!--android:textColor="#fff"-->
+    <!--android:layout_centerHorizontal="true"-->
+    <!--android:textSize="12dp"-->
+    <!--android:paddingTop="7dp"-->
+    <!--android:paddingBottom="5dp"/>-->
 
 
     <!--</RelativeLayout>-->
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="1.5dp"
+    android:background="@drawable/usage_border"></LinearLayout>
+
+    <LinearLayout
+        android:layout_weight="1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:layout_marginTop="4dp">
+
+        <com.daasuu.ahp.AnimateHorizontalProgressBar
+            android:id="@+id/animate_progress_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:ahp_cornerRadius="2dp"
+            app:ahp_backgroundColor="@color/colorPrimary"
+            app:ahp_progressColor="@color/colorAccent" />
+
+
+    </LinearLayout>
     <RelativeLayout
         android:layout_marginTop="10dp"
         android:layout_width="match_parent"
@@ -312,9 +320,11 @@
             android:layout_marginTop="5dp"
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
-            android:textColor="#fff"
+            android:textColor="@color/colorPrimary"
             android:layout_centerHorizontal="true"
             android:textSize="11sp"/>
+
+
 
     </RelativeLayout>
 

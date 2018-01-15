@@ -2,9 +2,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="astrocloud.zw.co.astrocloud.UploadActivity">
+
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
         android:title="@string/action_settings"
-        app:showAsAction="never" />
+        android:icon="@drawable/ic_cloud_settings"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/my_cloud"
+        android:icon="@drawable/ic_cloud_data"
+        app:showAsAction="ifRoom"
+        android:title="@string/my_cloud">
+    </item>
 </menu>

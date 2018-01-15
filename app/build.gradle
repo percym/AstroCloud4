@@ -42,7 +42,6 @@ dependencies {
     compile 'de.hdodenhof:circleimageview:2.2.0'
     implementation('com.h6ah4i.android.widget.advrecyclerview:advrecyclerview:0.11.0@aar') {
         transitive = true
-
     }
     compile 'com.droidninja:filepicker:2.1.1'
     compile 'com.github.rubensousa:bottomsheetbuilder:1.4'
@@ -54,6 +53,7 @@ dependencies {
     compile 'net.alhazmy13.MediaPicker:libary:2.4.0'
     compile 'com.devbrackets.android:exomedia:4.1.0'
     compile 'com.kbeanie:multipicker:1.1.31@aar'
+    compile 'com.daasuu:animateHorizontalProgressBar:0.2.4'
 
 }
 
