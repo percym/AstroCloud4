@@ -17,7 +17,9 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import astrocloud.zw.co.astrocloud.models.DocumentModel;
 import astrocloud.zw.co.astrocloud.models.ImageModel;
 import astrocloud.zw.co.astrocloud.models.MusicModel;
 import astrocloud.zw.co.astrocloud.models.VideoModel;
@@ -34,18 +36,25 @@ public class FireSizeCalculator extends Service{
     private DatabaseReference picturesDatabaseReference;
     private DatabaseReference videoDatabaseReference;
     private DatabaseReference musicDatabaseReference;
+    private DatabaseReference documentDatabaseReference;
+    private DatabaseReference contactsDatabaseReference;
 
 
 
     private long picturesDatabaseSize;
     private long musicDatabaseSize;
     private long videoDatabaseSize;
+    private long documentDatabaseSize;
+    private long contactsCount;
+
     public FireSizeCalculator(){
 
         userDatabaseReference = FirebaseDatabase.getInstance().getReference();
         picturesDatabaseReference =  userDatabaseReference.child("user_files").child(userId).child("pictures");
         musicDatabaseReference =  userDatabaseReference.child("user_files").child(userId).child("music");
         videoDatabaseReference =  userDatabaseReference.child("user_files").child(userId).child("video");
+        documentDatabaseReference =  userDatabaseReference.child("user_files").child(userId).child("documents");
+        contactsDatabaseReference =  userDatabaseReference.child("contacts").child(userId);
 
 
     }
@@ -102,12 +111,14 @@ public class FireSizeCalculator extends Service{
                 getImagesDatabaseSize(picturesDatabaseReference);
                 getMusicDatabaseReference(musicDatabaseReference);
                 getVideoDatabaseReference(videoDatabaseReference);
+                getDocumentDatabaseReference(documentDatabaseReference);
+                getContactDatabaseReference(contactsDatabaseReference);
 
 
             } catch (Exception e) {
                 Thread.currentThread().interrupt();
             }
-            showToast("Finishing TutorialService, id: " + msg.arg1);
+//            showToast("Finishing TutorialService, id: " + msg.arg1);
             // the msg.arg1 is the startId used in the onStartCommand, so we can track the running sevice here.
             stopSelf(msg.arg1);
         }
@@ -123,6 +134,11 @@ public class FireSizeCalculator extends Service{
     public long getMusicDatabaseSize() { return musicDatabaseSize; }
     public long getVideoDatabaseSize() {
         return videoDatabaseSize;
+    }
+    public long getDocumentDatabaseSize() {   return documentDatabaseSize; }
+
+    public long getContactsCount() {
+        return contactsCount;
     }
 
     public long getTotalUsedSpace(){
@@ -244,6 +260,62 @@ public class FireSizeCalculator extends Service{
             }
         });
 
+        return musicDatabaseSize;
+    }
+    public long getDocumentDatabaseReference(final DatabaseReference documentDatabaseReference) {
+        DatabaseReference localDatabaseReference = documentDatabaseReference;
+        localDatabaseReference.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                DocumentModel documentModel = new DocumentModel();
+                documentModel = dataSnapshot.getValue(DocumentModel.class);
+                documentDatabaseSize += documentModel.getSizeInBytes();
+                GLOBALDECLARATIONS.DOCUMENT_DATABASE_SIZE = documentDatabaseSize;
+
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                DocumentModel documentModel = new DocumentModel();
+                documentModel = dataSnapshot.getValue(DocumentModel.class);
+                documentDatabaseSize -= documentModel.getSizeInBytes();
+                GLOBALDECLARATIONS.DOCUMENT_DATABASE_SIZE = documentDatabaseSize;
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        return musicDatabaseSize;
+    }
+    public long getContactDatabaseReference(final DatabaseReference contactDatabaseReference) {
+        DatabaseReference localDatabaseReference = contactDatabaseReference;
+        localDatabaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                contactsCount= dataSnapshot.getChildrenCount();
+                GLOBALDECLARATIONS.CONTACTS_COUNT = contactsCount;
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
         return musicDatabaseSize;
     }
 

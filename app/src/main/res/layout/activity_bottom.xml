@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:layout_behavior="@string/bottom_sheet_behavior"
+    app:behavior_hideable="true"
+    app:behavior_peekHeight="56dp">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <com.ss.bottomnavigation.BottomNavigation
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_alignParentTop="true"
+        android:background="@color/colorPrimary"
+        app:mode="phone">
+
+
+        <com.ss.bottomnavigation.TabItem
+            android:id="@+id/tab_pictures"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            app:tab_text="Pics"
+            app:tab_icon="@drawable/ic_image_up"
+            />
+
+        <com.ss.bottomnavigation.TabItem
+            android:id="@+id/tab_music"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            app:tab_text="Music"
+            app:tab_icon="@drawable/ic_music_player"
+            />
+        <com.ss.bottomnavigation.TabItem
+            android:id="@+id/tab_videos"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            app:tab_text="Videos"
+            app:tab_icon="@drawable/ic_video_not_there"
+            />
+
+        <com.ss.bottomnavigation.TabItem
+            android:id="@+id/tab_documents"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            app:tab_text="Docs"
+            app:tab_icon="@drawable/ic_document_not_there"
+            />
+    </com.ss.bottomnavigation.BottomNavigation>
+    </RelativeLayout>
+</RelativeLayout>

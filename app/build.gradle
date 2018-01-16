@@ -53,7 +53,7 @@ dependencies {
     compile 'net.alhazmy13.MediaPicker:libary:2.4.0'
     compile 'com.devbrackets.android:exomedia:4.1.0'
     compile 'com.kbeanie:multipicker:1.1.31@aar'
-    compile 'com.daasuu:animateHorizontalProgressBar:0.2.4'
+    compile 'com.ss.bottomnavigation:bottomnavigation:1.5.2'
 
 }
 
