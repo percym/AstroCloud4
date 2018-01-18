@@ -290,10 +290,8 @@
 
 <RelativeLayout
     android:layout_width="match_parent"
-    android:layout_height="1.5dp"
-    android:background="@drawable/usage_border"
-    android:layout_marginLeft="30dp"
-    android:layout_marginRight="33dp"></RelativeLayout>
+    android:layout_height="1dp"
+    android:background="@drawable/usage_border"/>
 
       <RelativeLayout
         android:layout_width="match_parent"

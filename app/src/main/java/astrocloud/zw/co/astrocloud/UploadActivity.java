@@ -257,6 +257,49 @@ public class UploadActivity extends AppCompatActivity {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 switch (tab.getPosition()) {
+                    case 0: {
+                        rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_image_upload));
+                        if (rightLowerMenu.isOpen()) {
+                            rightLowerMenu.close(true);
+
+                        }
+                        if (rightLowerMenu.isOpen()) {
+                            rightLowerMenu.updateItemPositions();
+                        }
+                        rlIcon3.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                if (PermissionsManager.get().isStorageGranted()) {
+                                    documentPaths = new ArrayList<>();
+                                    FilePickerBuilder.getInstance().setMaxCount(20)
+                                            .setSelectedFiles(documentPaths)
+                                            .setActivityTheme(R.style.AppTheme_PopupOverlay)
+                                            .pickPhoto(UploadActivity.this);
+                                    //  imageUploaderToFireStore(photoPaths);
+
+                                } else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)) {
+
+                                    showPermissionsDialogueStorage();
+
+                                } else {
+                                    PermissionsManager.get().requestContactsPermission()
+                                            .subscribe(new Action1<PermissionsResult>() {
+                                                @Override
+                                                public void call(PermissionsResult permissionsResult) {
+                                                    if (!permissionsResult.isGranted()) {
+                                                        showPermissionsDialogueStorage();
+
+                                                    } else {
+                                                        imageUploaderToFireStore(photoPaths);
+
+                                                    }
+                                                }
+                                            });
+                                }
+                            }
+                        });
+                        break;
+                    }
                     case 4:
                         rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_upload_contacts));
                         if (rightLowerMenu.isOpen()) {
@@ -372,49 +415,7 @@ public class UploadActivity extends AppCompatActivity {
 
                         break;
 
-                    case 0: {
-                        rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_image_upload));
-                        if (rightLowerMenu.isOpen()) {
-                            rightLowerMenu.close(true);
 
-                        }
-                        if (rightLowerMenu.isOpen()) {
-                            rightLowerMenu.updateItemPositions();
-                        }
-                        rlIcon3.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                if (PermissionsManager.get().isStorageGranted()) {
-                                    documentPaths = new ArrayList<>();
-                                    FilePickerBuilder.getInstance().setMaxCount(20)
-                                            .setSelectedFiles(documentPaths)
-                                            .setActivityTheme(R.style.AppTheme_PopupOverlay)
-                                            .pickPhoto(UploadActivity.this);
-                                    //  imageUploaderToFireStore(photoPaths);
-
-                                } else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)) {
-
-                                    showPermissionsDialogueStorage();
-
-                                } else {
-                                    PermissionsManager.get().requestContactsPermission()
-                                            .subscribe(new Action1<PermissionsResult>() {
-                                                @Override
-                                                public void call(PermissionsResult permissionsResult) {
-                                                    if (!permissionsResult.isGranted()) {
-                                                        showPermissionsDialogueStorage();
-
-                                                    } else {
-                                                        imageUploaderToFireStore(photoPaths);
-
-                                                    }
-                                                }
-                                            });
-                                }
-                            }
-                        });
-                        break;
-                    }
                     case 2: {
                         rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_video_upload));
                         if (rightLowerMenu.isOpen()) {
@@ -683,6 +684,7 @@ public class UploadActivity extends AppCompatActivity {
 //
 //
 //                }
+
             }
 
             @Override
@@ -750,6 +752,12 @@ public class UploadActivity extends AppCompatActivity {
         }else  if (id==R.id.my_cloud){
            startActivity( new Intent(this, UsageActivity.class));
 
+        }else if(id == R.id.my_logout){
+            mAuth = FirebaseAuth.getInstance();
+            FirebaseUser currentUser = mAuth.getCurrentUser();
+            mAuth.signOut();
+            startActivity( new Intent(this, MainActivity.class));
+            finish();
         }
 
         return super.onOptionsItemSelected(item);

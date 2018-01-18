@@ -15,4 +15,5 @@
     <string name="delete_file">Delete</string>
     <string name="title_activity_usage">AstroCloud</string>
     <string name="my_cloud">My Cloud</string>
+    <string name="my_logout">Logout</string>
 </resources>

@@ -52,7 +52,7 @@ public class FireSizeCalculator extends Service{
         userDatabaseReference = FirebaseDatabase.getInstance().getReference();
         picturesDatabaseReference =  userDatabaseReference.child("user_files").child(userId).child("pictures");
         musicDatabaseReference =  userDatabaseReference.child("user_files").child(userId).child("music");
-        videoDatabaseReference =  userDatabaseReference.child("user_files").child(userId).child("video");
+        videoDatabaseReference =  userDatabaseReference.child("user_files").child(userId).child("videos");
         documentDatabaseReference =  userDatabaseReference.child("user_files").child(userId).child("documents");
         contactsDatabaseReference =  userDatabaseReference.child("contacts").child(userId);
 
@@ -136,11 +136,9 @@ public class FireSizeCalculator extends Service{
         return videoDatabaseSize;
     }
     public long getDocumentDatabaseSize() {   return documentDatabaseSize; }
-
     public long getContactsCount() {
         return contactsCount;
     }
-
     public long getTotalUsedSpace(){
         return musicDatabaseSize + picturesDatabaseSize + videoDatabaseSize;
     }
@@ -231,7 +229,7 @@ public class FireSizeCalculator extends Service{
                VideoModel videoModel = new VideoModel();
                 videoModel = dataSnapshot.getValue(VideoModel.class);
                 videoDatabaseSize += videoModel.getSizeInBytes();
-                GLOBALDECLARATIONS.VIDEO_DATABASE_SIZE = musicDatabaseSize;
+                GLOBALDECLARATIONS.VIDEO_DATABASE_SIZE = videoDatabaseSize;
 
             }
 
@@ -245,7 +243,7 @@ public class FireSizeCalculator extends Service{
                 VideoModel videoModel = new VideoModel();
                 videoModel = dataSnapshot.getValue(VideoModel.class);
                 videoDatabaseSize -= videoModel.getSizeInBytes();
-                GLOBALDECLARATIONS.VIDEO_DATABASE_SIZE = musicDatabaseSize;
+                GLOBALDECLARATIONS.VIDEO_DATABASE_SIZE = videoDatabaseSize;
 
             }
 
@@ -260,7 +258,7 @@ public class FireSizeCalculator extends Service{
             }
         });
 
-        return musicDatabaseSize;
+        return videoDatabaseSize;
     }
     public long getDocumentDatabaseReference(final DatabaseReference documentDatabaseReference) {
         DatabaseReference localDatabaseReference = documentDatabaseReference;

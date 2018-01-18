@@ -1,58 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/bottomsheet"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="350dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:layout_behavior="@string/bottom_sheet_behavior"
+    app:layout_behavior="android.support.design.widget.BottomSheetBehavior"
     app:behavior_hideable="true"
-    app:behavior_peekHeight="56dp">
+    app:behavior_peekHeight="56dp"
+    android:elevation="1dp"
+    android:background="@drawable/usage_border">
+
+
+    <!--<com.ss.bottomnavigation.BottomNavigation-->
+        <!--android:id="@+id/bottom_navigation"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="56dp"-->
+        <!--android:layout_alignParentTop="true"-->
+        <!--android:background="@drawable/green_back"-->
+        <!--android:elevation="1dp"-->
+        <!--app:mode="phone">-->
+
+
+        <!--<com.ss.bottomnavigation.TabItem-->
+            <!--android:id="@+id/tab_pictures"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:layout_weight="1"-->
+            <!--app:tab_text="Pics"-->
+            <!--app:tab_icon="@drawable/ic_photo_btm"-->
+            <!--/>-->
+
+        <!--<com.ss.bottomnavigation.TabItem-->
+            <!--android:id="@+id/tab_music"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:layout_weight="1"-->
+            <!--app:tab_text="Music"-->
+            <!--app:tab_icon="@drawable/ic_music_btm"-->
+            <!--/>-->
+        <!--<com.ss.bottomnavigation.TabItem-->
+            <!--android:id="@+id/tab_videos"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:layout_weight="1"-->
+            <!--app:tab_text="Videos"-->
+            <!--app:tab_icon="@drawable/ic_video_btm"-->
+            <!--/>-->
+
+        <!--<com.ss.bottomnavigation.TabItem-->
+            <!--android:id="@+id/tab_documents"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:layout_weight="1"-->
+            <!--app:tab_text="Docs"-->
+            <!--app:tab_icon="@drawable/ic_doc_btm"-->
+            <!--/>-->
+    <!--</com.ss.bottomnavigation.BottomNavigation>-->
+    <!--<com.luseen.luseenbottomnavigation.BottomNavigation.BottomNavigationView-->
+        <!--android:id="@+id/bottom_navigation"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentTop="true"-->
+        <!--android:elevation="1dp" />-->
+    <!---->
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:paddingTop="10dp">
+        <TextView
+            android:id="@+id/tvbackup"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="Add files to cloud"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimary"
+            android:padding="10dp"
+            android:layout_marginLeft="30dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"/>
+        <Button
+            android:id="@+id/btn_show"
+            android:layout_width="120dp"
+            android:layout_height="40dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="33dp"
+            android:background="@color/some_green"
+            android:layout_above="@+id/btn_verify"
+            android:textColor="#fff"
+            android:drawableBottom="@drawable/ic_scan_phone"
+            android:textAllCaps="false"
+            android:layout_alignParentEnd="true"/>
 
-    <com.ss.bottomnavigation.BottomNavigation
-        android:id="@+id/bottom_navigation"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_alignParentTop="true"
-        android:background="@color/colorPrimary"
-        app:mode="phone">
-
-
-        <com.ss.bottomnavigation.TabItem
-            android:id="@+id/tab_pictures"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            app:tab_text="Pics"
-            app:tab_icon="@drawable/ic_image_up"
-            />
-
-        <com.ss.bottomnavigation.TabItem
-            android:id="@+id/tab_music"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            app:tab_text="Music"
-            app:tab_icon="@drawable/ic_music_player"
-            />
-        <com.ss.bottomnavigation.TabItem
-            android:id="@+id/tab_videos"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            app:tab_text="Videos"
-            app:tab_icon="@drawable/ic_video_not_there"
-            />
-
-        <com.ss.bottomnavigation.TabItem
-            android:id="@+id/tab_documents"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            app:tab_text="Docs"
-            app:tab_icon="@drawable/ic_document_not_there"
-            />
-    </com.ss.bottomnavigation.BottomNavigation>
     </RelativeLayout>
+
+
+
+
+
 </RelativeLayout>

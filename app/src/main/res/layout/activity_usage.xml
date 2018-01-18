@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:scrollbars="horizontal"
     tools:context="astrocloud.zw.co.astrocloud.UsageActivity">
 
     <android.support.design.widget.AppBarLayout

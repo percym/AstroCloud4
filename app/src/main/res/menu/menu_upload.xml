@@ -15,4 +15,10 @@
         app:showAsAction="ifRoom"
         android:title="@string/my_cloud">
     </item>
+    <item
+    android:id="@+id/my_logout"
+    android:icon="@drawable/ic_logout"
+    app:showAsAction="never"
+    android:title="@string/my_logout">
+</item>
 </menu>
