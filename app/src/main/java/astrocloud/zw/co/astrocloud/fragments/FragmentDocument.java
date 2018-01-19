@@ -311,7 +311,7 @@ public class FragmentDocument extends Fragment {
 
     }
 //    @Override
-//    public void onCreateOptio     nsMenu(Menu menu, MenuInflater inflater) {
+//    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 //        super.onCreateOptionsMenu(menu, inflater);
 //        inflater.inflate(R.menu.frag_documents, menu);
 //        MenuItem searchViewItem = menu.findItem(R.id.search);

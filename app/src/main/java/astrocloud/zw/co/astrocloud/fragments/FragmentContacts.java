@@ -177,6 +177,7 @@ public class FragmentContacts extends Fragment {
 
         initSwipe();
         refreshView();
+        awesomeInfoDialog.hide();
         return view;
     }
 
@@ -267,9 +268,10 @@ public class FragmentContacts extends Fragment {
     }
 
     private void fillArrayListWithContactsDB(DataSnapshot dataSnapshot) {
+            System.out.println(dataSnapshot.getValue());
 
             //   Log.e(TAG, ds.toString());
-            ContactModel contactModel = dataSnapshot.getValue(ContactModel.class);
+            ContactModel contactModel = dataSnapshot.getValue(ContactModel.class) ;
 
                 arrayListContactsToDisplay.add(contactModel);
 
@@ -277,18 +279,28 @@ public class FragmentContacts extends Fragment {
 
     }
 
-    public void showFetchcontactsDialogue() {
+    public void showUploadingcontactsDialogue() {
         awesomeInfoDialog = new AwesomeInfoDialog(getActivity());
         awesomeInfoDialog
                 .setTitle(R.string.app_name)
-                .setMessage("Fetching your contacts")
+                .setMessage("Uploading your contacts")
                 .setDialogIconOnly(R.drawable.ic_app_icon)
                 .setColoredCircle(R.color.white)
                 .setCancelable(false)
                 .show();
 
     }
+    public void showFetchcontactsDialogue() {
+        awesomeInfoDialog = new AwesomeInfoDialog(getActivity());
+        awesomeInfoDialog
+                .setTitle(R.string.app_name)
+                .setMessage("Uploading your contacts")
+                .setDialogIconOnly(R.drawable.ic_app_icon)
+                .setColoredCircle(R.color.white)
+                .setCancelable(false)
+                .show();
 
+    }
     public void showFetchErrorDialogue(String databaseErrorString) {
 
         new AwesomeErrorDialog(getActivity())

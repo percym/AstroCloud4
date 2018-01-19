@@ -390,7 +390,7 @@ public class UploadActivity extends AppCompatActivity {
 
                                 } else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)) {
 
-                                    showFetchcontactsDialogue();
+                                    showPermissionsDialogue();
                                 } else {
                                     PermissionsManager.get().requestContactsPermission()
                                             .subscribe(new Action1<PermissionsResult>() {
