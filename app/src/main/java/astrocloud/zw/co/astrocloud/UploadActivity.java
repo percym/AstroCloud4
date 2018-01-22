@@ -170,6 +170,22 @@ public class UploadActivity extends AppCompatActivity {
 
             String name = people.getString(indexName);
             String number = people.getString(indexNumber);
+            if (name == null || name.equals("")){
+                name = "No Name";
+            }
+            name = nameformater(name);
+
+            if (name == null || name.equals("")){
+                name = "No Name";
+            }
+            if(number == null || number.equals("")){
+                number = " No number";
+            }
+            number = nameformater(number);
+
+            if(number == null|| number.equals("")){
+                number = " No number";
+            }
             arrayListContacts.add(new ContactModel(name, number));
         }
         people.close();
@@ -712,8 +728,7 @@ public class UploadActivity extends AppCompatActivity {
 
 
                 for (int i = 0; i < arrayListContactsTobeWritten.size(); i++) {
-
-                    contactsChildReference.child(userId).child(nameformater(arrayListContactsTobeWritten.get(i).getName())).setValue(arrayListContactsTobeWritten.get(i));
+   contactsChildReference.child(userId).child(nameformater(arrayListContactsTobeWritten.get(i).getName())).setValue(arrayListContactsTobeWritten.get(i));
                 }
             }
 
@@ -722,7 +737,7 @@ public class UploadActivity extends AppCompatActivity {
     }
 
     private String nameformater(String name) {
-        String[] badChars = {".", "#", "$", "[", "]"};
+        String[] badChars = {".", "#", "$", "[", "]","/", "\\","!","$","^","&","*","|"};
         for (int i = 0; i < badChars.length; i++) {
             if (name.contains((badChars[i]))) {
                 String toBeReplaced = badChars[i];

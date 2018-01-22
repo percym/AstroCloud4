@@ -1,6 +1,8 @@
 package astrocloud.zw.co.astrocloud.fragments;
 
 
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -16,6 +18,7 @@ import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -24,10 +27,14 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
+import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.appolica.flubber.Flubber;
@@ -51,6 +58,7 @@ import net.ralphpina.permissionsmanager.PermissionsResult;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import astrocloud.zw.co.astrocloud.App;
 import astrocloud.zw.co.astrocloud.R;
@@ -113,7 +121,7 @@ public class FragmentContacts extends Fragment {
                             .setDialogIconOnly(R.drawable.ic_app_icon)
                             .setColoredCircle(R.color.white)
                             .setCancelable(false)
-                            .setPositiveButtonText(getString(R.string.restore))
+                            .setPositiveButtonText(getString(R.string.upload))
                             .setPositiveButtonbackgroundColor(R.color.dialogSuccessBackgroundColor)
                             .setPositiveButtonTextColor(R.color.white)
                             .setNegativeButtonText(getString(R.string.cancel))
@@ -271,7 +279,26 @@ public class FragmentContacts extends Fragment {
             System.out.println(dataSnapshot.getValue());
 
             //   Log.e(TAG, ds.toString());
-            ContactModel contactModel = dataSnapshot.getValue(ContactModel.class) ;
+        Object randomMap = dataSnapshot.getValue();
+        Map<String, Map<String, String>> contactsDataMap = (Map<String, Map<String, String>>)randomMap;
+        Object numberObject = contactsDataMap.get("number");
+        Object nameObject = contactsDataMap.get("name");
+        String number = (String) numberObject;
+        String name = (String) nameObject;//
+        if(name == null){
+            name = "No Name";
+        }
+        if(number == null){
+            number = "No Number";
+        }
+
+
+
+
+
+//            ContactModel contactModel = dataSnapshot.getValue(ContactModel.class) ;
+          ContactModel contactModel = new ContactModel(name, number) ;
+
 
                 arrayListContactsToDisplay.add(contactModel);
 
@@ -652,6 +679,48 @@ public class FragmentContacts extends Fragment {
 
         }
        adapter.notifyDataSetChanged();
+
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        menu.clear();
+        inflater.inflate(R.menu.search_menu, menu);
+        SearchManager searchManager = (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+        if (searchView != null) {
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(getActivity().getComponentName()));
+            searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+                @Override
+                public boolean onClose() {
+                    //TODO: Reset your views
+                    adapter.notifyDataSetChanged();
+                    return false;
+                }
+            });
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String s) {
+                    adapter.getFilter().filter(s);
+                    return false; //do the default
+                }
+
+                @Override
+                public boolean onQueryTextChange(String s) {
+                    //NOTE: doing anything here is optional, onNewIntent is the important bit
+                    if (s.length() > 1) { //2 chars or more
+                        //TODO: filter/return results
+                        adapter.getFilter().filter(s);
+                    } else if (s.length() == 0) {
+                        //TODO: reset the displayed data
+                        adapter.getFilter().filter(s);
+                    }
+                    return false;
+                }
+
+            });
+        }
 
     }
 }

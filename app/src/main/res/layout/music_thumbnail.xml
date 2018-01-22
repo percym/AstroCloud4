@@ -17,8 +17,7 @@
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentTop="true"
                 android:src="@drawable/ic_user_green"
-                app:civ_border_color="@color/colorPrimary"
-                app:civ_border_width="1dp"/>
+                app:civ_border_color="@color/colorPrimary"/>
 
             <TextView
                 android:id="@+id/file_name"
