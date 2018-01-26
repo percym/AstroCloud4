@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/bottomsheet"
     android:layout_width="match_parent"
-    android:layout_height="350dp"
+    android:layout_height="410dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     app:layout_behavior="android.support.design.widget.BottomSheetBehavior"
     app:behavior_hideable="true"
@@ -10,63 +10,11 @@
     android:elevation="1dp"
     android:background="@drawable/usage_border">
 
-
-    <!--<com.ss.bottomnavigation.BottomNavigation-->
-        <!--android:id="@+id/bottom_navigation"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="56dp"-->
-        <!--android:layout_alignParentTop="true"-->
-        <!--android:background="@drawable/green_back"-->
-        <!--android:elevation="1dp"-->
-        <!--app:mode="phone">-->
-
-
-        <!--<com.ss.bottomnavigation.TabItem-->
-            <!--android:id="@+id/tab_pictures"-->
-            <!--android:layout_width="0dp"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:layout_weight="1"-->
-            <!--app:tab_text="Pics"-->
-            <!--app:tab_icon="@drawable/ic_photo_btm"-->
-            <!--/>-->
-
-        <!--<com.ss.bottomnavigation.TabItem-->
-            <!--android:id="@+id/tab_music"-->
-            <!--android:layout_width="0dp"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:layout_weight="1"-->
-            <!--app:tab_text="Music"-->
-            <!--app:tab_icon="@drawable/ic_music_btm"-->
-            <!--/>-->
-        <!--<com.ss.bottomnavigation.TabItem-->
-            <!--android:id="@+id/tab_videos"-->
-            <!--android:layout_width="0dp"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:layout_weight="1"-->
-            <!--app:tab_text="Videos"-->
-            <!--app:tab_icon="@drawable/ic_video_btm"-->
-            <!--/>-->
-
-        <!--<com.ss.bottomnavigation.TabItem-->
-            <!--android:id="@+id/tab_documents"-->
-            <!--android:layout_width="0dp"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:layout_weight="1"-->
-            <!--app:tab_text="Docs"-->
-            <!--app:tab_icon="@drawable/ic_doc_btm"-->
-            <!--/>-->
-    <!--</com.ss.bottomnavigation.BottomNavigation>-->
-    <!--<com.luseen.luseenbottomnavigation.BottomNavigation.BottomNavigationView-->
-        <!--android:id="@+id/bottom_navigation"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_alignParentTop="true"-->
-        <!--android:elevation="1dp" />-->
-    <!---->
     <RelativeLayout
+        android:id="@+id/layoutadd"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="10dp">
+        android:paddingTop="8dp">
         <TextView
             android:id="@+id/tvbackup"
             android:layout_width="150dp"
@@ -80,22 +28,49 @@
             android:layout_alignParentStart="true"/>
         <Button
             android:id="@+id/btn_show"
-            android:layout_width="120dp"
+            android:layout_width="80dp"
             android:layout_height="40dp"
             android:layout_marginBottom="5dp"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="33dp"
-            android:background="@color/some_green"
+            android:background="@drawable/circle_but"
             android:layout_above="@+id/btn_verify"
             android:textColor="#fff"
-            android:drawableBottom="@drawable/ic_scan_phone"
+            android:drawableBottom="@drawable/ic_updown"
             android:textAllCaps="false"
             android:layout_alignParentEnd="true"/>
 
     </RelativeLayout>
+    <RelativeLayout
+        android:layout_below="@+id/layoutadd"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="42dp">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycler_files"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
 
+        </android.support.v7.widget.RecyclerView>
 
 
+    </RelativeLayout>
 
+    <Button
+        android:id="@+id/btnscan"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:background="@drawable/circle_but"
+        android:layout_above="@+id/btn_verify"
+        android:textColor="#fff"
+        android:drawableBottom="@drawable/ic_scan_phone"
+        android:textAllCaps="false"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"/>
 </RelativeLayout>

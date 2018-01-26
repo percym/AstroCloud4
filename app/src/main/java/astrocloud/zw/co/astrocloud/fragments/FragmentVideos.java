@@ -31,7 +31,6 @@ import java.util.ArrayList;
 
 import astrocloud.zw.co.astrocloud.R;
 import astrocloud.zw.co.astrocloud.adapters.VideosAdapter;
-import astrocloud.zw.co.astrocloud.interfaces.VideoItem;
 import astrocloud.zw.co.astrocloud.models.VideoModel;
 import astrocloud.zw.co.astrocloud.utils.AppConfig;
 import de.hdodenhof.circleimageview.CircleImageView;

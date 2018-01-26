@@ -9,6 +9,7 @@ import android.os.Looper;
 import android.os.Process;
 import android.os.Message;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -18,6 +19,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
 
 import astrocloud.zw.co.astrocloud.models.DocumentModel;
 import astrocloud.zw.co.astrocloud.models.ImageModel;
@@ -47,6 +50,8 @@ public class FireSizeCalculator extends Service{
     private long documentDatabaseSize;
     private long contactsCount;
 
+
+    ArrayList<ImageModel > imagesArray= new ArrayList<>();
     public FireSizeCalculator(){
 
         userDatabaseReference = FirebaseDatabase.getInstance().getReference();
@@ -152,6 +157,8 @@ public class FireSizeCalculator extends Service{
                 imageModel = dataSnapshot.getValue(ImageModel.class);
                 picturesDatabaseSize += imageModel.getSizeInBytes();
                 GLOBALDECLARATIONS.PICTURES_DATABASE_SIZE = picturesDatabaseSize;
+                imagesArray.add(imageModel);
+                GLOBALDECLARATIONS.IMAGESARRAY = imagesArray;
             }
 
 
@@ -167,6 +174,19 @@ public class FireSizeCalculator extends Service{
                 imageModel = dataSnapshot.getValue(ImageModel.class);
                 picturesDatabaseSize -= imageModel.getSizeInBytes();
                 GLOBALDECLARATIONS.PICTURES_DATABASE_SIZE = picturesDatabaseSize;
+
+                String picKey = imageModel.getKey();
+                int picIndex = -1;
+                for(int i= 0 ; i < imagesArray.size(); i ++ ){
+                    if(imagesArray.get(i).getKey().contains(picKey)){
+                        picIndex= i;
+                    }
+                }
+                if(picIndex > -1 ){
+                    imagesArray.remove(picIndex);
+                    imagesArray.remove(picIndex);
+                }
+                GLOBALDECLARATIONS.IMAGESARRAY = imagesArray;
             }
 
             @Override
@@ -317,4 +337,11 @@ public class FireSizeCalculator extends Service{
         return musicDatabaseSize;
     }
 
+    public ArrayList<ImageModel> getImagesArray() {
+        return imagesArray;
+    }
+
+    public void setImagesArray(ArrayList<ImageModel> imagesArray) {
+        this.imagesArray = imagesArray;
+    }
 }
