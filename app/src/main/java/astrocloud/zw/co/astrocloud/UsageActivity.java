@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Observable;
 
 import astrocloud.zw.co.astrocloud.adapters.ModelAdapter;
+import astrocloud.zw.co.astrocloud.intefaces.ClickListener;
 import astrocloud.zw.co.astrocloud.models.Model;
 import astrocloud.zw.co.astrocloud.utils.GLOBALDECLARATIONS;
 
@@ -40,8 +41,6 @@ public class UsageActivity extends AppCompatActivity {
     private File root;
     private ArrayList<File> fileList = new ArrayList<File>();
     private ArrayList<Model> modelList = new ArrayList<>();
-    Uri URIEXTERNAL = MediaStore.Files.getContentUri("external");
-    Uri URIINTENAL = MediaStore.Files.getContentUri("internal");
     private ArrayList<Model> imageList;
     private ArrayList<Model> musicList;
     private ArrayList<Model> docList;
@@ -89,7 +88,19 @@ public class UsageActivity extends AppCompatActivity {
                 ArrayList <Model> xd= docList;
                 filesContainer.addAll(imageList);
                 filesContainer.addAll(musicList);
-                modelAdapter= new ModelAdapter(getApplicationContext(),filesContainer);
+                modelAdapter= new ModelAdapter(getApplicationContext(), filesContainer, new ClickListener() {
+                    @Override
+                    public void onPositionClicked(int position) {
+                        Model toBeUploaded =modelAdapter.getModelAt(position);
+
+
+                    }
+
+                    @Override
+                    public void onLongClicked(int position) {
+
+                    }
+                });
                 mLayoutManager = new GridLayoutManager(getApplicationContext(),1);
                 recyclerFiles.setLayoutManager(mLayoutManager);
                 recyclerFiles.setAdapter(modelAdapter);
@@ -324,7 +335,7 @@ public class UsageActivity extends AppCompatActivity {
 //        String webp = MimeTypeMap.getSingleton().getMimeTypeFromExtension("webp");
 //        //--------------music
 //        String mp3 = MimeTypeMap.getSingleton().getMimeTypeFromExtension("mp3");
-//        //String acc  = MimeTypeMap.getSingleton().getMimeTypeFromExtension("acc");
+//        String acc  = MimeTypeMap.getSingleton().getMimeTypeFromExtension("acc");
 //        String ts = MimeTypeMap.getSingleton().getMimeTypeFromExtension("ts");
 //        String txt = MimeTypeMap.getSingleton().getMimeTypeFromExtension("txt");
 //        String pdf = MimeTypeMap.getSingleton().getMimeTypeFromExtension("pdf");
@@ -332,19 +343,19 @@ public class UsageActivity extends AppCompatActivity {
 //        String xlt = MimeTypeMap.getSingleton().getMimeTypeFromExtension("xlt");
 //        String xlm = MimeTypeMap.getSingleton().getMimeTypeFromExtension("xlt");
 //        String xltx = MimeTypeMap.getSingleton().getMimeTypeFromExtension("xltx");
-////            String xltm  = MimeTypeMap.getSingleton().getMimeTypeFromExtension("xltm");
-////            String pptx  = MimeTypeMap.getSingleton().getMimeTypeFromExtension("pptx");
-////            String ptmp  = MimeTypeMap.getSingleton().getMimeTypeFromExtension("ptmp");
+////      String xltm  = MimeTypeMap.getSingleton().getMimeTypeFromExtension("xltm");
+////      String pptx  = MimeTypeMap.getSingleton().getMimeTypeFromExtension("pptx");
+////      String ptmp  = MimeTypeMap.getSingleton().getMimeTypeFromExtension("ptmp");
 //        String ppt = MimeTypeMap.getSingleton().getMimeTypeFromExtension("ppt");
 //        String pot = MimeTypeMap.getSingleton().getMimeTypeFromExtension("pot");
 //        String pps = MimeTypeMap.getSingleton().getMimeTypeFromExtension("pps");
-////            String potx  = MimeTypeMap.getSingleton().getMimeTypeFromExtension("potx");
-////            String potm  = MimeTypeMap.getSingleton().getMimeTypeFromExtension("potm");
-////            String ppam  = MimeTypeMap.getSingleton().getMimeTypeFromExtension("ppam");
+////      String potx  = MimeTypeMap.getSingleton().getMimeTypeFromExtension("potx");
+////      String potm  = MimeTypeMap.getSingleton().getMimeTypeFromExtension("potm");
+////      String ppam  = MimeTypeMap.getSingleton().getMimeTypeFromExtension("ppam");
 //        String doc = MimeTypeMap.getSingleton().getMimeTypeFromExtension("doc");
 //        String dot = MimeTypeMap.getSingleton().getMimeTypeFromExtension("dot");
 //        String docx = MimeTypeMap.getSingleton().getMimeTypeFromExtension("docx");
-////            String docm  = MimeTypeMap.getSingleton().getMimeTypeFromExtension("docm");
+////      String docm  = MimeTypeMap.getSingleton().getMimeTypeFromExtension("docm");
 //        String dotx = MimeTypeMap.getSingleton().getMimeTypeFromExtension("dotx");
 //        String dotm = MimeTypeMap.getSingleton().getMimeTypeFromExtension("dotm");
 //        String docb = MimeTypeMap.getSingleton().getMimeTypeFromExtension("docb");
@@ -435,7 +446,8 @@ public class UsageActivity extends AppCompatActivity {
                     MediaStore.Files.FileColumns.DATA,
                     MediaStore.Files.FileColumns.DISPLAY_NAME,
                     MediaStore.Files.FileColumns.MIME_TYPE,
-                    MediaStore.Files.FileColumns.SIZE};
+                    MediaStore.Files.FileColumns.SIZE,
+                    MediaStore.Files.FileColumns.DATE_ADDED};
 
             String selectionMimeType =
                     MediaStore.Files.FileColumns.MIME_TYPE + "=? OR " + MediaStore.Files.FileColumns.MIME_TYPE + "=? OR " + MediaStore.Files.FileColumns.MIME_TYPE + "=? OR " + MediaStore.Files.FileColumns.MIME_TYPE + "=?  ";

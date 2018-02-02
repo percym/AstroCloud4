@@ -652,55 +652,6 @@ public class UploadActivity extends AppCompatActivity {
                     }
 
                 }
-
-//                    case 0: {
-//                        rlIcon3.setImageDrawable(getResources().getDrawable(R.drawable.ic_image_upload));
-//                        if (rightLowerMenu.isOpen()) {
-//                            rightLowerMenu.close(true);
-//
-//                        }
-//                        if (rightLowerMenu.isOpen()) {
-//                            rightLowerMenu.updateItemPositions();
-//                        }
-//                        rlIcon3.setOnClickListener(new View.OnClickListener() {
-//                            @Override
-//                            public void onClick(View view) {
-//                                if (PermissionsManager.get().isStorageGranted()) {
-//                                    photoPaths = new ArrayList<>();
-//                                    FilePickerBuilder.getInstance().setMaxCount(20)
-//                                            .setSelectedFiles(photoPaths)
-//                                            .setActivityTheme(R.style.AppTheme_PopupOverlay)
-//                                            .pickPhoto(UploadActivity.this);
-//                                    //  imageUploaderToFireStore(photoPaths);
-//
-//                                } else if (PermissionsManager.get().neverAskForContacts(UploadActivity.this)) {
-//
-//                                    showPermissionsDialogueStorage();
-//
-//                                } else {
-//                                    PermissionsManager.get().requestContactsPermission()
-//                                            .subscribe(new Action1<PermissionsResult>() {
-//                                                @Override
-//                                                public void call(PermissionsResult permissionsResult) {
-//                                                    if (!permissionsResult.isGranted()) {
-//                                                        showPermissionsDialogueStorage();
-//
-//                                                    } else {
-//                                                        imageUploaderToFireStore(photoPaths);
-//
-//                                                    }
-//                                                }
-//                                            });
-//                                }
-//                            }
-//                        });
-//                        break;
-//                    }
-//
-//
-//
-//                }
-
             }
 
             @Override

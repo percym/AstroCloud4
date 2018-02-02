@@ -6,44 +6,41 @@
 
     <ImageView
         android:id="@+id/icon"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentTop="true"
-        android:layout_marginRight="6dip"
+        android:layout_marginLeft="27dip"
+        android:layout_marginRight="3dip"
         android:contentDescription="TODO"
+        android:scaleType="fitXY"
         android:src="@drawable/ic_user_green" />
-
 
 
     <TextView
         android:id="@+id/firstLine"
-        android:layout_width="200dp"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="5dp"
-        android:layout_marginRight="5dp"
-        android:layout_alignWithParentIfMissing="true"
-        android:layout_toRightOf="@id/icon"
+        android:layout_above="@+id/addToCloud"
+        android:layout_toEndOf="@+id/icon"
         android:gravity="center_vertical"
         android:maxLines="1"
-        android:textStyle="bold"
         android:text="Image name"
         android:textColor="@color/colorPrimary"
-        android:textSize="13sp" />
+        android:textSize="11sp" />
 
     <TextView
         android:id="@+id/firstLineLeft"
         android:layout_width="120dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="5dp"
-        android:layout_alignParentRight="true"
-        android:layout_toRightOf="@id/firstLine"
+        android:layout_alignBaseline="@+id/firstLine"
+        android:layout_alignBottom="@+id/firstLine"
+        android:layout_alignParentEnd="true"
         android:gravity="end"
         android:maxLines="1"
         android:text=""
-        android:textSize="13sp" />
+        android:textSize="13sp"
+        android:visibility="gone"/>
 
     <TextView
         android:id="@+id/secondLine"
@@ -54,9 +51,23 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_toRightOf="@id/icon"
-        android:ellipsize="marquee"
         android:text=""
         android:maxLines="1"
-        android:textSize="13sp" />
+        android:textSize="11sp"
+        android:visibility="gone"/>
+
+    <Button
+        android:id="@+id/addToCloud"
+        android:layout_width="70dp"
+        android:layout_height="25dp"
+        android:layout_marginBottom="3dp"
+        android:background="@drawable/circle_but"
+        android:textSize="11dp"
+        android:text="Upload"
+        android:textColor="#fff"
+        android:textAllCaps="false"
+        android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+        android:layout_marginRight="33dp"/>
 
 </RelativeLayout>

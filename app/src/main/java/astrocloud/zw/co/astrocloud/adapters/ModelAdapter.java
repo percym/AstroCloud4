@@ -4,22 +4,27 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import astrocloud.zw.co.astrocloud.R;
+import astrocloud.zw.co.astrocloud.intefaces.ClickListener;
 import astrocloud.zw.co.astrocloud.models.Model;
 
 /**
@@ -29,12 +34,14 @@ public class ModelAdapter extends RecyclerView.Adapter <ModelAdapter.ViewHolder>
 
     private ArrayList<Model> mOriginalDocValues; // Original Values
     private ArrayList<Model> mDisplayedDocValues;    // Values to be displayed
+    private final ClickListener cLickListener;
     Context context;
     int[] file_formats = new int[]{ R.drawable.doc, R.drawable.ppt, R.drawable.xls, R.drawable.txt, R.drawable.rtf, R.drawable.pdf, R.drawable.file , R.drawable.ppt};
-    public ModelAdapter(Context context, ArrayList<Model> mDocumentsArrayList) {
+    public ModelAdapter(Context context, ArrayList<Model> mDocumentsArrayList , ClickListener listener) {
         this.mOriginalDocValues = mDocumentsArrayList;
         this.mDisplayedDocValues = mDocumentsArrayList;
         this.context = context;
+        this.cLickListener = listener;
     }
 
 
@@ -81,15 +88,36 @@ public class ModelAdapter extends RecyclerView.Adapter <ModelAdapter.ViewHolder>
             holder.imv.setImageURI(Uri.parse(mDisplayedDocValues.get(position).getUrl()));
                 Glide.with(context).load(mDisplayedDocValues.get(position).getUrl()).thumbnail(0.1f).into(holder.imv);
 
-            }
+            }else if (mDisplayedDocValues.get(position).getName().endsWith("mp3")){
+                Drawable imageDrawable = context.getResources().getDrawable(R.drawable.mp3);
+//                holder.imv.setImageDrawable(imageDrawable);
+                Glide.with(context).load(imageDrawable).thumbnail(0.1f).into(holder.imv);
+
+            }else if (mDisplayedDocValues.get(position).getName().endsWith("wav")){
+                Drawable imageDrawable = context.getResources().getDrawable(R.drawable.wav);
+//                holder.imv.setImageDrawable(imageDrawable);
+                Glide.with(context).load(imageDrawable).thumbnail(0.1f).into(holder.imv);
+
+            }else if (mDisplayedDocValues.get(position).getName().endsWith("ogg")){
+                Drawable imageDrawable = context.getResources().getDrawable(R.drawable.ogpp);
+//                holder.imv.setImageDrawable(imageDrawable);
+                Glide.with(context).load(imageDrawable).thumbnail(0.1f).into(holder.imv);
+
+            }else if (mDisplayedDocValues.get(position).getName().endsWith("3gpp")){
+            Drawable imageDrawable = context.getResources().getDrawable(R.drawable.threegpp);
+//                holder.imv.setImageDrawable(imageDrawable);
+            Glide.with(context).load(imageDrawable).thumbnail(0.1f).into(holder.imv);
+
+        }
        }
 
 
 
     }
 
-
-
+        public Model getModelAt(int pos){
+        return mDisplayedDocValues.get(pos);
+        }
         @Override
         public int getItemCount () {
             return mDisplayedDocValues.size();
@@ -175,19 +203,37 @@ public class ModelAdapter extends RecyclerView.Adapter <ModelAdapter.ViewHolder>
         return filter;
     }
 
-    public class ViewHolder  extends RecyclerView.ViewHolder{
+    public class ViewHolder  extends RecyclerView.ViewHolder implements View.OnClickListener {
         RelativeLayout llContainer;
-        TextView tvFirstLine,tvFirstLineLeft,tvSecondLine;
+        TextView tvFirstLine, tvFirstLineLeft, tvSecondLine;
         ImageView imv;
+        Button addToCloud;
+        private WeakReference<ClickListener> listenerRef;
 
-        ViewHolder(View view){
+        ViewHolder(View view) {
             super(view);
             llContainer = (RelativeLayout) view.findViewById(R.id.contacts_layout);
-            tvFirstLine = (TextView)  view.findViewById(R.id.firstLine);
-            tvFirstLineLeft = (TextView)  view.findViewById(R.id.firstLineLeft);
-            tvSecondLine=(TextView) view.findViewById(R.id.secondLine);
-                imv=(ImageView) view.findViewById(R.id.icon);
+            tvFirstLine = (TextView) view.findViewById(R.id.firstLine);
+            tvFirstLineLeft = (TextView) view.findViewById(R.id.firstLineLeft);
+            tvSecondLine = (TextView) view.findViewById(R.id.secondLine);
+            imv = (ImageView) view.findViewById(R.id.icon);
+            addToCloud = view.findViewById(R.id.addToCloud);
+            addToCloud.setOnClickListener(this);
+            listenerRef = new WeakReference<ClickListener>(cLickListener);
+
 
         }
+
+        @Override
+        public void onClick(View view) {
+            if (view.getId() == addToCloud.getId()) {
+                listenerRef.get().onPositionClicked(getAdapterPosition());
+                String s = String.valueOf(getAdapterPosition());
+           Toast.makeText(context, s, Toast.LENGTH_LONG).show();
+
+            }
+        }
+
     }
+
 }
